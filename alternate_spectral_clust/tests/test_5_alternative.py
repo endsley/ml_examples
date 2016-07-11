@@ -20,4 +20,6 @@ ASC.run()
 
 omg = objective_magnitude
 db = ASC.db
+
+print db['Y_matrix']
 import pdb; pdb.set_trace()

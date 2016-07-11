@@ -10,36 +10,12 @@ import numpy.matlib
 import pickle
 
 #Initialize
-db = {}
-db['C_num'] = 3
-db['d'] = 3
 
-db['sigma'] = 1
-db['poly_order'] = 2
-db['q'] = 1
-db['lambda'] = 1
-db['alpha'] = 0.5
+X = genfromtxt('data_sets/data_1.csv', delimiter=',')
 
-db['data'] = genfromtxt('data_sets/data_1.csv', delimiter=',')
-db['N'] = db['data'].shape[0]
-
-db['Kernel_matrix'] = np.zeros((db['N'],db['N']))
-db['prev_clust'] = 0
-db['Y_matrix'] = np.array([])
-db['kernel_type'] = 'POLYNOMIAL_KERNEL'
-
-#outputs from U_optimize
-db['D_matrix'] = np.array([])
-db['U_matrix'] = np.array([])
-
-#output 
-db['W_matrix'] = np.array([])
-
-# output from spectral clustering
-db['allocation'] = np.array([])
-db['binary_allocation'] = np.array([[0,2,0],[8,2,0]])
-
-alt_spectral_clust(db)
+ASC = alt_spectral_clust(X)
+ASC.run()
+db = ASC.db
 
 print 'U matrix\n'
 print db['U_matrix'], '\n'

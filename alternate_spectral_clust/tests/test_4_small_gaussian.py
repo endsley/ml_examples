@@ -15,11 +15,7 @@ data = genfromtxt('data_sets/data_2.csv', delimiter=',')
 ASC = alt_spectral_clust(data)
 ASC.set_values('q',2)
 ASC.run()
-#print 'Y matrix : \n' , ASC.db['Y_matrix']
-#print 'U matrix : \n' , ASC.db['U_matrix']
-#print 'D matrix : \n' , ASC.db['D_matrix']
-#print 'K matrix : \n' , ASC.db['Kernel_matrix']
-#print 'H matrix : \n' , ASC.db['H_matrix']
-ASC.run()
 
-
+db = ASC.db
+print db['Y_matrix']
+import pdb; pdb.set_trace()
