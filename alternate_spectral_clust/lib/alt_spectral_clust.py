@@ -12,7 +12,7 @@ from numpy import genfromtxt
 class alt_spectral_clust:
 	def __init__(self, data_set):
 		self.db = {}
-		self.db['C_num'] = 2
+		self.db['C_num'] = 2				# Number of clusters
 
 		if type(data_set) == type({}):
 			data_set = np.array(data_set)

@@ -27,6 +27,8 @@ def random_svd(X, rank, num_of_random_column):
 
 	Q, R = np.linalg.qr(X_hat.dot(X_hat).dot(X).dot(omega), mode='reduced')
 	smaller_matrix = Q.T.dot(X)
+
+	print 'Running random svd with matrix size of : ' , smaller_matrix.shape
 	U,S,V = np.linalg.svd(smaller_matrix)
 	U = Q.dot(U)
 
@@ -40,8 +42,9 @@ def random_svd(X, rank, num_of_random_column):
 #	sampling_percentage is between 0 to 1
 #	note that X3 = [W G21.T; G21 G22]
 def nystrom(X, return_rank, sampling_percentage):
+	return_rank = int(return_rank)
 	p = sampling_percentage
-	num_of_columns = np.floor(p*X.shape[1])
+	num_of_columns = int(np.floor(p*X.shape[1]))
 	rp = np.random.permutation(X.shape[1])
 
 	rc = rp[num_of_columns:]	#	residual columns
@@ -53,7 +56,7 @@ def nystrom(X, return_rank, sampling_percentage):
 	W = X3[0:num_of_columns, 0:num_of_columns]
 	G21 = X3[num_of_columns:, 0:num_of_columns]
 	G22 = X3[num_of_columns:, num_of_columns:]
-
+	
 	[U,S,V] = random_svd(W, return_rank, return_rank+10)
 
 	ratio = float(X.shape[1])/num_of_columns
@@ -69,8 +72,9 @@ def nystrom(X, return_rank, sampling_percentage):
 if __name__ == '__main__':
 
 	desired_rank = 5
-	example_size = 10000
-
+	example_size = 3000
+	
+	print 'Generating the sample data.....'
 	X = np.random.normal(size=(example_size, example_size))
 	Q,R = np.linalg.qr(X, mode='reduced')
 	eigVecs = Q[:,0:desired_rank]
@@ -79,6 +83,7 @@ if __name__ == '__main__':
 	M = eigVecs.dot(eigVals).dot(eigVecs.T) + noise
 	
 	#for m in range(avg_amount):
+	print 'Starting the combine nystrom and random svd.....'
 	[V,D] = nystrom(M, desired_rank, 0.60)
 
 	print D[0:desired_rank]
