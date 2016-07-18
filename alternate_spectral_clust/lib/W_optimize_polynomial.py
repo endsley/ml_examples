@@ -1,6 +1,5 @@
 
 import numpy as np
-from create_A_ij_matrix import *
 from create_gamma_ij import *
 from create_y_tilde import *
 from objective_magnitude import *
