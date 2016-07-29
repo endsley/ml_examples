@@ -36,12 +36,12 @@ class alt_spectral_clust:
 		self.db['Y_matrix'] = np.array([])
 		#self.db['kernel_type'] = 'Gaussian Kernel'
 		self.db['kernel_type'] = 'Linear Kernel'
+		self.db['data_type'] = 'Feature Matrix'
 
 
 		#outputs from U_optimize
 		self.db['D_matrix'] = np.array([])
-		self.db['U_matrix'] = np.array([])
-	
+		self.db['U_matrix'] = np.array([])	
 		self.db['W_matrix'] = np.array([])
 
 		# output from spectral clustering
@@ -50,9 +50,7 @@ class alt_spectral_clust:
 
 		self.db['H_matrix'] = None
 		self.db['maximum_W_update_count'] = 300
-
-
-		self.db['data'] = self.center_data(data_set)
+		self.db['data'] = data_set
 
 	def set_values(self, key, val):
 		self.db[key] = val
@@ -69,6 +67,9 @@ class alt_spectral_clust:
 	def run(self):
 		db = self.db
 		N = self.db['N']
+
+		if db['data_type'] == 'Feature Matrix': 
+			self.db['data'] = self.center_data(self.db['data'])
 
 		if type(db['H_matrix']) == type(None):
 			db['H_matrix'] = np.eye(N) - np.ones((N,N))/N

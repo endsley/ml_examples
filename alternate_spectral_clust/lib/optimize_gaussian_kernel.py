@@ -27,16 +27,20 @@ def optimize_gaussian_kernel(db):
 	loop_count = 0
 
 	while WU_converge == False: 	
-		#import pdb; pdb.set_trace()
-		calc_gaussian_kernel(db)
-		U_optimize(db)
+		#import pdb; pdb.set_trace()	
+		if db['data_type'] == 'Feature Matrix': 
+			calc_gaussian_kernel(db)
+		elif db['data_type'] == 'Graph matrix': 
+			db['Kernel_matrix'] = db['data']
+			db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
 
-		if db['prev_clust'] == 0:
-			return
+
+		U_optimize(db)
+		if db['prev_clust'] == 0: return
+
+
 
 		W_optimize_Gaussian(db)
-
-
 		if not db.has_key('previous_U_matrix'): 
 			db['previous_U_matrix'] = db['U_matrix']
 			db['previous_W_matrix'] = db['W_matrix']
