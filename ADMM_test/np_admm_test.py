@@ -27,7 +27,7 @@ def Lagrange_Z(Z, x1, x2, L1, L2, W, Z_shape):
 	one_matrix = np.ones((Z_shape[1],Z_shape[1]))
 	eye_matrix = np.eye(Z_shape[1])
 
-
+	#import pdb; pdb.set_trace()
 	Lagrange = np.trace(L1.dot(W.T.dot(Z2) - eye_matrix)) + np.sum(L2.T*(W - Z2))
 
 	term1 = ( Z2.T.dot(W) - eye_matrix )
@@ -55,6 +55,8 @@ zi = Z.shape[0]
 zj = Z.shape[1]
 stay_in_loop = True
 loop_count = 0
+
+
 
 while stay_in_loop:
 	result_w = minimize(Lagrange_W, W, method='nelder-mead', args=(x1,x2,L1,L2,Z, W.shape), options={'xtol': 1e-6, 'disp': True})
