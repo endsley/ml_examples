@@ -3,12 +3,20 @@
 import numpy as np
 from scipy.optimize import minimize
 
-def Lagrange_W(W, x1, x2, L1, L2, Z, W_shape):	
+constant = [1,2,-1]
+
+
+def Lagrange_W(W, X, L1, L2, Z, W_shape):	
 	W2 = W.reshape(W_shape)
 	one_matrix = np.ones((W_shape[1],W_shape[1]))
 	eye_matrix = np.eye(W_shape[1])
 
-	cost_foo = -np.exp(-x1.T.dot(W2).dot(W2.T).dot(x1))-2*np.exp(-x2.T.dot(W2).dot(W2.T).dot(x2))
+	cost_foo = 0
+	for m in range(len(X)):
+		x = X[m]
+		cost_foo = cost_foo - constant[m]*np.exp(-x.T.dot(W2).dot(W2.T).dot(x))
+
+	#cost_foo = -np.exp(-x1.T.dot(W2).dot(W2.T).dot(x1))-2*np.exp(-x2.T.dot(W2).dot(W2.T).dot(x2))
 
 	Lagrange = np.trace(L1.dot(W2.T.dot(Z) - eye_matrix)) + np.sum(L2.T*(W2 - Z))
 
@@ -21,7 +29,7 @@ def Lagrange_W(W, x1, x2, L1, L2, Z, W_shape):
 
 	return foo
 
-def Lagrange_Z(Z, x1, x2, L1, L2, W, Z_shape):
+def Lagrange_Z(Z, L1, L2, W, Z_shape):
 	
 	Z2 = Z.reshape(Z_shape)
 	one_matrix = np.ones((Z_shape[1],Z_shape[1]))
@@ -41,8 +49,13 @@ def Lagrange_Z(Z, x1, x2, L1, L2, W, Z_shape):
 
 
 
-x1 = np.array([1,0,1])
-x2 = np.array([3,2,1])
+X = []
+X.append(np.array([1,0,1]))
+X.append(np.array([3,2,1]))
+X.append(np.array([3,4,-1]))
+
+#x1 = np.array([1,0,1])
+#x2 = np.array([3,2,1])
 
 Z = np.array([[1,0],[0,1],[0,0]])
 W = np.array([[1,0], [0,1],[0,0]])
@@ -59,10 +72,10 @@ loop_count = 0
 
 
 while stay_in_loop:
-	result_w = minimize(Lagrange_W, W, method='nelder-mead', args=(x1,x2,L1,L2,Z, W.shape), options={'xtol': 1e-6, 'disp': True})
+	result_w = minimize(Lagrange_W, W, method='nelder-mead', args=(X,L1,L2,Z, W.shape), options={'xtol': 1e-6, 'disp': True})
 	W = result_w.x.reshape(W.shape)
 	
-	result_z = minimize(Lagrange_Z, Z, method='nelder-mead', args=(x1,x2,L1,L2,W, Z.shape), options={'xtol': 1e-6, 'disp': True})
+	result_z = minimize(Lagrange_Z, Z, method='nelder-mead', args=(L1,L2,W, Z.shape), options={'xtol': 1e-6, 'disp': True})
 	Z = result_z.x.reshape(Z.shape)
 	
 	#print Z
