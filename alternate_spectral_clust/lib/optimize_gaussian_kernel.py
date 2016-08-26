@@ -6,7 +6,8 @@ from objective_magnitude import *
 
 #	You must comment out one of the method and keep the other, the stochastic approach is faster
 #from W_optimize_Gaussian import *
-from W_optimize_Gaussian_stochastic import *
+#from W_optimize_Gaussian_stochastic import *
+from W_optimize_Gaussian_ADMM import *
 
 
 def optimize_gaussian_kernel(db):
@@ -41,6 +42,7 @@ def optimize_gaussian_kernel(db):
 
 
 		W_optimize_Gaussian(db)
+
 		if not db.has_key('previous_U_matrix'): 
 			db['previous_U_matrix'] = db['U_matrix']
 			db['previous_W_matrix'] = db['W_matrix']
