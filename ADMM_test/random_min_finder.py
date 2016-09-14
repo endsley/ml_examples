@@ -28,14 +28,8 @@ class random_min_finder:
 		return np.dot(np.transpose(x_dif), x_dif)
 
 	def Lagrange_W(self, W):
-		Z = self.db['Z_matrix']
-		L1 = self.db['L1']
-		L2 = self.db['L2']
 		Wsh = self.W_shape
-
 		W2 = W.reshape(Wsh)
-		one_matrix = np.ones((self.wj, self.wj))
-		eye_matrix = np.eye(self.wj)
 	
 		#	Setting up the cost function
 		cost_foo = 0
@@ -58,8 +52,8 @@ class random_min_finder:
 		q, r = np.linalg.qr(random_matrix)
 		return q
 
-	def run(self):	
 
+	def run(self):	
 		for m in range(500000):
 			W = self.gen_random_W()
 			cost = self.Lagrange_W(W)
@@ -88,7 +82,12 @@ iv = np.array([0])
 jv = np.array([1,2])
 rmf = random_min_finder(db, iv, jv)
 
-rmf.run()
+
+W = np.array([[ 0.57643199, -0.14371058], [-0.57616693,  0.62657744], [-0.57944614, -0.76599473]], dtype='f')
+cost = rmf.Lagrange_W(W)
+
+
+
 
 import pdb; pdb.set_trace()
 

@@ -12,14 +12,17 @@ class exponential_solver:
 
 		self.optimal_val = 0
 		self.current_cost = 0
+		self.gamma_array = 0
 
 		self.W_shape = db['W_matrix'].shape
 		self.wi = self.W_shape[0]
 		self.wj = self.W_shape[1]
 
-	def create_gamma_ij(self, i,j):
-		gamma = np.array([[0,1,2,-1]])
-		return gamma[i,j]
+	def create_gamma_ij(self, db, y_tilde, i, j):
+		if type(self.gamma_array) == type(0):
+			return create_gamma_ij(db, self.y_tilde, i, j)
+		else:
+			return self.gamma_array[i,j]
 
 	def create_A_ij_matrix(i, j):
 		db = self.db
@@ -28,13 +31,13 @@ class exponential_solver:
 		return np.dot(np.transpose(x_dif), x_dif)
 
 	def Lagrange_W(self, W):
-		Z = self.db['Z_matrix']
-		L1 = self.db['L1']
-		L2 = self.db['L2']
+		db = self.db
+		Z = db['Z_matrix']
+		L1 = db['L1']
+		L2 = db['L2']
 		Wsh = self.W_shape
 
 		W2 = W.reshape(Wsh)
-		one_matrix = np.ones((self.wj, self.wj))
 		eye_matrix = np.eye(self.wj)
 	
 		#	Setting up the cost function
@@ -45,14 +48,14 @@ class exponential_solver:
 				x_dif = db['data'][i] - db['data'][j]
 				x_dif = x_dif[np.newaxis]
 			
-				gamma_ij = self.create_gamma_ij(i, j)
+				gamma_ij = self.create_gamma_ij(db, 0, i, j)
 				cost_foo = cost_foo - gamma_ij*np.exp(-x_dif.dot(W2).dot(W2.T).dot(x_dif.T))
 
 		self.current_cost = cost_foo
 		Lagrange = np.trace(L1.dot(W2.T.dot(Z) - eye_matrix)) + np.sum(L2.T*(W2 - Z))
 		term1 = ( Z.T.dot(W2) - eye_matrix )
 		term2 =  W2 - Z 	
-		Aug_lag = np.trace(one_matrix.dot(term1*term1)) + np.sum(term2*term2)
+		Aug_lag = np.sum(term1*term1) + np.sum(term2*term2)
 		foo = cost_foo + Lagrange + Aug_lag
 	
 		return foo
@@ -65,7 +68,6 @@ class exponential_solver:
 		Z_shape = self.db['Z_matrix'].shape
 		Z2 = Z.reshape(Z_shape)
 
-		one_matrix = np.ones((Z_shape[1],Z_shape[1]))
 		eye_matrix = np.eye(Z_shape[1])
 	
 		#	Setting up the cost function
@@ -74,7 +76,7 @@ class exponential_solver:
 		Lagrange = np.trace(L1.dot(W.T.dot(Z2) - eye_matrix)) + np.sum(L2.T*(W - Z2))
 		term1 = ( Z2.T.dot(W) - eye_matrix )
 		term2 =  W - Z2 	
-		Aug_lag = np.trace(one_matrix.dot(term1*term1)) + np.sum(term2*term2)
+		Aug_lag = np.sum(term1*term1) + np.sum(term2*term2)
 
 		foo = cost_foo + Lagrange + Aug_lag
 		return foo
@@ -123,24 +125,26 @@ class exponential_solver:
 
 
 
+def test_1():
+	db = {}
+	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1]])
+	db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]])
+	db['W_matrix'] = np.array([[1,0],[0,1],[0,0]])
+	
+	db['L1'] = np.array([[1,0], [0,2]])		# q x q
+	db['L2'] = np.array([[2,3,1],[0,0,1]])	# q x d
+	db['L'] = np.append(db['L1'], db['L2'].T, axis=0)
+	
+	
+	iv = np.array([0])
+	jv = np.array([1,2])
+	esolver = exponential_solver(db, iv, jv)
+	esolver.gamma_array = np.array([[0,1,2,-1]])
+	esolver.run()
+	
+	esolver.Lagrange_W(db['W_matrix'])
+	print esolver.current_cost
+	import pdb; pdb.set_trace()
 
-db = {}
-db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1],[0,0,1]])
-db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]])
-db['W_matrix'] = np.array([[1,0],[0,1],[0,0]])
 
-db['L1'] = np.array([[1,0], [0,2]])
-db['L2'] = np.array([[2,3,1],[0,0,1]])
-db['L'] = np.append(db['L1'], db['L2'].T, axis=0)
-
-
-iv = np.array([0])
-jv = np.array([1,2])
-esolver = exponential_solver(db, iv, jv)
-esolver.run()
-
-esolver.Lagrange_W(db['W_matrix'])
-print esolver.current_cost
-import pdb; pdb.set_trace()
-
-
+test_1()

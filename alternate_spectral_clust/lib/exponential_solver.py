@@ -8,11 +8,15 @@ class exponential_solver:
 	def __init__(self, db, y_tilde):
 		self.db = db
 		self.y_tilde = y_tilde
+		self.W_result = 0
+		self.gamma_array = 0
 		self.optimal_val = 0
 
-	#def create_gamma_ij(self, i,j):
-	#	gamma = np.array([[0,1,2,-1]])
-	#	return gamma[i,j]
+	def create_gamma_ij(self, db, y_tilde, i, j):
+		if type(self.gamma_array) == type(0):
+			return create_gamma_ij(db, self.y_tilde, i, j)
+		else:
+			return self.gamma_array[i,j]
 
 	def create_A_ij_matrix(i, j):
 		db = self.db
@@ -28,7 +32,6 @@ class exponential_solver:
 
 		W_shape = db['W_matrix'].shape
 		W2 = W.reshape(W_shape)
-		one_matrix = np.ones((W_shape[1],W_shape[1]))
 		eye_matrix = np.eye(W_shape[1])
 	
 		#	Setting up the cost function
@@ -39,10 +42,10 @@ class exponential_solver:
 				x_dif = db['data'][i] - db['data'][j]
 				x_dif = x_dif[np.newaxis]
 			
-				gamma_ij = create_gamma_ij(db, self.y_tilde, i, j)
+				gamma_ij = self.create_gamma_ij(db, self.y_tilde, i, j)
 				cost_foo = cost_foo - gamma_ij*np.exp(-x_dif.dot(W2).dot(W2.T).dot(x_dif.T))
 
-
+		self.optimal_val = cost_foo
 		Lagrange = np.trace(L1.dot(W2.T.dot(Z) - eye_matrix)) + np.sum(L2.T*(W2 - Z))
 		term1 = ( Z.T.dot(W2) - eye_matrix )
 		term2 =  W2 - Z 	
@@ -59,7 +62,6 @@ class exponential_solver:
 		Z_shape = self.db['Z_matrix'].shape
 		Z2 = Z.reshape(Z_shape)
 
-		one_matrix = np.ones((Z_shape[1],Z_shape[1]))
 		eye_matrix = np.eye(Z_shape[1])
 	
 		#	Setting up the cost function
@@ -82,10 +84,10 @@ class exponential_solver:
 		stay_in_loop = True
 
 		while stay_in_loop:
-			result_w = minimize(self.Lagrange_W, self.db['W_matrix'], method='nelder-mead', args=(iv, jv), options={'xtol': 1e-6, 'disp': True})
+			result_w = minimize(self.Lagrange_W, self.db['W_matrix'], method='nelder-mead', args=(iv, jv), options={'xtol': 1e-6, 'disp': False})
 			self.db['W_matrix'] = result_w.x.reshape(self.db['W_matrix'].shape)
 	
-			result_z = minimize(self.Lagrange_Z, self.db['Z_matrix'], method='nelder-mead', options={'xtol': 1e-6, 'disp': True})
+			result_z = minimize(self.Lagrange_Z, self.db['Z_matrix'], method='nelder-mead', options={'xtol': 1e-6, 'disp': False})
 			self.db['Z_matrix'] = result_z.x.reshape(self.db['Z_matrix'].shape)
 
 			Z = self.db['Z_matrix']
@@ -94,11 +96,11 @@ class exponential_solver:
 			A = np.append(Z.T, np.eye( zi ), axis=0)
 			B = np.append(np.zeros(Z.T.shape), np.eye( zi ), axis=0)
 			C = np.append(np.eye(zj), np.zeros(Z.shape), axis=0)
-			self.db['L'] = self.db['L'] + (A.dot(W)-B.dot(Z)-C).T
-			
-			self.db['L1'] = self.db['L'][:,0:zj]
-			self.db['L2'] = self.db['L'][:,zj:]	
-			
+			self.db['L'] = self.db['L'] + (A.dot(W)-B.dot(Z)-C)
+
+			db['L1'] = db['L'][0:zj,:]
+			db['L2'] = db['L'][zj:,:].T
+
 			loop_count += 1
 			if np.abs(np.sum(W.T.dot(Z) - np.eye(zj))) < 0.001: 
 				print('Exit base on threshold')
@@ -107,8 +109,7 @@ class exponential_solver:
 				print('Exit base on loop_count')
 				stay_in_loop = False
 
-		self.optimal_val = result_w.fun	
-
+		self.W_result = result_w
 		return result_w.x.reshape(self.db['W_matrix'].shape)
 
 
@@ -117,20 +118,22 @@ class exponential_solver:
 
 if __name__ == "__main__":
 	db = {}
-	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1],[0,0,1]])
+	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1]])
 	db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]])
 	db['W_matrix'] = np.array([[1,0],[0,1],[0,0]])
 	
 	db['L1'] = np.array([[1,0], [0,2]])
 	db['L2'] = np.array([[2,3,1],[0,0,1]])
-	db['L'] = np.append(db['L1'], db['L2'], axis=1)
+	db['L'] = np.append(db['L1'], db['L2'].T, axis=0)
 	
 	iv = np.array([0])
-	jv = np.array([1,2,3])
-	esolver = exponential_solver(db)
+	jv = np.array([1,2])
+	esolver = exponential_solver(db, None)
+	esolver.gamma_array = np.array([[0,1,2,-1]])
 	esolver.run(iv,jv)
 	
-	print esolver.Lagrange_W(db['W_matrix'])
+	esolver.Lagrange_W(db['W_matrix'], iv, jv)
+	print esolver.optimal_val
 	import pdb; pdb.set_trace()
 
 
