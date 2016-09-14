@@ -13,6 +13,10 @@ class exponential_solver:
 		self.optimal_val = 0
 		self.current_cost = 0
 
+		self.W_shape = db['W_matrix'].shape
+		self.wi = self.W_shape[0]
+		self.wj = self.W_shape[1]
+
 	def create_gamma_ij(self, i,j):
 		gamma = np.array([[0,1,2,-1]])
 		return gamma[i,j]
@@ -27,11 +31,11 @@ class exponential_solver:
 		Z = self.db['Z_matrix']
 		L1 = self.db['L1']
 		L2 = self.db['L2']
+		Wsh = self.W_shape
 
-		W_shape = self.db['W_matrix'].shape
-		W2 = W.reshape(W_shape)
-		one_matrix = np.ones((W_shape[1],W_shape[1]))
-		eye_matrix = np.eye(W_shape[1])
+		W2 = W.reshape(Wsh)
+		one_matrix = np.ones((self.wj, self.wj))
+		eye_matrix = np.eye(self.wj)
 	
 		#	Setting up the cost function
 		cost_foo = 0
