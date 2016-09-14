@@ -28,7 +28,7 @@ class alt_spectral_clust:
 		self.db['q'] = 1
 		self.db['lambda'] = 1
 		self.db['alpha'] = 0.01
-		self.db['SGD_size'] = 5
+		self.db['SGD_size'] = 6
 		self.db['polynomial_constant'] = 1
 
 		self.db['Kernel_matrix'] = np.zeros((self.db['N'],self.db['N']))

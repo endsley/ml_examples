@@ -135,6 +135,7 @@ db['W_matrix'] = np.array([[1,0],[0,1],[0,0]])
 db['L1'] = np.array([[1,0], [0,2]])
 db['L2'] = np.array([[2,3,1],[0,0,1]])
 db['L'] = np.append(db['L1'], db['L2'], axis=1)
+import pdb; pdb.set_trace();
 
 iv = np.array([0])
 jv = np.array([1,2,3])

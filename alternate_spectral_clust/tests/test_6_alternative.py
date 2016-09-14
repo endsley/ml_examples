@@ -18,7 +18,7 @@ db = ASC.db
 
 ASC.set_values('q',1)
 ASC.set_values('C_num',2)
-ASC.set_values('kernel_type','Polynomial Kernel')
+ASC.set_values('kernel_type','Gaussian Kernel')
 ASC.run()
 
 print db['Y_matrix']

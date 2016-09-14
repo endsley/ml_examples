@@ -39,8 +39,6 @@ def optimize_gaussian_kernel(db):
 		U_optimize(db)
 		if db['prev_clust'] == 0: return
 
-
-
 		W_optimize_Gaussian(db)
 
 		if not db.has_key('previous_U_matrix'): 
