@@ -2,7 +2,8 @@
 
 import numpy as np
 from scipy.optimize import minimize
-
+import csv
+from StringIO import StringIO
 
 class dimension_growth:
 	def __init__(self, db, iv, jv):
@@ -22,7 +23,8 @@ class dimension_growth:
 	def Lagrange_W(self, W):
 		Wsh = self.W_shape
 		W2 = W.reshape(Wsh)
-	
+		db = self.db	
+
 		#	Setting up the cost function
 		cost_foo = 0
 		for i in self.iv:
@@ -156,10 +158,6 @@ class dimension_growth:
 				if counter > db['maximum_W_update_count']: 
 					print '\nExit due to maximum update reached'
 					w_converged = True
-					try:
-						db.pop('previous_wolfe_direction')
-						db.pop('previous_wolfe_magnitude')
-					except: pass
 	
 			w_converged = False
 			previous_gw = self.update_previous_gw(last_W, previous_gw)
@@ -170,29 +168,66 @@ class dimension_growth:
 
 
 
+def test_1():		#	optimal = -2.4308
+	db = {}
+	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1],[0,0,1]])
+	db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]], dtype='f' )
+	db['W_matrix'] = np.array([[10,15],[10,1],[0,0]], dtype='f')
+	
+	db['N'] = db['data'].shape[0]
+	db['SGD_size'] = db['N']
+	db['q'] = db['W_matrix'].shape[1]
+	db['sigma'] = np.sqrt(1/2.0)
+	db['maximum_W_update_count'] = 100
+	
+	iv = np.array([0])
+	jv = np.array([1,2])
+	dgrowth = dimension_growth(db, iv, jv)
+	dgrowth.gamma_array = np.array([[0,1,2,-1]])
+	dgrowth.run()
+	
+	final_cost = dgrowth.Lagrange_W(db['W_matrix'])
+	print final_cost
+	import pdb; pdb.set_trace()
+	
+	
+def test_2():
+	q = 4		# the dimension you want to lower it to
 
-db = {}
-db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1],[0,0,1]])
-db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]], dtype='f' )
-db['W_matrix'] = np.array([[1,0],[0,1],[0,0]], dtype='f')
+	fin = open('data_1.csv','r')
+	data = fin.read()
+	fin.close()
 
-db['L1'] = np.array([[1,0], [0,2]])		#	q x q
-db['L2'] = np.array([[2,3,1],[1,1,1]])	#	q x d
-db['L'] = np.append(db['L1'], db['L2'].T, axis=0)
-db['N'] = db['data'].shape[0]
-db['SGD_size'] = db['N']
-db['q'] = db['W_matrix'].shape[1]
-db['sigma'] = np.sqrt(1/2.0)
-db['maximum_W_update_count'] = 100
-
-iv = np.array([0,1,2])
-jv = np.array([0,1,2])
-dgrowth = dimension_growth(db, iv, jv)
-dgrowth.gamma_array = np.array([[0,1,2,-1]])
-dgrowth.run()
-
-final_cost = dgrowth.Lagrange_W(db['W_matrix'])
-print final_cost
-import pdb; pdb.set_trace()
+	db = {}
+	db['data'] = np.genfromtxt(StringIO(data), delimiter=",")
+	db['N'] = db['data'].shape[0]
+	db['d'] = db['data'].shape[1]
+	db['q'] = q
+		
+	db['SGD_size'] = db['N']
+	db['sigma'] = np.sqrt(1/2.0)
+	db['maximum_W_update_count'] = 100
+	
+	iv = np.arange(db['N'])
+	jv = np.arange(db['N'])
 
 
+	for m in range(10):
+		db['Z_matrix'] = np.random.normal(0,10, (db['d'], db['q']) )
+		#db['Z_matrix'] = np.identity(db['d'])[:,0:db['q']]
+		db['W_matrix'] = db['Z_matrix']
+
+		dgrowth = dimension_growth(db, iv, jv)
+		dgrowth.gamma_array = np.array([[0,1,2,-1,-1,-2], [3,1,-3,-4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [-1,-2,2,1,-5,0]])
+		dgrowth.run()
+		
+		final_cost = dgrowth.Lagrange_W(db['W_matrix'])
+		print final_cost
+
+	import pdb; pdb.set_trace()
+	
+np.set_printoptions(precision=4)
+np.set_printoptions(threshold=np.nan)
+np.set_printoptions(linewidth=300)
+
+test_2()

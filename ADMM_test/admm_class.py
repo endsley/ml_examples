@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy.optimize import minimize
+from StringIO import StringIO
 
 
 class exponential_solver:
@@ -52,6 +53,7 @@ class exponential_solver:
 				cost_foo = cost_foo - gamma_ij*np.exp(-x_dif.dot(W2).dot(W2.T).dot(x_dif.T))
 
 		self.current_cost = cost_foo
+		print self.current_cost
 		Lagrange = np.trace(L1.dot(W2.T.dot(Z) - eye_matrix)) + np.sum(L2.T*(W2 - Z))
 		term1 = ( Z.T.dot(W2) - eye_matrix )
 		term2 =  W2 - Z 	
@@ -92,16 +94,18 @@ class exponential_solver:
 		stay_in_loop = True
 
 		while stay_in_loop:
-			result_w = minimize(self.Lagrange_W, db['W_matrix'], method='nelder-mead', options={'xtol': 1e-6, 'disp': False})
+			#result_w = minimize(self.Lagrange_W, db['W_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
+			#result_w = minimize(self.Lagrange_W, db['W_matrix'], method='BFGS', options={'disp': False}) #nelder-mead, BFGS
+			result_w = minimize(self.Lagrange_W, db['W_matrix'], method='CG', options={'disp': False}) #nelder-mead, BFGS
+
 			db['W_matrix'] = result_w.x.reshape(db['W_matrix'].shape)
 	
-			result_z = minimize(self.Lagrange_Z, db['Z_matrix'], method='nelder-mead', options={'xtol': 1e-6, 'disp': False})
+			result_z = minimize(self.Lagrange_Z, db['Z_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
 			db['Z_matrix'] = result_z.x.reshape(db['Z_matrix'].shape)
 
 			Z = db['Z_matrix']
 			W = db['W_matrix']
 
-			#print Z
 			A = np.append(Z.T, np.eye( zi ), axis=0)
 			B = np.append(np.zeros(Z.T.shape), np.eye( zi ), axis=0)
 			C = np.append(np.eye(zj), np.zeros(Z.shape), axis=0)
@@ -111,6 +115,7 @@ class exponential_solver:
 			db['L2'] = db['L'][zj:,:].T
 			
 			loop_count += 1
+			print loop_count
 			if np.abs(np.sum(W.T.dot(Z) - np.eye(zj))) < 0.001: 
 				print('Exit base on threshold')
 				stay_in_loop = False
@@ -125,11 +130,11 @@ class exponential_solver:
 
 
 
-def test_1():
+def test_1():		# optimal = 2.4309
 	db = {}
 	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1]])
 	db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]])
-	db['W_matrix'] = np.array([[1,0],[0,1],[0,0]])
+	db['W_matrix'] = np.array([[1,10],[1,1],[0,0]])
 	
 	db['L1'] = np.array([[1,0], [0,2]])		# q x q
 	db['L2'] = np.array([[2,3,1],[0,0,1]])	# q x d
@@ -147,4 +152,52 @@ def test_1():
 	import pdb; pdb.set_trace()
 
 
-test_1()
+def test_2():
+	q = 4		# the dimension you want to lower it to
+
+	fin = open('data_1.csv','r')
+	data = fin.read()
+	fin.close()
+
+	db = {}
+	db['data'] = np.genfromtxt(StringIO(data), delimiter=",")
+	db['N'] = db['data'].shape[0]
+	db['d'] = db['data'].shape[1]
+	db['q'] = q
+		
+	db['L1'] = np.random.normal(0,10, (db['q'], db['q']) )		# q x q
+	db['L2'] = np.random.normal(0,10, (db['q'], db['d']) )	# q x d
+	db['L'] = np.append(db['L1'], db['L2'].T, axis=0)
+
+	db['SGD_size'] = 2
+	db['sigma'] = np.sqrt(1/2.0)
+	
+	iv = np.arange(db['N'])
+	jv = np.arange(db['N'])
+
+	#i_values = np.random.permutation( np.array(range(db['N'])) )
+	#iv = i_values[0:db['SGD_size']]
+	#j_values = np.random.permutation( np.array(range(db['N'])) )
+	#jv = j_values[0:db['SGD_size']]
+
+
+	for m in range(10):
+		db['Z_matrix'] = np.random.normal(0,10, (db['d'], db['q']) )
+		db['W_matrix'] = db['Z_matrix']
+
+		esolver = exponential_solver(db, iv, jv)
+		esolver.gamma_array = np.array([[0,1,2,-1,-1,-2], [3,1,-3,-4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [-1,-2,2,1,-5,0]])
+		try:
+			esolver.run()
+			esolver.Lagrange_W(db['W_matrix'])
+			print esolver.current_cost
+		except:
+			pass
+
+	import pdb; pdb.set_trace()
+	
+np.set_printoptions(precision=4)
+np.set_printoptions(threshold=np.nan)
+np.set_printoptions(linewidth=300)
+
+test_2()
