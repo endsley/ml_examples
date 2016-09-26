@@ -218,16 +218,38 @@ def test_2():
 		db['W_matrix'] = db['Z_matrix']
 
 		dgrowth = dimension_growth(db, iv, jv)
-		dgrowth.gamma_array = np.array([[0,1,2,-1,-1,-2], [3,1,-3,-4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [-1,-2,2,1,-5,0]])
+		dgrowth.gamma_array = np.array([[0,1,2,1,1,2], [3,1,3,4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [1,2,2,1,5,0]])
 		dgrowth.run()
 		
 		final_cost = dgrowth.Lagrange_W(db['W_matrix'])
 		print final_cost
 
 	import pdb; pdb.set_trace()
+
+def test_3():		#	optimal = -2.4308
+	db = {}
+	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1],[1,1,1]])
+	db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]], dtype='f' )
+	db['W_matrix'] = np.array([[10,15],[10,1],[0,0]], dtype='f')
+	
+	db['N'] = db['data'].shape[0]
+	db['SGD_size'] = db['N']
+	db['q'] = db['W_matrix'].shape[1]
+	db['sigma'] = np.sqrt(1/2.0)
+	db['maximum_W_update_count'] = 100
+	
+	iv = np.array([0])
+	jv = np.array([1,2,3])
+	dgrowth = dimension_growth(db, iv, jv)
+	dgrowth.gamma_array = np.array([[0,1,2,-1,2]])
+	dgrowth.run()
+	
+	final_cost = dgrowth.Lagrange_W(db['W_matrix'])
+	print final_cost
+	import pdb; pdb.set_trace()
 	
 np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 
-test_1()
+test_3()
