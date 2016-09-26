@@ -132,12 +132,6 @@ class exponential_solver:
 		db['L1'] = db['L'][0:self.zj,:]
 		db['L2'] = db['L'][self.zj:,:].T
 
-		#L = L + alpha*(A.dot(W)-B.dot(Z)-C)
-		#L1 = db['L'][0:zj,:]
-		#L2 = db['L'][zj:,:].T
-		#return {'L':L, 'L1':L1, 'L2':L2}
-
-
 	def w_optimize(self):
 		#	Calculate dL/dw gradient
 		db = self.db

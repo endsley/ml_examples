@@ -13,12 +13,10 @@ def W_optimize_Gaussian(db):
 	db['Z_matrix'] = db['W_matrix']
 	db['L1'] = np.eye(db['q'])
 	db['L2'] = np.eye(db['q'], db['d'])
+	db['L'] = np.append(db['L1'], db['L2'].T, axis=0)
 
-	db['L'] = np.append(db['L1'], db['L2'], axis=1)	
 	
-	eSolver = exponential_solver(db, y_tilde)
-	
-	use_all_data = False
+	use_all_data = True
 	if use_all_data :
 		iv = np.array(range(db['N']))
 		jv = iv
@@ -28,8 +26,9 @@ def W_optimize_Gaussian(db):
 		j_values = np.random.permutation( np.array(range(db['N'])) )
 		jv = j_values[0:db['SGD_size']]
 
-	db['W_matrix'] = eSolver.run(iv,jv)
+	eSolver = exponential_solver(db, iv, jv, y_tilde)
+	optimize_result = eSolver.run()
 
-	print db['W_matrix']
-	import pdb; pdb.set_trace();
+	#print db['W_matrix']
+	#import pdb; pdb.set_trace();
 
