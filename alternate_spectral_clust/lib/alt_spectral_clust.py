@@ -25,7 +25,7 @@ class alt_spectral_clust:
 		
 		self.db['sigma'] = 1
 		self.db['poly_order'] = 2
-		self.db['q'] = 1
+		self.db['q'] = 2
 		self.db['lambda'] = 1
 		self.db['alpha'] = 0.01
 		self.db['SGD_size'] = 6
