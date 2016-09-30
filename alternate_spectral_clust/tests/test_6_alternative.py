@@ -21,8 +21,8 @@ ASC.set_values('C_num',2)
 ASC.set_values('kernel_type','Gaussian Kernel')
 ASC.run()
 
-print db['Y_matrix'].T
+#print db['Y_matrix'].T
 ASC.run()
-print db['Y_matrix'].T
-
+print db['Y_matrix']
+import matplotlib.pyplot as plt
 import pdb; pdb.set_trace()

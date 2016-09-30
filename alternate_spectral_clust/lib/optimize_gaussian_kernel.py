@@ -16,9 +16,9 @@ def optimize_gaussian_kernel(db):
 
 	if db['W_matrix'].shape[0] == 0:
 		db['W_matrix'] = np.identity(db['d'])
-		#db['W_matrix'] = np.random.normal(0,3, (db['d'], db['d']) )
 	else:
-		db['W_matrix'] = db['W_matrix'][:,0:db['q']]
+		#db['W_matrix'] = db['W_matrix'][:,0:db['q']]
+		db['W_matrix'] = np.random.normal(0,1, (db['d'], db['q']) )
 
 
 	#print db['Kernel_matrix']
@@ -50,6 +50,10 @@ def optimize_gaussian_kernel(db):
 			U_change = np.linalg.norm(db['previous_U_matrix'] - db['U_matrix'])
 			W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])
 
+			print db['updated_magnitude']
+			print '------------'
+			#print db['W_matrix']
+			#print (U_change + W_change)/matrix_mag
 			if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
 
 
@@ -59,7 +63,7 @@ def optimize_gaussian_kernel(db):
 		
 		#print db['updated_magnitude']
 		print 'Loop count = ' , loop_count
-		if loop_count > 30:
+		if loop_count > 80:
 			WU_converge = True
 
 

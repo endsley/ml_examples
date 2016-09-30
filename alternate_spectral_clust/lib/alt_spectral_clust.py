@@ -25,17 +25,17 @@ class alt_spectral_clust:
 		
 		self.db['sigma'] = 1
 		self.db['poly_order'] = 2
-		self.db['q'] = 2
+		self.db['q'] = 1
 		self.db['lambda'] = 1
 		self.db['alpha'] = 0.01
-		self.db['SGD_size'] = 6
+		self.db['SGD_size'] = 20
 		self.db['polynomial_constant'] = 1
 
 		self.db['Kernel_matrix'] = np.zeros((self.db['N'],self.db['N']))
 		self.db['prev_clust'] = 0
 		self.db['Y_matrix'] = np.array([])
-		#self.db['kernel_type'] = 'Gaussian Kernel'
-		self.db['kernel_type'] = 'Linear Kernel'
+		self.db['kernel_type'] = 'Gaussian Kernel'
+		#self.db['kernel_type'] = 'Linear Kernel'
 		self.db['data_type'] = 'Feature Matrix'
 
 

@@ -16,6 +16,7 @@ ASC = alt_spectral_clust(data)
 ASC.set_values('q',2)
 ASC.run()
 
+ASC.run()
 db = ASC.db
 print db['Y_matrix']
 import pdb; pdb.set_trace()
