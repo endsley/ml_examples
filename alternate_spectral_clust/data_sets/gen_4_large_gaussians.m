@@ -22,4 +22,4 @@ X = round(X*100)/100
 plot(X(:,1), X(:,2), 'x');
 
 %save KDAC_test.mat X
-csvwrite('Four_dimond_gaussians.csv',X)
+csvwrite('Four_dimond_gaussians.csv',X, 'precision', 3)
