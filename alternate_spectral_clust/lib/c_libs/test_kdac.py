@@ -6,17 +6,32 @@ from numpy import genfromtxt
 
 data = genfromtxt('data_gaussian_2.csv', delimiter=',')
 input_dim = data.shape
-i = Nice4Py.PyInterface()
-i.Init(data, Nice4Py.ModelType.KDAC, input_dim[0], input_dim[1])
-params = {}
-i.SetupParams(params)
+kdac = Nice4Py.KDAC()
+
+# Kernel type can be Gaussian|Linear|Polynomial
+params = {'c':2, 'q':2, 'kernel':'Gaussian', 'lambda':1.0, 'sigma':1.0}
+kdac.SetupParams(params)
 output = np.empty((input_dim[0], 1))
 print data
 print "=============="
-i.Run(output, input_dim[0], 1)
+kdac.Fit(data, input_dim[0], input_dim[1])
+kdac.Predict(output, input_dim[0], 1)
 print output
 print "=============="
-i.Run(output, input_dim[0], 1)
+kdac.Fit()
+kdac.Predict(output, input_dim[0], 1)
 print output
 print "=============="
 
+# If you want to get matrix U
+# the syntax is as below
+# kdac.GetU(output, <row number of U>, <row number of V>)
+# Getting Matrix W uses same syntax
+
+# Another Getters GetQ() GetD() GetN(), No argument needed
+q = kdac.GetQ();
+d = kdac.GetD();
+n = kdac.GetN();
+print q
+print d
+print n
