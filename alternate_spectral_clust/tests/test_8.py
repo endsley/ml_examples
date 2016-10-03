@@ -11,17 +11,16 @@ import pickle
 
 
 #np.set_printoptions(suppress=True)
-data = genfromtxt('data_sets/KDAC_dat.csv', delimiter=',')
+data = genfromtxt('data_sets/data_4.csv', delimiter=',')
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
 
-ASC.set_values('q',2)
-ASC.set_values('C_num',3)
+ASC.set_values('q',1)
+ASC.set_values('C_num',2)
 ASC.set_values('kernel_type','Gaussian Kernel')
 ASC.run()
 
-print db['Y_matrix']
 ASC.run()
 print db['Y_matrix']
 
