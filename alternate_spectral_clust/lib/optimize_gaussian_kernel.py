@@ -6,8 +6,8 @@ from objective_magnitude import *
 
 #	You must comment out one of the method and keep the other, the stochastic approach is faster
 #from W_optimize_Gaussian import *
-from W_optimize_Gaussian_stochastic import *
-#from W_optimize_Gaussian_ADMM import *
+#from W_optimize_Gaussian_stochastic import *
+from W_optimize_Gaussian_ADMM import *
 
 
 def optimize_gaussian_kernel(db):
@@ -50,8 +50,6 @@ def optimize_gaussian_kernel(db):
 			U_change = np.linalg.norm(db['previous_U_matrix'] - db['U_matrix'])
 			W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])
 
-			print db['updated_magnitude']
-			print '------------'
 			#print db['W_matrix']
 			#print (U_change + W_change)/matrix_mag
 			if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
