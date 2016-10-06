@@ -71,7 +71,6 @@ class exponential_solver:
 		Lagrange = np.trace(L1.dot(term1)) + np.trace(L2.dot(term2))
 		Aug_lag = np.sum(term1*term1) + np.sum(term2*term2)
 		foo = cost_foo + Lagrange + Aug_lag
-	
 		#print cost_foo, foo 
 		return foo
 
@@ -184,7 +183,7 @@ class exponential_solver:
 
 			loop_count += 1
 			self.matrix_gap = np.abs(np.sum(db['W_matrix'].T.dot(db['Z_matrix']) - np.eye(self.zj)))
-			print loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
+			#print loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
 
 			if self.matrix_gap < 0.001: 
 				print('Exit base on threshold')
