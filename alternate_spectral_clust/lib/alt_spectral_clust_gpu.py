@@ -60,6 +60,7 @@ class alt_spectral_clust:
 		self.translateion['C_num'] = 'c'
 		self.translateion['sigma'] = 'sigma'
 		self.translateion['q'] = 'q'
+		print '\n\nRan inside GPU\n\n'
 
 	def set_values(self, key, val):
 		params = {}	
@@ -87,7 +88,7 @@ class alt_spectral_clust:
 	def run(self):
 		db = self.db
 		N = db['N']
-
+		
 		if db['data_type'] == 'Feature Matrix': 
 			db['data'] = self.center_data(db['data'])
 
@@ -97,14 +98,24 @@ class alt_spectral_clust:
 		if db['kernel_type'] == 'Linear Kernel':
 			optimize_linear_kernel(db)
 		elif db['kernel_type'] == 'Gaussian Kernel':
+			print 'a'
 			output = np.empty((N, 1))
 
-			if self.db['prev_clust'] == 0 : self.kdac.Fit(db['data'], N, db['d'])
-			else : self.kdac.Fit()
+			if self.db['prev_clust'] == 0 : 
+				print 'b'
+				self.kdac.Fit(db['data'], N, db['d'])
+			else : 
+				print 'c'
+				#import pdb; pdb.set_trace()
+				self.kdac.Fit()
+
+			print 'd'
 			self.kdac.Predict(output, N, 1)
+			print 'e'
 
 
 			db['allocation'] = output.T[0]
+			db['allocation'].astype(np.int32)
 			db['allocation'] += 1		# starts from 1 instead of 0
 		
 			db['binary_allocation'] = np.zeros( ( N, db['C_num'] ) )
@@ -119,6 +130,7 @@ class alt_spectral_clust:
 				db['Y_matrix'] = np.append( db['Y_matrix'] , db['binary_allocation'], axis=1)
 
 			self.db['prev_clust'] += 1
+			print 'd'
 			return
 
 

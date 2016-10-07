@@ -11,23 +11,25 @@ import numpy as np
 from numpy import genfromtxt
 import numpy.matlib
 import pickle
-
+import time
 
 #np.set_printoptions(suppress=True)
 data = genfromtxt('data_sets/data_4.csv', delimiter=',')
+#data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
 
 ASC.set_values('q',1)
 ASC.set_values('C_num',2)
-ASC.set_values('sigma',2)
+ASC.set_values('sigma',3)
 ASC.set_values('kernel_type','Gaussian Kernel')
-ASC.run()
 
-print db['Y_matrix']
-import pdb; pdb.set_trace()
+start = time.time()
 ASC.run()
+ASC.run()
+end = time.time()
 print db['Y_matrix']
+print(end - start) , ' seconds'
 
 import pdb; pdb.set_trace()
