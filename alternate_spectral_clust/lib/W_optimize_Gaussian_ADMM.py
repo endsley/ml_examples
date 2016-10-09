@@ -9,6 +9,7 @@ from exponential_solver import *
 
 def W_optimize_Gaussian(db):
 	y_tilde = create_y_tilde(db)
+	db['y_tilde'] = y_tilde
 
 	db['Z_matrix'] = db['W_matrix']
 	db['L1'] = np.eye(db['q'])

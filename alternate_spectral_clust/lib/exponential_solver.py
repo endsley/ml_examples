@@ -5,7 +5,7 @@ from scipy.optimize import minimize
 from create_gamma_ij import *
 from StringIO import StringIO
 from sklearn.preprocessing import normalize
-import pdb
+from get_current_cost import *
 
 
 class exponential_solver:
@@ -171,8 +171,11 @@ class exponential_solver:
 		stay_in_loop = True
 
 		while stay_in_loop: #nelder-mead, BFGS, CG , maxiter, Newton-CG
-			result_w = minimize(self.Lagrange_W, db['W_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
+			print 'a'
+			result_w = minimize(self.Lagrange_W, db['W_matrix'], method='BFGS', options={'disp': False})
+			#result_w = minimize(self.Lagrange_W, db['W_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
 			db['W_matrix'] = result_w.x.reshape(db['W_matrix'].shape)
+			print 'b'
 
 			result_z = minimize(self.Lagrange_Z, db['Z_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
 			db['Z_matrix'] = result_z.x.reshape(db['Z_matrix'].shape)
@@ -183,7 +186,9 @@ class exponential_solver:
 
 			loop_count += 1
 			self.matrix_gap = np.abs(np.sum(db['W_matrix'].T.dot(db['Z_matrix']) - np.eye(self.zj)))
-			#print loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
+			print loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
+		
+			#print ': ' , get_current_cost(db)
 
 			if self.matrix_gap < 0.001: 
 				print('Exit base on threshold')

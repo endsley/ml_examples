@@ -17,8 +17,6 @@ class alt_spectral_clust:
 		if type(data_set) == type({}):
 			data_set = np.array(data_set)
 
-		print data_set.shape , '\n'
-
 		data_dimension = data_set.shape
 		self.db['N'] = data_dimension[0]
 		self.db['d'] = data_dimension[1]

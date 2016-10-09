@@ -11,13 +11,16 @@ import pickle
 
 
 #np.set_printoptions(suppress=True)
-data = genfromtxt('data_sets/data_4.csv', delimiter=',')
+#data = genfromtxt('data_sets/data_4.csv', delimiter=',')
+data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')
+
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
 
-ASC.set_values('q',1)
+ASC.set_values('q',2)
 ASC.set_values('C_num',2)
+#ASC.set_values('lambda',1)
 ASC.set_values('kernel_type','Gaussian Kernel')
 ASC.run()
 

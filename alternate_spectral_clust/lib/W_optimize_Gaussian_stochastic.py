@@ -61,6 +61,7 @@ def get_orthogonal_vector(db, m, input_vector):
 
 def W_optimize_Gaussian(db):
 	y_tilde = create_y_tilde(db)
+	db['y_tilde'] = y_tilde
 	#print 'y tilde \n', y_tilde
 	
 	previous_gw = np.ones((db['N'],db['N']))
@@ -100,6 +101,7 @@ def W_optimize_Gaussian(db):
 					new_alpha = 0
 					break
 
+
 			if type(last_W) != type(None):
 				relative_magnitude = np.linalg.norm(new_W)
 				distance_change_since_last_update = np.linalg.norm(last_W - new_W)
@@ -123,6 +125,8 @@ def W_optimize_Gaussian(db):
 					db.pop('previous_wolfe_magnitude')
 				except: pass
 
+
+		
 		w_converged = False
 		previous_gw = update_previous_gw(db, last_W, previous_gw)
 
