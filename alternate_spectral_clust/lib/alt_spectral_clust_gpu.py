@@ -108,6 +108,7 @@ class alt_spectral_clust:
 				print 'c'
 				#import pdb; pdb.set_trace()
 				self.kdac.Fit()
+				print '2nd'
 
 			print 'd'
 			self.kdac.Predict(output, N, 1)
@@ -122,7 +123,7 @@ class alt_spectral_clust:
 		
 			#	Convert from allocation to binary_allocation
 			for m in range(db['allocation'].shape[0]):
-				db['binary_allocation'][m, db['allocation'][m] - 1 ] = 1
+				db['binary_allocation'][m, int(db['allocation'][m]) - 1 ] = 1
 		
 			if db['Y_matrix'].shape[0] == 0:
 				db['Y_matrix'] = db['binary_allocation']
