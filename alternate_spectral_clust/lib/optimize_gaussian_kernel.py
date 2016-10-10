@@ -3,7 +3,6 @@ import numpy as np
 from calc_gaussian_kernel import *
 from U_optimize import *
 from objective_magnitude import *
-from get_current_cost import *
 
 #	You must comment out one of the method and keep the other, the stochastic approach is faster
 #from W_optimize_Gaussian import *
@@ -18,8 +17,8 @@ def optimize_gaussian_kernel(db):
 	if db['W_matrix'].shape[0] == 0:
 		db['W_matrix'] = np.identity(db['d'])
 	else:
-		db['W_matrix'] = db['W_matrix'][:,0:db['q']]
-		#db['W_matrix'] = np.random.normal(0,1, (db['d'], db['q']) )
+		#db['W_matrix'] = db['W_matrix'][:,0:db['q']]
+		db['W_matrix'] = np.random.normal(0,1, (db['d'], db['q']) )
 
 
 	#print db['Kernel_matrix']
@@ -42,36 +41,29 @@ def optimize_gaussian_kernel(db):
 		if db['prev_clust'] == 0: return
 
 		W_optimize_Gaussian(db)
-		#print 'C : ' , get_current_cost(db)
 
 		if not db.has_key('previous_U_matrix'): 
 			db['previous_U_matrix'] = db['U_matrix']
-			db['previous_W_matrix'] = np.copy(db['W_matrix'])
+			db['previous_W_matrix'] = db['W_matrix']
 		else:
 			matrix_mag = np.linalg.norm(db['U_matrix'])
 			U_change = np.linalg.norm(db['previous_U_matrix'] - db['U_matrix'])
 			W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])
 
+			print db['updated_magnitude']
+			print '------------'
 			#print db['W_matrix']
-			#print 'U : ' , U_change/matrix_mag
-			#print 'W : ' , W_change/matrix_mag
-			#print '---'
-			if U_change/matrix_mag < 0.001: WU_converge = True
-			#if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
+			#print (U_change + W_change)/matrix_mag
+			if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
 
 
 		db['previous_U_matrix'] = db['U_matrix']
-		db['previous_W_matrix'] = np.copy(db['W_matrix'])
+		db['previous_W_matrix'] = db['W_matrix']
 		loop_count += 1
 		
 		#print db['updated_magnitude']
-<<<<<<< HEAD
-		#print 'Loop count = ' , loop_count
-		if loop_count > 30:
-=======
 		print 'Loop count = ' , loop_count
-		if loop_count > 10:
->>>>>>> e13a8dd3aac34e8037512161a0ec7aa2a398cc8a
+		if loop_count > 80:
 			WU_converge = True
 
 
