@@ -58,11 +58,20 @@ class alt_spectral_clust:
 
 		self.translateion = {}
 		self.translateion['C_num'] = 'c'
+		self.translateion['sigma'] = 'sigma'
+		self.translateion['q'] = 'q'
+		print '\n\nRan inside GPU\n\n'
+
 	def set_values(self, key, val):
 		params = {}	
+		#import pdb; pdb.set_trace()
+
 		if key in self.translateion:
 			params[self.translateion[key]] = val
-			kdac.SetupParams(params)
+			if(key == 'sigma'): params['kernel'] = 'Gaussian'
+
+			self.kdac.SetupParams(params)
+
 
 		self.db[key] = val
 
@@ -73,14 +82,13 @@ class alt_spectral_clust:
 		N = self.db['N']
 		centering_matrix = np.eye(N) - (1.0/N)*np.ones((N,N))
 
-		#import pdb; pdb.set_trace()
 
 		return np.dot(centering_matrix, data_set)
 
 	def run(self):
 		db = self.db
 		N = db['N']
-
+		
 		if db['data_type'] == 'Feature Matrix': 
 			db['data'] = self.center_data(db['data'])
 
@@ -90,28 +98,41 @@ class alt_spectral_clust:
 		if db['kernel_type'] == 'Linear Kernel':
 			optimize_linear_kernel(db)
 		elif db['kernel_type'] == 'Gaussian Kernel':
+			print 'a'
 			output = np.empty((N, 1))
-			kdac.Fit(db['data'], N, db['d'])
-			kdac.Predict(output, N, 1)
 
-			import pdb; pdb.set_trace()
+			if self.db['prev_clust'] == 0 : 
+				print 'b'
+				self.kdac.Fit(db['data'], N, db['d'])
+			else : 
+				print 'c'
+				#import pdb; pdb.set_trace()
+				self.kdac.Fit()
+				print '2nd'
 
-			db['allocation'] = output
+			print 'd'
+			self.kdac.Predict(output, N, 1)
+			print 'e'
+
+
+			db['allocation'] = output.T[0]
+			db['allocation'].astype(np.int32)
 			db['allocation'] += 1		# starts from 1 instead of 0
 		
-			db['binary_allocation'] = np.zeros( ( db['normalized_U_matrix'].shape[0], db['C_num'] ) )
+			db['binary_allocation'] = np.zeros( ( N, db['C_num'] ) )
 		
 			#	Convert from allocation to binary_allocation
 			for m in range(db['allocation'].shape[0]):
-				db['binary_allocation'][m, db['allocation'][m] - 1 ] = 1
+				db['binary_allocation'][m, int(db['allocation'][m]) - 1 ] = 1
 		
 			if db['Y_matrix'].shape[0] == 0:
 				db['Y_matrix'] = db['binary_allocation']
 			else:
 				db['Y_matrix'] = np.append( db['Y_matrix'] , db['binary_allocation'], axis=1)
 
-
-
+			self.db['prev_clust'] += 1
+			print 'd'
+			return
 
 
 		elif self.db['kernel_type'] == 'Polynomial Kernel':

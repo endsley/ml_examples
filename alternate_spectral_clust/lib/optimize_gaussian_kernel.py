@@ -7,8 +7,8 @@ from get_current_cost import *
 
 #	You must comment out one of the method and keep the other, the stochastic approach is faster
 #from W_optimize_Gaussian import *
-#from W_optimize_Gaussian_stochastic import *
-from W_optimize_Gaussian_ADMM import *
+from W_optimize_Gaussian_stochastic import *
+#from W_optimize_Gaussian_ADMM import *
 
 
 def optimize_gaussian_kernel(db):
@@ -65,8 +65,13 @@ def optimize_gaussian_kernel(db):
 		loop_count += 1
 		
 		#print db['updated_magnitude']
+<<<<<<< HEAD
 		#print 'Loop count = ' , loop_count
 		if loop_count > 30:
+=======
+		print 'Loop count = ' , loop_count
+		if loop_count > 10:
+>>>>>>> e13a8dd3aac34e8037512161a0ec7aa2a398cc8a
 			WU_converge = True
 
 
