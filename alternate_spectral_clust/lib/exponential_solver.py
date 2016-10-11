@@ -173,7 +173,6 @@ class exponential_solver:
 		return [Lagrange_cost, cost]
 
 
-		return cost
 
 	def calc_dL_dW(self, W):
 		#	Calculate dL/dw gradient
@@ -212,41 +211,56 @@ class exponential_solver:
 		return dL_dW
 
 	def w_optimize(self):
-		W_converged = False
 		W = self.db['W_matrix']
 		alpha = 0
 		Armijo_sigma = 0.5
-		Armijo_beta = 0.8
-		m = 0
+		lowest_cost = float('inf')
+		s = 1
 
 
-		[original_cost, foo_cost] = self.calc_cost_function(W)
-		while not W_converged:
+		for cnt in range(10):	# best out of 10
+			print 'Iteration : ' , cnt
+			W_converged = False
+			#if(np.random.uniform() > 0.5):
+			W = np.random.normal(0,1, (self.db['d'], self.db['q']) )
+			W, r = np.linalg.qr(W)
+			#s = 2
+
+			Armijo_beta = 0.8
+			m = 0
+
+			[original_cost, foo_cost] = self.calc_cost_function(W)
+			while not W_converged:
+				dL_dW = self.calc_dL_dW(W)
+				not_found_alpha = True
+
+				while not_found_alpha:
+					alpha = np.power(Armijo_beta,m)*s
+					new_W = W - alpha*dL_dW
+					[cost_new, foo_new] = self.calc_cost_function(new_W)
+
+					cost_change = original_cost - cost_new
+					if cost_change >= 0:  #Armijo_sigma*alpha*np.linalg.norm(dL_dW):
+
+						W = new_W
+						original_cost = cost_new
+						not_found_alpha = False
+						#print original_cost[0][0]  #, cost_change
+					else:
+						m = m + 1
+
+				cost_ratio = np.abs(cost_change/cost_new)
+				#print '\texit : ' , cost_ratio
+				if (cost_ratio < 0.001): 
+					if(cost_new[0][0] < lowest_cost): 
+						lowest_cost = cost_new[0][0]
+						self.db['W_matrix'] = W
+					
+					break
 
 
-			dL_dW = self.calc_dL_dW(W)
-			not_found_alpha = True
-
-			while not_found_alpha:
-				alpha = np.power(Armijo_beta,m)
-				new_W = W - alpha*dL_dW
-				[cost_new, foo_new] = self.calc_cost_function(new_W)
-
-				cost_change = original_cost - cost_new
-				if cost_change >= 0:  #Armijo_sigma*alpha*np.linalg.norm(dL_dW):
-
-					W = new_W
-					original_cost = cost_new
-					not_found_alpha = False
-					print original_cost  #, cost_change
-				else:
-					m = m + 1
-
-			print '\texit : ' , cost_change/cost_new
-			if (cost_change/cost_new < 0.001): 
-				import pdb; pdb.set_trace()
-				#W_converged = True
-
+		print 'Lowest cost : ' , lowest_cost
+		#import pdb; pdb.set_trace()
 
 
 
@@ -272,18 +286,22 @@ class exponential_solver:
 
 
 			#	Optimize Z matrix
+			print 'Optimizing Z'
 			result_z = minimize(self.Lagrange_Z, db['Z_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
 			db['Z_matrix'] = result_z.x.reshape(db['Z_matrix'].shape)
+			print 'Optimizing Z finished'
 			#db['Z_matrix'] = normalize(db['Z_matrix'], norm='l2', axis=0)
-
-
-
 
 			self.calc_dual()
 
+
+			self.current_cost = self.calc_cost_function(db['W_matrix']) # debug code should be commented out later
+
+
+
 			loop_count += 1
 			self.matrix_gap = np.abs(np.sum(db['W_matrix'].T.dot(db['Z_matrix']) - np.eye(self.zj)))
-			#print loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
+			print loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
 		
 			#print ': ' , get_current_cost(db)
 

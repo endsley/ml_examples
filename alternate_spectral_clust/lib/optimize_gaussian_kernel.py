@@ -51,7 +51,7 @@ def optimize_gaussian_kernel(db):
 			W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])
 
 			#print db['W_matrix']
-			#print (U_change + W_change)/matrix_mag
+			#print '\t\tU change ratio : ' , U_change/matrix_mag
 			if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
 
 
