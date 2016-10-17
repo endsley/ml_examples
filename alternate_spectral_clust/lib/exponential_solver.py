@@ -214,7 +214,8 @@ class exponential_solver:
 		W = self.db['W_matrix']
 		alpha = 0
 		Armijo_sigma = 0.5
-		lowest_cost = float('inf')
+		#lowest_cost = float('inf')
+		[lowest_cost, foo_cost] = self.calc_cost_function(W)
 		s = 1
 
 
@@ -240,12 +241,18 @@ class exponential_solver:
 					[cost_new, foo_new] = self.calc_cost_function(new_W)
 
 					cost_change = original_cost - cost_new
-					if cost_change >= 0:  #Armijo_sigma*alpha*np.linalg.norm(dL_dW):
+					print 'alpha : ' , alpha
 
+					if alpha < 0.0001:
 						W = new_W
 						original_cost = cost_new
 						not_found_alpha = False
-						#print original_cost[0][0]  #, cost_change
+
+					if cost_change >= 0:  #Armijo_sigma*alpha*np.linalg.norm(dL_dW):
+						W = new_W
+						original_cost = cost_new
+						not_found_alpha = False
+						print '\t\t Cost : ' , original_cost[0][0]  #, cost_change
 					else:
 						m = m + 1
 
@@ -259,7 +266,7 @@ class exponential_solver:
 					break
 
 
-		print 'Lowest cost : ' , lowest_cost
+		print '\t\tLowest cost : ' , lowest_cost
 		#import pdb; pdb.set_trace()
 
 
@@ -301,7 +308,7 @@ class exponential_solver:
 
 			loop_count += 1
 			self.matrix_gap = np.abs(np.sum(db['W_matrix'].T.dot(db['Z_matrix']) - np.eye(self.zj)))
-			print loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
+			print '\t\tLoop count :' , loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
 		
 			#print ': ' , get_current_cost(db)
 

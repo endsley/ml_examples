@@ -12,6 +12,8 @@ import pickle
 
 #np.set_printoptions(suppress=True)
 data = genfromtxt('data_sets/data_4.csv', delimiter=',')
+#data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')
+
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db

@@ -18,6 +18,7 @@ def W_optimize_Gaussian(db):
 
 	
 	use_all_data = True
+	#use_all_data = False
 	if use_all_data :
 		iv = np.array(range(db['N']))
 		jv = iv
