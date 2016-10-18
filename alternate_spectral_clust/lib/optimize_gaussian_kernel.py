@@ -3,11 +3,12 @@ import numpy as np
 from calc_gaussian_kernel import *
 from U_optimize import *
 from objective_magnitude import *
+from calc_cost import *
 
 #	You must comment out one of the method and keep the other, the stochastic approach is faster
 #from W_optimize_Gaussian import *
-#from W_optimize_Gaussian_stochastic import *
-from W_optimize_Gaussian_ADMM import *
+from W_optimize_Gaussian_stochastic import *
+#from W_optimize_Gaussian_ADMM import *
 
 
 def optimize_gaussian_kernel(db):
@@ -17,9 +18,9 @@ def optimize_gaussian_kernel(db):
 	if db['W_matrix'].shape[0] == 0:
 		db['W_matrix'] = np.identity(db['d'])
 	else:
-		#db['W_matrix'] = db['W_matrix'][:,0:db['q']]
-		W = np.random.normal(0,1, (db['d'], db['q']) )
-		db['W_matrix'], r = np.linalg.qr(W)
+		db['W_matrix'] = db['W_matrix'][:,0:db['q']]
+		#W = np.random.normal(0,1, (db['d'], db['q']) )
+		#db['W_matrix'], r = np.linalg.qr(W)
 
 	#print db['Kernel_matrix']
 	#print 'H matrix'
@@ -39,8 +40,9 @@ def optimize_gaussian_kernel(db):
 
 		U_optimize(db)
 		if db['prev_clust'] == 0: return
-
 		W_optimize_Gaussian(db)
+
+		#print calc_cost_function(db, db['W_matrix'])
 
 		if not db.has_key('previous_U_matrix'): 
 			db['previous_U_matrix'] = db['U_matrix']
@@ -60,7 +62,7 @@ def optimize_gaussian_kernel(db):
 		loop_count += 1
 		
 		#print db['updated_magnitude']
-		print 'Loop count = ' , loop_count
+		#print 'Loop count = ' , loop_count
 		if loop_count > 80:
 			WU_converge = True
 

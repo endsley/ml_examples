@@ -19,11 +19,11 @@ def get_previous_wolfe_terms(db, w_l, y_tilde):
 
 	return [db['previous_wolfe_direction'], db['previous_wolfe_magnitude']]
 
-def get_alpha_passing_wolfe(db, y_tilde, w_l, new_direction):
+def obtain_Wolfe_alpha(db, y_tilde, w_l, new_direction):
 	wolfe_passed = False
 	alpha = 1
-	a1 = 0.0001
-	a2 = 0.9
+	c1 = 0.0001
+	c2 = 0.9
 	loop_exit = 80
 	count = 0
 	while not wolfe_passed:	
@@ -33,14 +33,14 @@ def get_alpha_passing_wolfe(db, y_tilde, w_l, new_direction):
 
 		#if updated_magnitude < previous_wolfe_magnitude:
 		#	print 'updated_magnitude : ' , updated_magnitude
-		#	print 'previous : ' , previous_wolfe_magnitude #+ a1*alpha*np.linalg.norm(previous_wolfe_direction)
+		#	print 'previous : ' , previous_wolfe_magnitude #+ c1*alpha*np.linalg.norm(previous_wolfe_direction)
 
 		#um = updated_magnitude
 		#pwm = previous_wolfe_magnitude
-		#tt = a1*alpha*np.linalg.norm(previous_wolfe_direction)
+		#tt = c1*alpha*np.linalg.norm(previous_wolfe_direction)
 
-		sufficient_increase_condition = updated_magnitude > previous_wolfe_magnitude + a1*alpha*np.dot(new_direction, new_direction)
-		curvature_condition = np.dot(new_direction, update_direction) < a2*np.dot(new_direction, new_direction)
+		sufficient_increase_condition = updated_magnitude > previous_wolfe_magnitude + c1*alpha*np.dot(new_direction, new_direction)
+		curvature_condition = np.dot(new_direction, update_direction) < c2*np.dot(new_direction, new_direction)
 
 
 		if sufficient_increase_condition and curvature_condition : 
@@ -52,7 +52,7 @@ def get_alpha_passing_wolfe(db, y_tilde, w_l, new_direction):
 		#if not sufficient_increase_condition: 
 		#	print alpha, 'sufficient_increase_condition'
 		#	print '\tupdated_magnitude : ' , updated_magnitude
-		#	print '\tprevious : ' , previous_wolfe_magnitude #+ a1*alpha*np.linalg.norm(previous_wolfe_direction)
+		#	print '\tprevious : ' , previous_wolfe_magnitude #+ c1*alpha*np.linalg.norm(previous_wolfe_direction)
 		#	#import pdb; pdb.set_trace()
 		#if not curvature_condition : print alpha, 'curvature_condition'
 
@@ -117,8 +117,6 @@ def get_orthogonal_vector(db, m, input_vector):
 
 def W_optimize_Gaussian(db):
 	y_tilde = create_y_tilde(db)
-	#print 'y tilde \n', y_tilde
-	
 	previous_gw = np.ones((db['N'],db['N']))
 	w_converged = False
 	last_W = None
@@ -126,57 +124,73 @@ def W_optimize_Gaussian(db):
 	for m in range(db['q']):
 		db['W_matrix'][:,m] = get_orthogonal_vector(db, m, db['W_matrix'][:,m])
 		counter = 0
-		new_alpha = 0.5
-
 		while not w_converged:
 			w_l = db['W_matrix'][:,m]
-			[update_direction, db['updated_magnitude']] = get_W_gradient(db, y_tilde, previous_gw, w_l)
-			update_direction = get_orthogonal_vector(db, m+1, update_direction) # m+1 is to also remove the current dimension
+			alpha = obtain_Wolfe_alpha(db, y_tilde, w_l, new_direction)	
 
 
-			#new_alpha = get_alpha_passing_wolfe(db, y_tilde, w_l, update_direction)
-
-			new_W = np.sqrt(1-new_alpha*new_alpha)*w_l + new_alpha*update_direction
-			#import pdb; pdb.set_trace()
-			
-			[tmp_dir, new_mag] = get_W_gradient(db, y_tilde, previous_gw, new_W)
-			#print db['updated_magnitude'], new_mag, new_alpha
-			while new_mag < db['updated_magnitude']:
-				new_alpha = new_alpha * 0.8
-				if new_alpha > 0.00001 :
-					new_W = np.sqrt(1-new_alpha*new_alpha)*w_l + new_alpha*update_direction
-					[tmp_dir, new_mag] = get_W_gradient(db, y_tilde, previous_gw, new_W)
-					#import pdb; pdb.set_trace()
-				else:
-					new_alpha = 0
-					break
-
-			if type(last_W) != type(None):
-				relative_magnitude = np.linalg.norm(new_W)
-				distance_change_since_last_update = np.linalg.norm(last_W - new_W)
-
-				if (distance_change_since_last_update/relative_magnitude) < 0.001 : 
-					w_converged = True
-					try:
-						db.pop('previous_wolfe_direction')
-						db.pop('previous_wolfe_magnitude')
-					except: pass
-
-			#print new_W
-			last_W = new_W/np.linalg.norm(new_W)
-			db['W_matrix'][:,m] = last_W
-			counter += 1
-			if counter > db['maximum_W_update_count']: 
-				print '\nExit due to maximum update reached'
-				w_converged = True
-				try:
-					db.pop('previous_wolfe_direction')
-					db.pop('previous_wolfe_magnitude')
-				except: pass
-
-		w_converged = False
-		previous_gw = update_previous_gw(db, last_W, previous_gw)
-		#print previous_gw
-
-	db['W_matrix'] = db['W_matrix'][:,0:db['q']]
-	#print db['W_matrix']
+#def W_optimize_Gaussian(db):
+#	y_tilde = create_y_tilde(db)
+#	#print 'y tilde \n', y_tilde
+#	
+#	previous_gw = np.ones((db['N'],db['N']))
+#	w_converged = False
+#	last_W = None
+#
+#	for m in range(db['q']):
+#		db['W_matrix'][:,m] = get_orthogonal_vector(db, m, db['W_matrix'][:,m])
+#		counter = 0
+#		new_alpha = 0.5
+#
+#		while not w_converged:
+#			w_l = db['W_matrix'][:,m]
+#			[update_direction, db['updated_magnitude']] = get_W_gradient(db, y_tilde, previous_gw, w_l)
+#			update_direction = get_orthogonal_vector(db, m+1, update_direction) # m+1 is to also remove the current dimension
+#
+#
+#			#new_alpha = get_alpha_passing_wolfe(db, y_tilde, w_l, update_direction)
+#
+#			new_W = np.sqrt(1-new_alpha*new_alpha)*w_l + new_alpha*update_direction
+#			#import pdb; pdb.set_trace()
+#			
+#			[tmp_dir, new_mag] = get_W_gradient(db, y_tilde, previous_gw, new_W)
+#			#print db['updated_magnitude'], new_mag, new_alpha
+#			while new_mag < db['updated_magnitude']:
+#				new_alpha = new_alpha * 0.8
+#				if new_alpha > 0.00001 :
+#					new_W = np.sqrt(1-new_alpha*new_alpha)*w_l + new_alpha*update_direction
+#					[tmp_dir, new_mag] = get_W_gradient(db, y_tilde, previous_gw, new_W)
+#					#import pdb; pdb.set_trace()
+#				else:
+#					new_alpha = 0
+#					break
+#
+#			if type(last_W) != type(None):
+#				relative_magnitude = np.linalg.norm(new_W)
+#				distance_change_since_last_update = np.linalg.norm(last_W - new_W)
+#
+#				if (distance_change_since_last_update/relative_magnitude) < 0.001 : 
+#					w_converged = True
+#					try:
+#						db.pop('previous_wolfe_direction')
+#						db.pop('previous_wolfe_magnitude')
+#					except: pass
+#
+#			#print new_W
+#			last_W = new_W/np.linalg.norm(new_W)
+#			db['W_matrix'][:,m] = last_W
+#			counter += 1
+#			if counter > db['maximum_W_update_count']: 
+#				print '\nExit due to maximum update reached'
+#				w_converged = True
+#				try:
+#					db.pop('previous_wolfe_direction')
+#					db.pop('previous_wolfe_magnitude')
+#				except: pass
+#
+#		w_converged = False
+#		previous_gw = update_previous_gw(db, last_W, previous_gw)
+#		#print previous_gw
+#
+#	db['W_matrix'] = db['W_matrix'][:,0:db['q']]
+#	#print db['W_matrix']
