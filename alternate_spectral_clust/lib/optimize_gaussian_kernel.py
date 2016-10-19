@@ -53,7 +53,7 @@ def optimize_gaussian_kernel(db):
 			W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])
 
 			#print db['W_matrix']
-			#print '\t\tU change ratio : ' , U_change/matrix_mag
+			print '\t\tU change ratio : ' , U_change/matrix_mag
 			if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
 
 
@@ -62,7 +62,7 @@ def optimize_gaussian_kernel(db):
 		loop_count += 1
 		
 		#print db['updated_magnitude']
-		#print 'Loop count = ' , loop_count
+		print 'Loop count = ' , loop_count
 		if loop_count > 80:
 			WU_converge = True
 

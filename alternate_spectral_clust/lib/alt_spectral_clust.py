@@ -47,7 +47,7 @@ class alt_spectral_clust:
 		self.db['binary_allocation'] = np.array([[0,2,0],[8,2,0]])
 
 		self.db['H_matrix'] = None
-		self.db['maximum_W_update_count'] = 300
+		self.db['maximum_W_update_count'] = 400
 		self.db['data'] = data_set
 
 	def set_values(self, key, val):

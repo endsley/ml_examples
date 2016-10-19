@@ -8,7 +8,7 @@ import numpy as np
 from numpy import genfromtxt
 import numpy.matlib
 import pickle
-
+import sklearn
 
 #np.set_printoptions(suppress=True)
 data = genfromtxt('data_sets/data_4.csv', delimiter=',')
