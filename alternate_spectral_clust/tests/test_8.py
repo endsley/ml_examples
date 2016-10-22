@@ -23,7 +23,7 @@ ASC.set_values('C_num',2)
 ASC.set_values('kernel_type','Gaussian Kernel')
 ASC.run()
 
-ASC.run()
-print db['Y_matrix']
+#ASC.run()
+#print db['Y_matrix']
 
 import pdb; pdb.set_trace()

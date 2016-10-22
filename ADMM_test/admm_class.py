@@ -27,6 +27,38 @@ class exponential_solver:
 		self.last_matrix_gap = 0
 		self.learning_rate = 1
 
+	def calc_cost_function(self, W):
+		#	Calculate dL/dw gradient
+		db = self.db
+		Z = db['Z_matrix']
+		L1 = db['L1']
+		L2 = db['L2']
+		iv_all = np.array(range(db['N']))
+		jv_all = iv_all
+
+		Z_shape = Z.shape
+		I = np.eye(Z_shape[1])
+
+		#	Calc Base
+		cost = 0
+		for i in iv_all:
+			for j in jv_all:
+				
+				x_dif = db['data'][i] - db['data'][j]
+				x_dif = x_dif[np.newaxis]
+			
+				gamma_ij = self.create_gamma_ij(db, i, j)
+				cost = cost -  gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
+
+
+		term1 = W.T.dot(Z) - I
+		term2 = W - Z
+
+		Lagrange = np.trace(L1.dot(term1)) + np.trace(L2.dot(term2))
+		Aug_lag = np.sum(term1*term1) + np.sum(term2*term2)
+
+		Lagrange_cost = cost + Lagrange + Aug_lag
+		return [Lagrange_cost, cost]
 
 	def create_gamma_ij(self, db, y_tilde, i, j):
 		if type(self.gamma_array) == type(0):
@@ -204,6 +236,7 @@ def test_1():		# optimal = 2.4309
 	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1]])
 	db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]])
 	db['W_matrix'] = np.array([[1,10],[1,1],[0,0]])
+	#db['W_matrix'] = np.array([[-0.577350, 0.098784],[0.577350,-0.652521],[0.577350,0.751304]])
 	
 	db['L1'] = np.array([[1,0], [0,2]])		# q x q
 	db['L2'] = np.array([[2,3,1],[0,0,1]])	# q x d
@@ -216,8 +249,9 @@ def test_1():		# optimal = 2.4309
 	esolver.gamma_array = np.array([[0,1,2,-1]])
 	esolver.run()
 	
-	esolver.Lagrange_W(db['W_matrix'])
+	print 'T cost: ' , esolver.Lagrange_W(db['W_matrix'])
 	print esolver.current_cost
+
 	pdb.set_trace()
 
 
@@ -275,4 +309,4 @@ np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 
-test_2()
+test_1()

@@ -122,7 +122,7 @@ class dimension_growth:
 				[tmp_dir, new_mag] = self.Stochastic_W_gradient(db, self.y_tilde, previous_gw, new_W, self.iv, self.jv)
 
 	
-				#print db['updated_magnitude'], new_mag, new_alpha
+				print db['updated_magnitude'], new_mag, new_alpha
 				while new_mag < db['updated_magnitude']:
 					new_alpha = new_alpha * 0.8
 					if new_alpha > 0.00001 :
@@ -167,7 +167,10 @@ def test_1():		#	optimal = -2.4308
 	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1]])
 	#db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]], dtype='f' )
 	db['W_matrix'] = np.array([[10,15],[10,1],[0,0]], dtype='f')
-	
+	#db['W_matrix'] = np.array([[-0.577350, 0.098784],[0.577350,-0.652521],[0.577350,0.751304]])
+
+
+
 	db['N'] = db['data'].shape[0]
 	db['SGD_size'] = db['N']
 	db['q'] = db['W_matrix'].shape[1]
@@ -246,4 +249,4 @@ np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 
-test_2()
+test_1()

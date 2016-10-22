@@ -46,3 +46,4 @@ def test_1():		# optimal = 2.4309
 	pdb.set_trace()
 
 
+test_1()

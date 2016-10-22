@@ -20,10 +20,15 @@ class random_min_finder:
 		self.wi = self.W_shape[0]
 		self.wj = self.W_shape[1]
 
+		self.db['d'] = self.db['data'].shape[1]
+		self.db['q'] = self.db['W_matrix'].shape[1]
 
 	def create_gamma_ij(self, db, y_tilde, i, j):
 		if type(self.gamma_array) == type(0):
-			return create_gamma_ij(db, self.y_tilde, i, j)
+			try:
+				return create_gamma_ij(db, self.y_tilde, i, j)
+			except:
+				return self.gamma_array[i,j]
 		else:
 			return self.gamma_array[i,j]
 
@@ -76,12 +81,12 @@ class random_min_finder:
 def test_1():
 	db = {}
 	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1]])
-	db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]])
 	db['W_matrix'] = np.array([[1,0],[0,1],[0,0]])
 	
 	iv = np.array([0])
 	jv = np.array([1,2])
 	rmf = random_min_finder(db, iv, jv)
+	rmf.gamma_array = np.array([[0,1,2]])
 	
 	#W = np.array([[ 0.57643199, -0.14371058], [-0.57616693,  0.62657744], [-0.57944614, -0.76599473]], dtype='f')
 	#cost = rmf.Lagrange_W(W)
@@ -126,4 +131,4 @@ np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 
-test_2()
+test_1()

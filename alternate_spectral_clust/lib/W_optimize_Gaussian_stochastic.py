@@ -83,7 +83,7 @@ def W_optimize_Gaussian(db):
 			[update_direction, db['updated_magnitude']] = Stochastic_W_gradient(db, y_tilde, previous_gw, w_l, i_values, j_values)
 			update_direction = get_orthogonal_vector(db, m+1, update_direction) # m+1 is to also remove the current dimension
 
-			new_alpha = 1	# this is with back trace
+			#new_alpha = 1	# this is with back trace
 			new_W = np.sqrt(1-new_alpha*new_alpha)*w_l + new_alpha*update_direction
 			#import pdb; pdb.set_trace()
 			
