@@ -3,6 +3,8 @@
 import numpy as np
 import pdb
 import csv
+from create_y_tilde import *
+from create_gamma_ij import *
 from StringIO import StringIO
 
 
@@ -17,9 +19,10 @@ class SDG:
 		self.sigma2 = np.power(db['sigma'],2)
 		self.gamma_array = None
 		self.W = None
+		self.y_tilde = None
 
-	def create_gamma_ij(self, db, y_tilde, i, j):
-		if type(self.gamma_array) == type(0):
+	def create_gamma_ij(self, db, i, j):
+		if type(self.gamma_array) == type(None):
 			return create_gamma_ij(db, self.y_tilde, i, j)
 		else:
 			return self.gamma_array[i,j]
@@ -38,7 +41,7 @@ class SDG:
 				x_dif = db['data'][i] - db['data'][j]
 				x_dif = x_dif[np.newaxis]
 			
-				gamma_ij = self.create_gamma_ij(db, 0, i, j)
+				gamma_ij = self.create_gamma_ij(db, i, j)
 				cost = cost -  gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
 
 		return cost
@@ -52,13 +55,15 @@ class SDG:
 	def run(self):
 		exponent_term = 1
 		W = np.zeros((self.d,self.q))
+		best_W = np.zeros((self.d,self.q))
+		cost_function = float("inf")
 
-		for m in range(100):
+		for m in range(15):
 			matrix_sum = np.zeros((self.d, self.d))
 			A_sum = np.zeros((self.d, self.d))
 			for i in self.iv:
 				for j in self.jv:
-					gamma_ij = self.create_gamma_ij(self.db, 0, i, j)
+					gamma_ij = self.create_gamma_ij(self.db, i, j)
 					A_ij = self.create_A_ij_matrix(i,j)
 					exponent_term = np.exp(-0.5*np.sum(A_ij.T*(W.dot(W.T)))/self.sigma2)
 
@@ -69,15 +74,38 @@ class SDG:
 			[U,S,V] = np.linalg.svd(matrix_sum)
 			W = np.fliplr(U)[:,0:self.q]
 
+			#W = 0.5*W_new + (1-0.5)*W		# interpolation doesn't seem to work
+
+			new_cost = self.calc_cost_function(W)
+			#print cost_function, new_cost
+			print 'Sum(Aw) : ' , np.sum(matrix_sum.dot(W))
+
+			cost_ratio = np.abs(new_cost - cost_function)/np.abs(new_cost)
+			if(new_cost < cost_function):
+				cost_function = new_cost
+				best_W = W
 			try: 
-				if np.linalg.norm(W - self.W)/np.linalg.norm(W) < 0.0001: 
-					print m
-					break;
+				exit_condition = np.linalg.norm(W - self.W)/np.linalg.norm(W)
+				if(cost_ratio < 0.01): break
+				if exit_condition < 0.0001: break;
 			except: pass
 
-			self.W = W
+		self.W = best_W
+		#pdb.set_trace()
+		return self.W
 
+def W_optimize_Gaussian(db):
+	iv = np.arange(db['N'])
+	jv = np.arange(db['N'])
 
+	sdg = SDG(db, iv, jv)
+	sdg.y_tilde = create_y_tilde(db)
+	
+	db['W_matrix'] = sdg.run()
+	
+	#print sdg.W
+	#print sdg.calc_cost_function(sdg.W)
+	#pdb.set_trace()
 
 def test_1():		# optimal = 2.4309
 	db = {}
@@ -128,4 +156,3 @@ def test_2():
 
 	import pdb; pdb.set_trace()
 
-test_2()

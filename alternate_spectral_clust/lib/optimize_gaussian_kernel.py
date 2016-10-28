@@ -7,8 +7,9 @@ from calc_cost import *
 
 #	You must comment out one of the method and keep the other, the stochastic approach is faster
 #from W_optimize_Gaussian import *
-from W_optimize_Gaussian_stochastic import *
+#from W_optimize_Gaussian_stochastic import *
 #from W_optimize_Gaussian_ADMM import *
+from SDG import *
 
 
 def optimize_gaussian_kernel(db):
@@ -63,7 +64,7 @@ def optimize_gaussian_kernel(db):
 		
 		#print db['updated_magnitude']
 		print 'Loop count = ' , loop_count
-		if loop_count > 80:
+		if loop_count > 10:
 			WU_converge = True
 
 
