@@ -17,10 +17,14 @@ class SDG:
 		self.sigma2 = np.power(db['sigma'],2)
 		self.gamma_array = None
 		self.W = None
+		self.A = np.zeros((self.N, self.N, self.d, self.d))
+		self.gamma = np.zeros((self.N, self.N))
+		self.y_tilde = None
+		self.exponent_term = np.zeros((self.N, self.N))
 
-	def create_gamma_ij(self, db, y_tilde, i, j):
+	def create_gamma_ij(self, i, j):
 		if type(self.gamma_array) == type(0):
-			return create_gamma_ij(db, self.y_tilde, i, j)
+			return create_gamma_ij(self.db, self.y_tilde, i, j)
 		else:
 			return self.gamma_array[i,j]
 
@@ -38,7 +42,7 @@ class SDG:
 				x_dif = db['data'][i] - db['data'][j]
 				x_dif = x_dif[np.newaxis]
 			
-				gamma_ij = self.create_gamma_ij(db, 0, i, j)
+				gamma_ij = self.create_gamma_ij(i, j)
 				cost = cost -  gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
 
 		return cost
@@ -49,29 +53,72 @@ class SDG:
 		x_dif = x_dif[np.newaxis]
 		return np.dot(x_dif.T, x_dif)
 
-	def run(self):
-		exponent_term = 1
+	def create_A_matrix(self):
+		for i in self.iv:
+			for j in self.jv:
+				x_dif = self.db['data'][i] - self.db['data'][j]
+				x_dif = x_dif[np.newaxis]
+				self.A[i][j] = np.dot(x_dif.T, x_dif)
+
+	def create_gamma(self):
+		for i in self.iv:
+			for j in self.jv:
+				self.gamma[i][j] = self.create_gamma_ij(i, j)	
+
+	def create_exponent_term(self, W):
+		for i in self.iv:
+			for j in self.jv:
+				self.exponent_term[i,j] = np.exp(-0.5*np.sum(self.A[i][j]*(W.dot(W.T)))/self.sigma2)
+
+
+	def get_new_W(self, matrix_sum):
+		[U,S,V] = np.linalg.svd(matrix_sum)
+		U = np.fliplr(U)
+
 		W = np.zeros((self.d,self.q))
+		column_count = 0
+		for idx in range(U.shape[1]):
+			w = U[:,idx]
+			self.create_exponent_term(w)
+			const_term = self.gamma*self.exponent_term/self.sigma2
+			Hessian = np.zeros((self.d, self.d))
+			for i in self.iv:
+				for j in self.jv:
+					p = self.A[i][j].dot(w)
+					Hessian += const_term[i][j]*(self.A[i][j] - (1/self.sigma2)*p.dot(p.T))
+	
+			
+			[eU,eigV,eV] = np.linalg.svd(Hessian)
+	
+			if np.min(eigV) > 0:
+				print 'Positive'
+				W[:,column_count] = w
+				column_count += 1
+			else:
+				print 'Negative'
+
+			if(column_count == self.q): break
+
+		return W
+
+	def run(self):
+		self.create_A_matrix()
+		self.create_gamma()
+
+		W = np.zeros((self.d,self.q))
+		self.create_exponent_term(W)
 
 		for m in range(100):
 			matrix_sum = np.zeros((self.d, self.d))
-			A_sum = np.zeros((self.d, self.d))
+			self.create_exponent_term(W)
 			for i in self.iv:
 				for j in self.jv:
-					gamma_ij = self.create_gamma_ij(self.db, 0, i, j)
-					A_ij = self.create_A_ij_matrix(i,j)
-					exponent_term = np.exp(-0.5*np.sum(A_ij.T*(W.dot(W.T)))/self.sigma2)
+					matrix_sum += self.gamma[i][j]*self.exponent_term[i][j]*self.A[i][j] # did not include constant sigma cus it doesn't matter
 
-					matrix_sum += gamma_ij*exponent_term*A_ij
-		
-					A_sum += A_ij
-
-			[U,S,V] = np.linalg.svd(matrix_sum)
-			W = np.fliplr(U)[:,0:self.q]
+			W = self.get_new_W(matrix_sum)
 
 			try: 
 				if np.linalg.norm(W - self.W)/np.linalg.norm(W) < 0.0001: 
-					print m
 					break;
 			except: pass
 
@@ -83,7 +130,7 @@ def test_1():		# optimal = 2.4309
 	db = {}
 	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1]])
 	db['W_matrix'] = np.array([[1,0],[1,1],[0,0]])
-	db['sigma'] = 1
+	db['sigma'] = 1/np.sqrt(2)
 		
 	iv = np.array([0])
 	jv = np.array([1,2])

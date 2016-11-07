@@ -319,7 +319,7 @@ class exponential_solver:
 				print('Exit base on loop_count')
 				stay_in_loop = False
 
-		return result_w
+		#return result_w
 
 
 

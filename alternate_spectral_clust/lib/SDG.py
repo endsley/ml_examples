@@ -18,7 +18,8 @@ class SDG:
 		self.jv = jv
 		self.sigma2 = np.power(db['sigma'],2)
 		self.gamma_array = None
-		self.W = None
+		self.W = np.zeros((db['data'].shape[1], db['q']))
+
 		self.y_tilde = None
 
 	def create_gamma_ij(self, db, i, j):
@@ -57,6 +58,7 @@ class SDG:
 		W = np.zeros((self.d,self.q))
 		best_W = np.zeros((self.d,self.q))
 		cost_function = float("inf")
+		gradient = float("inf")
 
 		for m in range(15):
 			matrix_sum = np.zeros((self.d, self.d))
@@ -71,6 +73,7 @@ class SDG:
 		
 					A_sum += A_ij
 
+			matrix_sum = matrix_sum.dot(matrix_sum)
 			[U,S,V] = np.linalg.svd(matrix_sum)
 			W = np.fliplr(U)[:,0:self.q]
 
@@ -78,20 +81,33 @@ class SDG:
 
 			new_cost = self.calc_cost_function(W)
 			#print cost_function, new_cost
-			print 'Sum(Aw) : ' , np.sum(matrix_sum.dot(W))
-
 			cost_ratio = np.abs(new_cost - cost_function)/np.abs(new_cost)
+			new_gradient = np.sum(matrix_sum.dot(W))
+
 			if(new_cost < cost_function):
 				cost_function = new_cost
 				best_W = W
-			try: 
-				exit_condition = np.linalg.norm(W - self.W)/np.linalg.norm(W)
-				if(cost_ratio < 0.01): break
-				if exit_condition < 0.0001: break;
-			except: pass
+				gradient = new_gradient
+			elif(cost_ratio < 0.001):
+				if new_gradient < gradient:
+					best_W = W
+					gradient = new_gradient
+
+
+			#if(cost_ratio < 0.0001): break
+			#pdb.set_trace()
+
+			exit_condition = np.linalg.norm(W - self.W)/np.linalg.norm(W)
+			print 'Sum(Aw) : ' , np.sum(matrix_sum.dot(W)), 'New cost :', new_cost, 'Cost fun :' , cost_function, 'Exit cond :' , exit_condition , 'Cost ratio : ' , cost_ratio
+			if exit_condition < 0.0001: break;
+			self.W = W
+			#except: pass
 
 		self.W = best_W
 		#pdb.set_trace()
+		print 'Best : '
+		print 'Gradient ' , gradient 
+		print 'Cost  ' , cost_function
 		return self.W
 
 def W_optimize_Gaussian(db):

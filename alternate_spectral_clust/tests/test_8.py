@@ -7,6 +7,7 @@ import numpy as np
 #from io import StringIO   # StringIO behaves like a file object
 from numpy import genfromtxt
 import numpy.matlib
+from sklearn.metrics.cluster import normalized_mutual_info_score
 import pickle
 import sklearn
 
@@ -26,13 +27,14 @@ ASC.set_values('C_num',2)
 ASC.set_values('sigma',1)
 ASC.set_values('kernel_type','Gaussian Kernel')
 ASC.run()
-print db['allocation']
+a = db['allocation']
 
 start_time = time.time() 
 ASC.run()
-print db['allocation']
+b = db['allocation']
 print("--- %s seconds ---" % (time.time() - start_time))
 
+print "NMI : " , normalized_mutual_info_score(a,b)
 
 #print db['Y_matrix']
 
