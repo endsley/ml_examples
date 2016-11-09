@@ -189,7 +189,7 @@ def test_1():		#	optimal = -2.4308
 	
 	
 def test_2():
-	q = 4		# the dimension you want to lower it to
+	q = 3		# the dimension you want to lower it to
 
 	fin = open('data_1.csv','r')
 	data = fin.read()
@@ -215,7 +215,9 @@ def test_2():
 		db['W_matrix'] = np.random.normal(0,10, (db['d'], db['q']) )
 
 		dgrowth = dimension_growth(db, iv, jv)
-		dgrowth.gamma_array = np.array([[0,1,2,1,1,2], [3,1,3,4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [1,2,2,1,5,0]])
+		#dgrowth.gamma_array = np.array([[0,1,2,1,1,2], [3,1,3,4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [1,2,2,1,5,0]])
+		dgrowth.gamma_array = np.array([[0,1,2,-1,1,2], [-3,1,-3,4,0,2], [1,2,-3,-8,-5,1], [1,2,-3,-8,-5,1], [1,0,0,-8,0,0], [-1,-2,-2,-1,-5,0]])
+
 		dgrowth.run()
 		
 		final_cost = dgrowth.Lagrange_W(db['W_matrix'])

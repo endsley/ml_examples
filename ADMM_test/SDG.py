@@ -68,7 +68,7 @@ class SDG:
 	def create_exponent_term(self, W):
 		for i in self.iv:
 			for j in self.jv:
-				self.exponent_term[i,j] = np.exp(-0.5*np.sum(self.A[i][j]*(W.dot(W.T)))/self.sigma2)
+				self.exponent_term[i][j] = np.exp(-0.5*W.T.dot(self.A[i][j]).dot(W)/self.sigma2)
 
 
 	def get_new_W(self, matrix_sum):
@@ -87,42 +87,57 @@ class SDG:
 					p = self.A[i][j].dot(w)
 					Hessian += const_term[i][j]*(self.A[i][j] - (1/self.sigma2)*p.dot(p.T))
 	
-			
+
+			#print 'Hessian'
+			#print Hessian
+			#print w
+			#print '\n\n\n'
+		
 			[eU,eigV,eV] = np.linalg.svd(Hessian)
-	
+			
 			if np.min(eigV) > 0:
-				print 'Positive'
+				#print 'Positive'
 				W[:,column_count] = w
 				column_count += 1
 			else:
-				print 'Negative'
+				#print 'Negative'
+				pass
 
 			if(column_count == self.q): break
 
+		#print matrix_sum.dot(W)
 		return W
 
 	def run(self):
 		self.create_A_matrix()
 		self.create_gamma()
 
-		W = np.zeros((self.d,self.q))
+		#W = np.zeros((self.d,1))
+		W = np.random.randn(self.d)
+		#W = np.array([ 0.51552105, -0.06093224, -0.43931364,  0.593512  , -0.43043273])
+		#W = np.array([ 0.8148338, -0.09630965,-0.69438019, 0.93810649,-0.680343  ])
+		print W
 		self.create_exponent_term(W)
 
 		for m in range(100):
 			matrix_sum = np.zeros((self.d, self.d))
-			self.create_exponent_term(W)
 			for i in self.iv:
 				for j in self.jv:
 					matrix_sum += self.gamma[i][j]*self.exponent_term[i][j]*self.A[i][j] # did not include constant sigma cus it doesn't matter
 
 			W = self.get_new_W(matrix_sum)
 
+			print matrix_sum.dot(W)
+
 			try: 
-				if np.linalg.norm(W - self.W)/np.linalg.norm(W) < 0.0001: 
+				exit_cond = np.linalg.norm(W - self.W)/np.linalg.norm(W)
+				print exit_cond
+				if exit_cond < 0.0001: 
 					break;
 			except: pass
 
 			self.W = W
+			#self.create_exponent_term(W)
 
 
 
@@ -145,7 +160,7 @@ def test_1():		# optimal = 2.4309
 
 
 def test_2():
-	q = 4		# the dimension you want to lower it to
+	q = 1		# the dimension you want to lower it to
 
 	fin = open('data_1.csv','r')
 	data = fin.read()
@@ -166,7 +181,8 @@ def test_2():
 
 
 	sdg = SDG(db, iv, jv)
-	sdg.gamma_array = np.array([[0,1,2,1,1,2], [3,1,3,4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [1,2,2,1,5,0]])
+	#sdg.gamma_array = np.array([[0,1,2,1,1,2], [3,1,3,4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [1,2,2,1,5,0]])
+	sdg.gamma_array = np.array([[0,1,2,-1,1,2], [-3,1,-3,4,0,2], [1,2,-3,-8,-5,1], [1,2,-3,-8,-5,1], [1,0,0,-8,0,0], [-1,-2,-2,-1,-5,0]])
 	sdg.run()
 		
 
