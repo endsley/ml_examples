@@ -89,9 +89,10 @@ def W_optimize_Gaussian(db):
 			
 			[tmp_dir, new_mag] = Stochastic_W_gradient(db, y_tilde, previous_gw, new_W, i_values, j_values)
 
-			#print db['updated_magnitude'], new_mag, new_alpha
+			print 'Previous mag : ', db['updated_magnitude'], 'New mag : ' , new_mag, new_alpha
 			while new_mag < db['updated_magnitude']:
-				new_alpha = new_alpha * 0.8
+				new_alpha = new_alpha * 0.4
+				print 'Alpha : ', new_alpha
 				if new_alpha > 0.00001 :
 					new_W = np.sqrt(1-new_alpha*new_alpha)*w_l + new_alpha*update_direction
 					[tmp_dir, new_mag] = Stochastic_W_gradient(db, y_tilde, previous_gw, new_W, i_values, j_values)

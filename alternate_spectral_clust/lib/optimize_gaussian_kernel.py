@@ -7,9 +7,10 @@ from calc_cost import *
 
 #	You must comment out one of the method and keep the other, the stochastic approach is faster
 #from W_optimize_Gaussian import *
-#from W_optimize_Gaussian_stochastic import *
+from W_optimize_Gaussian_stochastic import *
 #from W_optimize_Gaussian_ADMM import *
 from SDG import *
+#from direct_GD import *
 
 
 def optimize_gaussian_kernel(db):
@@ -23,12 +24,10 @@ def optimize_gaussian_kernel(db):
 		#W = np.random.normal(0,1, (db['d'], db['q']) )
 		#db['W_matrix'], r = np.linalg.qr(W)
 
-	#print db['Kernel_matrix']
-	#print 'H matrix'
-	#print db['H_matrix']
-	#print '\n\n'
-	
 	loop_count = 0
+	db['lowest_cost'] = float("inf")
+	db['lowest_gradient'] = float("inf")
+
 
 	while WU_converge == False: 	
 		#import pdb; pdb.set_trace()	
@@ -41,7 +40,11 @@ def optimize_gaussian_kernel(db):
 
 		U_optimize(db)
 		if db['prev_clust'] == 0: return
-		W_optimize_Gaussian(db)
+		W_optimize_Gaussian_SDG(db)
+		#W_optimize_Gaussian(db)
+		#db['lowest_cost'] = get_cost(db, db['W_matrix'])
+		#print '\n\nLowest cost : ' , db['lowest_cost'] , '\n\n'
+
 
 		#print calc_cost_function(db, db['W_matrix'])
 

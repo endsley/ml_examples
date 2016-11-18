@@ -6,6 +6,7 @@ import csv
 from create_y_tilde import *
 from create_gamma_ij import *
 from StringIO import StringIO
+from scipy.optimize import minimize
 
 
 class SDG:
@@ -86,19 +87,12 @@ class SDG:
 	def run(self):
 		db = self.db
 		exponent_term = 1
-		W = db['W_matrix']
+		#W = db['W_matrix']
+		W = np.zeros((db['d'], db['q']) )
+		new_cost = float("inf")
 
-#		try:
-#			cost_function = db['lowest_cost']
-#			gradient = db['lowest_gradient']
-#		except:
-#			print 'except --------------------...>'
-#			cost_function = float("inf")
-#			gradient = float("inf")
-
-		for m in range(15):
+		for m in range(2):
 			matrix_sum = np.zeros((self.d, self.d))
-			A_sum = np.zeros((self.d, self.d))
 			for i in self.iv:
 				for j in self.jv:
 					gamma_ij = self.create_gamma_ij(self.db, i, j)
@@ -107,9 +101,17 @@ class SDG:
 
 					matrix_sum += gamma_ij*exponent_term*A_ij
 		
-					A_sum += A_ij
 
 			#import pdb; pdb.set_trace()
+			new_gradient = np.sum(matrix_sum.dot(W))
+
+			if(new_cost == db['lowest_cost']):
+				if np.abs(new_gradient) < np.abs(db['lowest_gradient']):	# This gives us the most room for GD improvement
+					db['lowest_cost'] = new_cost
+					db['lowest_gradient'] = new_gradient
+					db['W_matrix'] = W
+
+
 			matrix_sum = matrix_sum.dot(matrix_sum)
 			[U,S,V] = np.linalg.svd(matrix_sum)
 			W = np.fliplr(U)[:,0:self.q]
@@ -117,11 +119,8 @@ class SDG:
 			#for k in range(self.q):
 			#	self.check_positive_hessian(W[:,k])
 
-			#W = 0.5*W_new + (1-0.5)*W		# interpolation doesn't seem to work
-
 			new_cost = self.calc_cost_function(W)
 			cost_ratio = np.abs(new_cost - db['lowest_cost'])/np.abs(new_cost)
-			new_gradient = np.sum(matrix_sum.dot(W))
 
 			exit_condition = np.linalg.norm(W - db['W_matrix'])/np.linalg.norm(W)
 			if(new_cost < db['lowest_cost']):
@@ -129,24 +128,37 @@ class SDG:
 				db['lowest_gradient'] = new_gradient
 				db['W_matrix'] = W
 
-			print 'Sum(Aw) : ' , np.sum(matrix_sum.dot(W)), 'New cost :', new_cost, 'lowest Cost :' , db['lowest_cost'], 'Exit cond :' , exit_condition , 'Cost ratio : ' , cost_ratio
+			print 'Sum(Aw) : ' , new_gradient, 'New cost :', new_cost, 'lowest Cost :' , db['lowest_cost'], 'Exit cond :' , exit_condition , 'Cost ratio : ' , cost_ratio
+			print W.T
 			if exit_condition < 0.0001: break;
 			#except: pass
 
+
+		import pdb; pdb.set_trace()
+		result_w = minimize(self.calc_cost_function, db['W_matrix'], method='BFGS', options={'disp': True})
+		optimal_val = result_w.fun	
 
 		#pdb.set_trace()
 		print 'Best : '
 		print 'Gradient ' , db['lowest_gradient'] 
 		print 'Cost  ' , db['lowest_cost']
+		print 'Opt val ' , optimal_val
 		self.W = db['W_matrix']
 		return db['W_matrix']
 
-def W_optimize_Gaussian(db):
+
+def get_cost(db, W):
 	iv = np.arange(db['N'])
 	jv = np.arange(db['N'])
 
-	db['lowest_cost'] = float("inf")
-	db['lowest_gradient'] = float("inf")
+	sdg = SDG(db, iv, jv)
+	sdg.y_tilde = create_y_tilde(db)
+	return sdg.calc_cost_function(W)
+
+
+def W_optimize_Gaussian_SDG(db):
+	iv = np.arange(db['N'])
+	jv = np.arange(db['N'])
 
 	sdg = SDG(db, iv, jv)
 	sdg.y_tilde = create_y_tilde(db)
@@ -210,4 +222,4 @@ def test_2():
 
 	import pdb; pdb.set_trace()
 
-test_2()
+#test_2()
