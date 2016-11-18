@@ -11,18 +11,12 @@ import pickle
 
 
 #np.set_printoptions(suppress=True)
-data = genfromtxt('data_sets/data_4.csv', delimiter=',')
+data = genfromtxt('data_sets/data_2.csv', delimiter=',')
 ASC = alt_spectral_clust(data)
-omg = objective_magnitude
+ASC.set_values('q',2)
+ASC.run()
+
+ASC.run()
 db = ASC.db
-
-ASC.set_values('q',1)
-ASC.set_values('C_num',2)
-ASC.set_values('kernel_type','Gaussian Kernel')
-ASC.run()
-
-#print db['Y_matrix'].T
-ASC.run()
 print db['Y_matrix']
-import matplotlib.pyplot as plt
 import pdb; pdb.set_trace()

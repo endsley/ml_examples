@@ -5,7 +5,7 @@ from scipy.optimize import minimize
 from create_gamma_ij import *
 from StringIO import StringIO
 from sklearn.preprocessing import normalize
-import pdb
+from get_current_cost import *
 
 
 class exponential_solver:
@@ -71,7 +71,6 @@ class exponential_solver:
 		Lagrange = np.trace(L1.dot(term1)) + np.trace(L2.dot(term2))
 		Aug_lag = np.sum(term1*term1) + np.sum(term2*term2)
 		foo = cost_foo + Lagrange + Aug_lag
-	
 		#print cost_foo, foo 
 		return foo
 
@@ -140,27 +139,139 @@ class exponential_solver:
 		#L2 = db['L'][zj:,:].T
 		#return {'L':L, 'L1':L1, 'L2':L2}
 
-
-	def w_optimize(self):
+	def calc_cost_function(self, W):
 		#	Calculate dL/dw gradient
 		db = self.db
-		W = db['W_matrix']
 		Z = db['Z_matrix']
 		L1 = db['L1']
 		L2 = db['L2']
+		iv_all = np.array(range(db['N']))
+		jv_all = iv_all
+
+		Z_shape = Z.shape
+		I = np.eye(Z_shape[1])
+
+		#	Calc Base
+		cost = 0
+		for i in iv_all:
+			for j in jv_all:
+				
+				x_dif = db['data'][i] - db['data'][j]
+				x_dif = x_dif[np.newaxis]
+			
+				gamma_ij = self.create_gamma_ij(db, i, j)
+				cost = cost -  gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
+
+
+		term1 = W.T.dot(Z) - I
+		term2 = W - Z
+
+		Lagrange = np.trace(L1.dot(term1)) + np.trace(L2.dot(term2))
+		Aug_lag = np.sum(term1*term1) + np.sum(term2*term2)
+
+		Lagrange_cost = cost + Lagrange + Aug_lag
+		return [Lagrange_cost, cost]
+
+
+
+	def calc_dL_dW(self, W):
+		#	Calculate dL/dw gradient
+		db = self.db
+		Z = db['Z_matrix']
+		L1 = db['L1']
+		L2 = db['L2']
+		I = np.eye(db['q'])
 
 		#	Calc Base
 		dL_dW_1 = 0
+		cost_1 = 0
 		for i in self.iv:
 			for j in self.jv:
 				
 				x_dif = db['data'][i] - db['data'][j]
 				x_dif = x_dif[np.newaxis]
 			
-				gamma_ij = self.create_gamma_ij(db, 0, i, j)
-				dL_dW_1 = dL_dW_1 + (x_dif.T.dot(x_dif).dot(W))* gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
+				gamma_ij = self.create_gamma_ij(db, i, j)
 
-		dL_dW_2 = Z.dot(L1) + L2.T + 2*Z.dot(Z.T.dot(W) - np.identity(db['q']))
+				new_part = gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
+				cost_1 = cost_1 -  new_part
+				dL_dW_1 = dL_dW_1 + 2*(x_dif.T.dot(x_dif).dot(W))*new_part
+
+
+		term1 = W.T.dot(Z) - I
+		term2 = W - Z
+
+		#Lagrange = np.trace(L1.dot(term1)) + np.trace(L2.dot(term2))
+		#Aug_lag = np.sum(term1*term1) + np.sum(term2*term2)
+		#Lagrange_cost = cost_1 + Lagrange + Aug_lag
+
+		dL_dW_2 = Z.dot(L1) + L2.T + 2*Z.dot(Z.T.dot(W) - I) + 2*term2
+		dL_dW = dL_dW_1 + dL_dW_2
+
+		return dL_dW
+
+	def w_optimize(self):
+		W = self.db['W_matrix']
+		alpha = 0
+		Armijo_sigma = 0.5
+		#lowest_cost = float('inf')
+		[lowest_cost, foo_cost] = self.calc_cost_function(W)
+		s = 1
+
+
+		for cnt in range(10):	# best out of 10
+			print 'Iteration : ' , cnt
+			W_converged = False
+			#if(np.random.uniform() > 0.5):
+			W = np.random.normal(0,1, (self.db['d'], self.db['q']) )
+			W, r = np.linalg.qr(W)
+			#s = 2
+
+			Armijo_beta = 0.8
+			m = 0
+
+			[original_cost, foo_cost] = self.calc_cost_function(W)
+			while not W_converged:
+				dL_dW = self.calc_dL_dW(W)
+				not_found_alpha = True
+
+				while not_found_alpha:
+					alpha = np.power(Armijo_beta,m)*s
+					new_W = W - alpha*dL_dW
+					[cost_new, foo_new] = self.calc_cost_function(new_W)
+
+					cost_change = original_cost - cost_new
+					print 'alpha : ' , alpha
+
+					if alpha < 0.0001:
+						W = new_W
+						original_cost = cost_new
+						not_found_alpha = False
+
+					if cost_change >= 0:  #Armijo_sigma*alpha*np.linalg.norm(dL_dW):
+						W = new_W
+						original_cost = cost_new
+						not_found_alpha = False
+						print '\t\t Cost : ' , original_cost[0][0]  #, cost_change
+					else:
+						m = m + 1
+
+				cost_ratio = np.abs(cost_change/cost_new)
+				#print '\texit : ' , cost_ratio
+				if (cost_ratio < 0.001): 
+					if(cost_new[0][0] < lowest_cost): 
+						lowest_cost = cost_new[0][0]
+						self.db['W_matrix'] = W
+					
+					break
+
+
+		print '\t\tLowest cost : ' , lowest_cost
+		#import pdb; pdb.set_trace()
+
+
+
+
 
 	def run(self):	
 		db = self.db
@@ -172,19 +283,34 @@ class exponential_solver:
 		stay_in_loop = True
 
 		while stay_in_loop: #nelder-mead, BFGS, CG , maxiter, Newton-CG
-			result_w = minimize(self.Lagrange_W, db['W_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
-			db['W_matrix'] = result_w.x.reshape(db['W_matrix'].shape)
+			
+			#	Optmize W Matrix
+			self.w_optimize()
+				#result_w = minimize(self.Lagrange_W, db['W_matrix'], method='BFGS', options={'disp': False})
+				##result_w = minimize(self.Lagrange_W, db['W_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
+				#db['W_matrix'] = result_w.x.reshape(db['W_matrix'].shape)
+				#self.optimal_val = result_w.fun	
 
+
+			#	Optimize Z matrix
+			print 'Optimizing Z'
 			result_z = minimize(self.Lagrange_Z, db['Z_matrix'], method='nelder-mead', options={'xtol': 1e-4, 'disp': False})
 			db['Z_matrix'] = result_z.x.reshape(db['Z_matrix'].shape)
+			print 'Optimizing Z finished'
 			#db['Z_matrix'] = normalize(db['Z_matrix'], norm='l2', axis=0)
 
-			#self.w_optimize()
 			self.calc_dual()
+
+
+			self.current_cost = self.calc_cost_function(db['W_matrix']) # debug code should be commented out later
+
+
 
 			loop_count += 1
 			self.matrix_gap = np.abs(np.sum(db['W_matrix'].T.dot(db['Z_matrix']) - np.eye(self.zj)))
-			print loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
+			print '\t\tLoop count :' , loop_count, self.matrix_gap, self.learning_rate, 'cost : ' , self.current_cost
+		
+			#print ': ' , get_current_cost(db)
 
 			if self.matrix_gap < 0.001: 
 				print('Exit base on threshold')
@@ -193,8 +319,7 @@ class exponential_solver:
 				print('Exit base on loop_count')
 				stay_in_loop = False
 
-		self.optimal_val = result_w.fun	
-		return result_w
+		#return result_w
 
 
 

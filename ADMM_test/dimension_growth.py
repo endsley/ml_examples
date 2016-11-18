@@ -114,12 +114,6 @@ class dimension_growth:
 			while not w_converged:
 				w_l = db['W_matrix'][:,m]
 	
-				#	This is for a subset instead of the whole set
-				#i_values = np.random.permutation( np.array(range(db['N'])) )
-				#i_values = i_values[0:db['SGD_size']]
-				#j_values = np.random.permutation( np.array(range(db['N'])) )
-				#j_values = j_values[0:db['SGD_size']]
-	
 				[update_direction, db['updated_magnitude']] = self.Stochastic_W_gradient(db, self.y_tilde, previous_gw, w_l, self.iv, self.jv)
 				update_direction = self.get_orthogonal_vector(db, m+1, update_direction) # m+1 is to also remove the current dimension
 	
@@ -128,7 +122,7 @@ class dimension_growth:
 				[tmp_dir, new_mag] = self.Stochastic_W_gradient(db, self.y_tilde, previous_gw, new_W, self.iv, self.jv)
 
 	
-				#print db['updated_magnitude'], new_mag, new_alpha
+				print db['updated_magnitude'], new_mag, new_alpha
 				while new_mag < db['updated_magnitude']:
 					new_alpha = new_alpha * 0.8
 					if new_alpha > 0.00001 :
@@ -170,10 +164,13 @@ class dimension_growth:
 
 def test_1():		#	optimal = -2.4308
 	db = {}
-	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1],[0,0,1]])
-	db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]], dtype='f' )
+	db['data'] = np.array([[3,4,0],[2,4,-1],[0,2,-1]])
+	#db['Z_matrix'] = np.array([[1,0],[0,1],[0,0]], dtype='f' )
 	db['W_matrix'] = np.array([[10,15],[10,1],[0,0]], dtype='f')
-	
+	#db['W_matrix'] = np.array([[-0.577350, 0.098784],[0.577350,-0.652521],[0.577350,0.751304]])
+
+
+
 	db['N'] = db['data'].shape[0]
 	db['SGD_size'] = db['N']
 	db['q'] = db['W_matrix'].shape[1]
@@ -192,7 +189,7 @@ def test_1():		#	optimal = -2.4308
 	
 	
 def test_2():
-	q = 4		# the dimension you want to lower it to
+	q = 3		# the dimension you want to lower it to
 
 	fin = open('data_1.csv','r')
 	data = fin.read()
@@ -213,12 +210,14 @@ def test_2():
 
 
 	for m in range(10):
-		db['Z_matrix'] = np.random.normal(0,10, (db['d'], db['q']) )
+		#db['Z_matrix'] = np.random.normal(0,10, (db['d'], db['q']) )
 		#db['Z_matrix'] = np.identity(db['d'])[:,0:db['q']]
-		db['W_matrix'] = db['Z_matrix']
+		db['W_matrix'] = np.random.normal(0,10, (db['d'], db['q']) )
 
 		dgrowth = dimension_growth(db, iv, jv)
 		dgrowth.gamma_array = np.array([[0,1,2,1,1,2], [3,1,3,4,0,2], [1,2,3,8,5,1], [1,2,3,8,5,1], [1,0,0,8,0,0], [1,2,2,1,5,0]])
+		#dgrowth.gamma_array = np.array([[0,1,2,-1,1,2], [-3,1,-3,4,0,2], [1,2,-3,-8,-5,1], [1,2,-3,-8,-5,1], [1,0,0,-8,0,0], [-1,-2,-2,-1,-5,0]])
+
 		dgrowth.run()
 		
 		final_cost = dgrowth.Lagrange_W(db['W_matrix'])
@@ -252,4 +251,4 @@ np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 
-test_3()
+test_2()
