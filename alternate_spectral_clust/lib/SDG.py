@@ -23,30 +23,6 @@ class SDG:
 		self.y_tilde = None
 		self.W = None
 
-	def create_gamma_ij(self, db, i, j):
-		if type(self.gamma_array) == type(None):
-			return create_gamma_ij(db, self.y_tilde, i, j)
-		else:
-			return self.gamma_array[i,j]
-
-	def calc_cost_function(self, W):
-		#	Calculate dL/dw gradient
-		db = self.db
-		iv_all = np.array(range(self.N))
-		jv_all = iv_all
-
-		#	Calc Base
-		cost = 0
-		for i in self.iv:
-			for j in self.jv:
-				
-				x_dif = db['data'][i] - db['data'][j]
-				x_dif = x_dif[np.newaxis]
-			
-				gamma_ij = self.create_gamma_ij(db, i, j)
-				cost = cost -  gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
-
-		return cost
 
 	def check_positive_hessian(self, w):
 		Hessian = np.zeros((self.d, self.d))
@@ -61,11 +37,6 @@ class SDG:
 				p = A_ij.dot(w)
 				Hessian += (gamma_ij/self.sigma2)*exponent_term*(A_ij - (1/self.sigma2)*p.dot(p.T))
 	
-
-		#print 'Hessian'
-		#print Hessian
-		#print w
-		#print '\n\n\n'
 	
 		[eU,eigV,eV] = np.linalg.svd(Hessian)
 		
@@ -76,14 +47,6 @@ class SDG:
 			pass
 
 
-
-
-	def create_A_ij_matrix(self, i, j):
-		db = self.db
-		x_dif = db['data'][i] - db['data'][j]
-		x_dif = x_dif[np.newaxis]
-		return np.dot(x_dif.T, x_dif)
-
 	def run(self):
 		db = self.db
 		exponent_term = 1
@@ -91,35 +54,40 @@ class SDG:
 		W = np.zeros((db['d'], db['q']) )
 		new_cost = float("inf")
 
-		for m in range(2):
-			matrix_sum = np.zeros((self.d, self.d))
-			for i in self.iv:
-				for j in self.jv:
-					gamma_ij = self.create_gamma_ij(self.db, i, j)
-					A_ij = self.create_A_ij_matrix(i,j)
-					exponent_term = np.exp(-0.5*np.sum(A_ij.T*(W.dot(W.T)))/self.sigma2)
-
-					matrix_sum += gamma_ij*exponent_term*A_ij
-		
+		for m in range(8):	
+		#	Old way of calculating matrix_sum
+		#
+		#	matrix_sum = np.zeros((self.d, self.d))
+		#	for i in self.iv:
+		#		for j in self.jv:
+		#			gamma_ij = self.create_gamma_ij(self.db, i, j)
+		#			A_ij = self.create_A_ij_matrix(i,j)
+		#			exponent_term = np.exp(-0.5*np.sum(A_ij.T*(W.dot(W.T)))/self.sigma2)
+		#			matrix_sum += gamma_ij*exponent_term*A_ij
 
 			#import pdb; pdb.set_trace()
+			matrix_sum = db['cf'].create_gamma_exp_A(W)
+			#import pdb; pdb.set_trace()
+
+
 			new_gradient = np.sum(matrix_sum.dot(W))
 
-			if(new_cost == db['lowest_cost']):
-				if np.abs(new_gradient) < np.abs(db['lowest_gradient']):	# This gives us the most room for GD improvement
-					db['lowest_cost'] = new_cost
-					db['lowest_gradient'] = new_gradient
-					db['W_matrix'] = W
+			#if(new_cost == db['lowest_cost']):
+			#	if np.abs(new_gradient) < np.abs(db['lowest_gradient']):	# This gives us the most room for GD improvement
+			#		db['lowest_cost'] = new_cost
+			#		db['lowest_gradient'] = new_gradient
+			#		db['W_matrix'] = W
 
 
-			matrix_sum = matrix_sum.dot(matrix_sum)
-			[U,S,V] = np.linalg.svd(matrix_sum)
+			matrix_sqrt = matrix_sum.dot(matrix_sum)
+			[U,S,V] = np.linalg.svd(matrix_sqrt)
 			W = np.fliplr(U)[:,0:self.q]
 
-			#for k in range(self.q):
-			#	self.check_positive_hessian(W[:,k])
 
-			new_cost = self.calc_cost_function(W)
+			#new_cost = self.calc_cost_function(W)
+			new_cost = db['cf'].calc_cost_function(W)
+
+
 			cost_ratio = np.abs(new_cost - db['lowest_cost'])/np.abs(new_cost)
 
 			exit_condition = np.linalg.norm(W - db['W_matrix'])/np.linalg.norm(W)
@@ -134,15 +102,14 @@ class SDG:
 			#except: pass
 
 
-		import pdb; pdb.set_trace()
-		result_w = minimize(self.calc_cost_function, db['W_matrix'], method='BFGS', options={'disp': True})
-		optimal_val = result_w.fun	
+#		import pdb; pdb.set_trace()
+#		result_w = minimize(self.calc_cost_function, db['W_matrix'], method='BFGS', options={'disp': True})
+#		optimal_val = result_w.fun	
 
 		#pdb.set_trace()
 		print 'Best : '
 		print 'Gradient ' , db['lowest_gradient'] 
 		print 'Cost  ' , db['lowest_cost']
-		print 'Opt val ' , optimal_val
 		self.W = db['W_matrix']
 		return db['W_matrix']
 
@@ -153,6 +120,8 @@ def get_cost(db, W):
 
 	sdg = SDG(db, iv, jv)
 	sdg.y_tilde = create_y_tilde(db)
+
+	import pdb; pdb.set_trace()
 	return sdg.calc_cost_function(W)
 
 
@@ -165,6 +134,7 @@ def W_optimize_Gaussian_SDG(db):
 	
 	db['W_matrix'] = sdg.run()
 	
+	print 'Final cost : ' , get_cost(db, db['W_matrix'])
 	#print sdg.W
 	#print sdg.calc_cost_function(sdg.W)
 	#pdb.set_trace()

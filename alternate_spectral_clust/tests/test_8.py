@@ -10,8 +10,8 @@ import numpy.matlib
 from sklearn.metrics.cluster import normalized_mutual_info_score
 import pickle
 import sklearn
-
 import time 
+from cost_function import *
 
 
 #np.set_printoptions(suppress=True)
@@ -40,7 +40,6 @@ b = db['allocation']
 #print "NMI : " , normalized_mutual_info_score(a,b)
 #g_truth = np.concatenate((np.ones(100), np.zeros(100),np.ones(100), np.zeros(100)))
 #print "NMI Against Ground Truth : " , normalized_mutual_info_score(b,g_truth)
-
 #print db['Y_matrix']
 
 import pdb; pdb.set_trace()
