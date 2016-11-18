@@ -7,6 +7,7 @@ from normalize_each_U_row import *
 from optimize_polynomial_kernel import *
 from K_means import *
 from numpy import genfromtxt
+from cost_function import *
 
 
 class alt_spectral_clust:
@@ -50,6 +51,9 @@ class alt_spectral_clust:
 		self.db['maximum_W_update_count'] = 400
 		self.db['data'] = data_set
 
+
+
+
 	def set_values(self, key, val):
 		self.db[key] = val
 	
@@ -71,6 +75,7 @@ class alt_spectral_clust:
 
 		if type(db['H_matrix']) == type(None):
 			db['H_matrix'] = np.eye(N) - np.ones((N,N))/N
+
 
 		if self.db['kernel_type'] == 'Linear Kernel':
 			optimize_linear_kernel(self.db)

@@ -28,12 +28,15 @@ class cost_function:
 		self.exp = np.zeros((self.N, self.N))
 		self.A = np.empty((self.N,self.N,self.d, self.d))
 		self.Aw = np.empty((self.N,self.N,self.d, self.q))
-		self.last_w_for_Aw = np.empty((self.d, self.q))
+		self.last_used_W = np.empty((self.d, self.q))
 		self.gamma_exp = np.empty((self.N, self.N))
 
+		self.create_A()
+
+
+	def initialize_constants(self):
 		self.create_y_tilde()
 		self.create_gamma()
-		self.create_A()
 
 	def create_y_tilde(self):
 		#	tr(H K_y H D K D)
@@ -73,30 +76,42 @@ class cost_function:
 				self.A[i][j] = np.dot(x_dif.T, x_dif)
 
 	def create_Aw(self,W):
-		if np.sum(W - self.last_w_for_Aw) == 0: return
-		self.last_w_for_Aw = W
-
 		db = self.db
 		for i in self.iv:
 			for j in self.jv:
 				self.Aw[i][j] = self.A[i][j].dot(W)
 
+	def create_D_matrix(self, kernel):
+		d_matrix = np.diag(1/np.sqrt(np.sum(kernel,axis=1))) # 1/sqrt(D)
+		return d_matrix
+
 	def create_Kernel(self, W):
 		db = self.db
 		self.create_Aw(W)
+		kernel = np.zeros((db['N'], db['N']))
 
 		for i in self.iv:
 			for j in self.jv:
-				db['Kernel_matrix'][i][j] = np.exp(np.sum(-W*self.Aw[i][j])/(2*self.sigma2))
+				kernel[i][j] = np.exp(np.sum(-W*self.Aw[i][j])/(2*self.sigma2))
 
-		db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
-		return db['Kernel_matrix']
+		return kernel
 
-	def calc_cost_function(self, W):
-		print '----------------'
-		import pdb; pdb.set_trace()
+	def create_gamma_exps(self, W):
 		exp_wAw = self.create_Kernel(W)
 		self.gamma_exp = self.gamma*exp_wAw
+		return self.gamma_exp
+
+	def create_gamma_exp_A(self, W):
+		gamma_exp = self.create_gamma_exps(W)
+		matrix_sum = np.zeros((self.d, self.d))
+		for i in self.iv:
+			for j in self.jv:
+				matrix_sum += gamma_exp[i][j]*self.A[i][j]
+
+		return matrix_sum
+
+	def calc_cost_function(self, W):
+		self.create_gamma_exps(W)
 		return np.sum(self.gamma_exp)
 
 def test_1():		# optimal = 2.4309

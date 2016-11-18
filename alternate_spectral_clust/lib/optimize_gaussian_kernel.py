@@ -31,23 +31,26 @@ def optimize_gaussian_kernel(db):
 
 
 	while WU_converge == False: 	
-		#import pdb; pdb.set_trace()	
+		cf = cost_function(db)
+		db['cf'] = cf
+
 		if db['data_type'] == 'Feature Matrix': 
-			calc_gaussian_kernel(db)
+			db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
+			db['D_matrix'] = cf.create_D_matrix(db['Kernel_matrix'])
+			#calc_gaussian_kernel(db)	#-> calculates the same thing, but other is more efficient
+
 		elif db['data_type'] == 'Graph matrix': 
 			db['Kernel_matrix'] = db['data']
 			db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
 
 
 		U_optimize(db)
+
 		if db['prev_clust'] == 0: return
+		cf.initialize_constants()
 		W_optimize_Gaussian_SDG(db)
-		#W_optimize_Gaussian(db)
-		#db['lowest_cost'] = get_cost(db, db['W_matrix'])
-		#print '\n\nLowest cost : ' , db['lowest_cost'] , '\n\n'
 
 
-		#print calc_cost_function(db, db['W_matrix'])
 
 		if not db.has_key('previous_U_matrix'): 
 			db['previous_U_matrix'] = db['U_matrix']
@@ -70,6 +73,4 @@ def optimize_gaussian_kernel(db):
 		if loop_count > 10:
 			WU_converge = True
 
-	cf = cost_function(db)
-	print '\n\n\n\n\nCost Function : ' , cf.calc_cost_function( db['W_matrix'] )
 
