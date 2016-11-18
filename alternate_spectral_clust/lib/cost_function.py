@@ -93,6 +93,8 @@ class cost_function:
 		return db['Kernel_matrix']
 
 	def calc_cost_function(self, W):
+		print '----------------'
+		import pdb; pdb.set_trace()
 		exp_wAw = self.create_Kernel(W)
 		self.gamma_exp = self.gamma*exp_wAw
 		return np.sum(self.gamma_exp)
@@ -126,6 +128,6 @@ def test_1():		# optimal = 2.4309
 	c_f = cost_function(db)
 	print c_f.calc_cost_function(db['W_matrix'])
 
-	pdb.set_trace()
+	#pdb.set_trace()
 
-test_1()
+#test_1()

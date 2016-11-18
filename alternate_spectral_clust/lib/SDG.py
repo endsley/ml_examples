@@ -44,7 +44,7 @@ class SDG:
 				x_dif = x_dif[np.newaxis]
 			
 				gamma_ij = self.create_gamma_ij(db, i, j)
-				cost = cost -  gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
+				cost = cost -  gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T)/(2*self.sigma2))
 
 		return cost
 
@@ -134,15 +134,14 @@ class SDG:
 			#except: pass
 
 
-		import pdb; pdb.set_trace()
-		result_w = minimize(self.calc_cost_function, db['W_matrix'], method='BFGS', options={'disp': True})
-		optimal_val = result_w.fun	
+#		import pdb; pdb.set_trace()
+#		result_w = minimize(self.calc_cost_function, db['W_matrix'], method='BFGS', options={'disp': True})
+#		optimal_val = result_w.fun	
 
 		#pdb.set_trace()
 		print 'Best : '
 		print 'Gradient ' , db['lowest_gradient'] 
 		print 'Cost  ' , db['lowest_cost']
-		print 'Opt val ' , optimal_val
 		self.W = db['W_matrix']
 		return db['W_matrix']
 
@@ -153,6 +152,8 @@ def get_cost(db, W):
 
 	sdg = SDG(db, iv, jv)
 	sdg.y_tilde = create_y_tilde(db)
+
+	import pdb; pdb.set_trace()
 	return sdg.calc_cost_function(W)
 
 
@@ -165,6 +166,7 @@ def W_optimize_Gaussian_SDG(db):
 	
 	db['W_matrix'] = sdg.run()
 	
+	print 'Final cost : ' , get_cost(db, db['W_matrix'])
 	#print sdg.W
 	#print sdg.calc_cost_function(sdg.W)
 	#pdb.set_trace()

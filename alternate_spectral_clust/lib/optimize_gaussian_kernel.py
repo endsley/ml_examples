@@ -4,10 +4,11 @@ from calc_gaussian_kernel import *
 from U_optimize import *
 from objective_magnitude import *
 from calc_cost import *
+from cost_function import *
 
 #	You must comment out one of the method and keep the other, the stochastic approach is faster
 #from W_optimize_Gaussian import *
-from W_optimize_Gaussian_stochastic import *
+#from W_optimize_Gaussian_stochastic import *
 #from W_optimize_Gaussian_ADMM import *
 from SDG import *
 #from direct_GD import *
@@ -56,7 +57,6 @@ def optimize_gaussian_kernel(db):
 			U_change = np.linalg.norm(db['previous_U_matrix'] - db['U_matrix'])
 			W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])
 
-			#print db['W_matrix']
 			print '\t\tU change ratio : ' , U_change/matrix_mag
 			if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
 
@@ -70,4 +70,6 @@ def optimize_gaussian_kernel(db):
 		if loop_count > 10:
 			WU_converge = True
 
+	cf = cost_function(db)
+	print '\n\n\n\n\nCost Function : ' , cf.calc_cost_function( db['W_matrix'] )
 
