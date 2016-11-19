@@ -30,4 +30,5 @@ np.set_printoptions(linewidth=300)
 #import test_7_polynomial
 #import test_7_polynomial
 #import test_8
-import gene_data_test
+import test_9
+#import gene_data_test
