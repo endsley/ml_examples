@@ -107,8 +107,10 @@ class cost_function:
 		for i in self.iv:
 			for j in self.jv:
 				matrix_sum += gamma_exp[i][j]*self.A[i][j]
-
+		
+		matrix_sum = matrix_sum/float(self.sigma2)
 		return matrix_sum
+
 
 	def calc_cost_function(self, W):
 		self.create_gamma_exps(W)

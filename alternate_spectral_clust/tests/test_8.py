@@ -15,8 +15,8 @@ from cost_function import *
 
 
 #np.set_printoptions(suppress=True)
-data = genfromtxt('data_sets/data_4.csv', delimiter=',')
-#data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')		# -0.0858 , -0.9
+#data = genfromtxt('data_sets/data_4.csv', delimiter=',')
+data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')		# -0.0858 , -0.9
 
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
@@ -39,7 +39,8 @@ b = db['allocation']
 #print("--- %s seconds ---" % (time.time() - start_time))
 #print "NMI : " , normalized_mutual_info_score(a,b)
 #g_truth = np.concatenate((np.ones(100), np.zeros(100),np.ones(100), np.zeros(100)))
-#print "NMI Against Ground Truth : " , normalized_mutual_info_score(b,g_truth)
+#a_truth = np.concatenate((np.ones(200), np.zeros(200)))
+#print "NMI Against Ground Truth : " , normalized_mutual_info_score(b,a_truth)
 #print db['Y_matrix']
 
 import pdb; pdb.set_trace()

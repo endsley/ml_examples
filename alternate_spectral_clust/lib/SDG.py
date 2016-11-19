@@ -50,27 +50,13 @@ class SDG:
 	def run(self):
 		db = self.db
 		exponent_term = 1
-		#W = db['W_matrix']
-		W = np.zeros((db['d'], db['q']) )
+		W = db['W_matrix']
+		#W = np.zeros((db['d'], db['q']) )
+		use_frank = False
 		new_cost = float("inf")
 
-		for m in range(8):	
-		#	Old way of calculating matrix_sum
-		#
-		#	matrix_sum = np.zeros((self.d, self.d))
-		#	for i in self.iv:
-		#		for j in self.jv:
-		#			gamma_ij = self.create_gamma_ij(self.db, i, j)
-		#			A_ij = self.create_A_ij_matrix(i,j)
-		#			exponent_term = np.exp(-0.5*np.sum(A_ij.T*(W.dot(W.T)))/self.sigma2)
-		#			matrix_sum += gamma_ij*exponent_term*A_ij
-
-			#import pdb; pdb.set_trace()
+		for m in range(3):
 			matrix_sum = db['cf'].create_gamma_exp_A(W)
-			#import pdb; pdb.set_trace()
-
-
-			new_gradient = np.sum(matrix_sum.dot(W))
 
 			#if(new_cost == db['lowest_cost']):
 			#	if np.abs(new_gradient) < np.abs(db['lowest_gradient']):	# This gives us the most room for GD improvement
@@ -79,13 +65,26 @@ class SDG:
 			#		db['W_matrix'] = W
 
 
+
+
+			new_gradient = matrix_sum.dot(W)
+			new_gradient_mag = np.sum(new_gradient)
+
+#			if use_frank:
+###		Frank Wolfe
+#				W = -new_gradient/np.linalg.norm(new_gradient)
+#				use_frank = not use_frank
+#				print '\t\tTrace : ' , np.trace(new_gradient.T.dot(W))
+#			else:
+##		My way
+#			use_frank = not use_frank
 			matrix_sqrt = matrix_sum.dot(matrix_sum)
 			[U,S,V] = np.linalg.svd(matrix_sqrt)
 			W = np.fliplr(U)[:,0:self.q]
 
 
-			#new_cost = self.calc_cost_function(W)
-			new_cost = db['cf'].calc_cost_function(W)
+			
+			new_cost = -db['cf'].calc_cost_function(W)
 
 
 			cost_ratio = np.abs(new_cost - db['lowest_cost'])/np.abs(new_cost)
@@ -93,11 +92,10 @@ class SDG:
 			exit_condition = np.linalg.norm(W - db['W_matrix'])/np.linalg.norm(W)
 			if(new_cost < db['lowest_cost']):
 				db['lowest_cost'] = new_cost
-				db['lowest_gradient'] = new_gradient
+				db['lowest_gradient'] = new_gradient_mag
 				db['W_matrix'] = W
 
-			print 'Sum(Aw) : ' , new_gradient, 'New cost :', new_cost, 'lowest Cost :' , db['lowest_cost'], 'Exit cond :' , exit_condition , 'Cost ratio : ' , cost_ratio
-			print W.T
+			print 'Sum(Aw) : ' , new_gradient_mag, 'New cost :', new_cost, 'lowest Cost :' , db['lowest_cost'], 'Exit cond :' , exit_condition , 'Cost ratio : ' , cost_ratio
 			if exit_condition < 0.0001: break;
 			#except: pass
 
@@ -125,7 +123,7 @@ def get_cost(db, W):
 	return sdg.calc_cost_function(W)
 
 
-def W_optimize_Gaussian_SDG(db):
+def W_optimize_Gaussian(db):
 	iv = np.arange(db['N'])
 	jv = np.arange(db['N'])
 
@@ -134,10 +132,6 @@ def W_optimize_Gaussian_SDG(db):
 	
 	db['W_matrix'] = sdg.run()
 	
-	print 'Final cost : ' , get_cost(db, db['W_matrix'])
-	#print sdg.W
-	#print sdg.calc_cost_function(sdg.W)
-	#pdb.set_trace()
 
 def test_1():		# optimal = 2.4309
 	db = {}

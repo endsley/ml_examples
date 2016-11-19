@@ -12,6 +12,7 @@ import pickle
 import sklearn
 import time 
 
+#	Min -0.25
 
 #np.set_printoptions(suppress=True)
 data = genfromtxt('data_sets/gene_dat.csv', delimiter=',')
@@ -22,9 +23,9 @@ db = ASC.db
 
 ASC.set_values('q',118)
 ASC.set_values('C_num',4)
-ASC.set_values('lambda',2)
+ASC.set_values('lambda',1)
 ASC.set_values('kernel_type','Gaussian Kernel')
-ASC.set_values('sigma',20)
+ASC.set_values('sigma',15)
 ASC.run()
 a = db['allocation']
 

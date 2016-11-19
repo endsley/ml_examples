@@ -48,7 +48,7 @@ def optimize_gaussian_kernel(db):
 
 		if db['prev_clust'] == 0: return
 		cf.initialize_constants()
-		W_optimize_Gaussian_SDG(db)
+		W_optimize_Gaussian(db)
 
 
 
