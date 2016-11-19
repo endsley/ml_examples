@@ -38,9 +38,10 @@ y = [y1 y2];
 Y = [x a;y b]';
 %plot(Y(:,1), Y(:,2), 'x'); hold on;
 
-data = [Y, X];
+noise = 20*(rand(164,3) - 0.5);
+data = [Y, X, noise];
 %plot(data(:,1), data(:,2), 'x'); hold on;
-plot(data(:,3), data(:,4), 'x'); hold on;
+%plot(data(:,3), data(:,4), 'x'); hold on;
 
 
-csvwrite('moon.csv', data, 'precision', 3)
+csvwrite('moon_164x7.csv', data, 'precision', 3)
