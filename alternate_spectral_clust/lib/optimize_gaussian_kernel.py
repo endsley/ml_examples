@@ -74,3 +74,4 @@ def optimize_gaussian_kernel(db):
 			WU_converge = True
 
 
+	print 'Major cost : ' , cf.calc_cost_function(db['W_matrix'])

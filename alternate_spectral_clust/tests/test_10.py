@@ -14,9 +14,7 @@ import time
 from cost_function import *
 import matplotlib.pyplot as plt
 
-#np.set_printoptions(suppress=True)
-data = genfromtxt('data_sets/data_4.csv', delimiter=',')
-#data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')		# -0.0858 , -0.9
+data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')	
 
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
@@ -48,37 +46,37 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 
 
-X = db['data']
-
-plt.figure(1)
-
-plt.subplot(311)
-plt.plot(X[:,0], X[:,1], 'bo')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('data_4.csv original plot')
-
-#plt.figure(2)
-plt.subplot(312)
-group1 = X[a == 1]
-group2 = X[a == 2]
-plt.plot(group1[:,0], group1[:,1], 'bo')
-plt.plot(group2[:,0], group2[:,1], 'ro')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('Original Clustering by FKDAC')
-
-
-plt.subplot(313)
-group1 = X[b == 1]
-group2 = X[b == 2]
-plt.plot(group1[:,0], group1[:,1], 'bo')
-plt.plot(group2[:,0], group2[:,1], 'ro')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('Alternative Clustering by FKDAC')
-
-plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
-plt.show()
-
+#X = db['data']
+#
+#plt.figure(1)
+#
+#plt.subplot(311)
+#plt.plot(X[:,0], X[:,1], 'bo')
+#plt.xlabel('Feature 1')
+#plt.ylabel('Feature 2')
+#plt.title('data_4.csv original plot')
+#
+##plt.figure(2)
+#plt.subplot(312)
+#group1 = X[a == 1]
+#group2 = X[a == 2]
+#plt.plot(group1[:,0], group1[:,1], 'bo')
+#plt.plot(group2[:,0], group2[:,1], 'ro')
+#plt.xlabel('Feature 1')
+#plt.ylabel('Feature 2')
+#plt.title('Original Clustering by FKDAC')
+#
+#
+#plt.subplot(313)
+#group1 = X[b == 1]
+#group2 = X[b == 2]
+#plt.plot(group1[:,0], group1[:,1], 'bo')
+#plt.plot(group2[:,0], group2[:,1], 'ro')
+#plt.xlabel('Feature 1')
+#plt.ylabel('Feature 2')
+#plt.title('Alternative Clustering by FKDAC')
+#
+#plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+#plt.show()
+#
 import pdb; pdb.set_trace()
