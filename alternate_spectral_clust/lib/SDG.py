@@ -55,7 +55,7 @@ class SDG:
 		use_frank = False
 		new_cost = float("inf")
 
-		for m in range(2):
+		for m in range(15):
 			matrix_sum = db['cf'].create_gamma_exp_A(W)
 
 			#if(new_cost == db['lowest_cost']):
