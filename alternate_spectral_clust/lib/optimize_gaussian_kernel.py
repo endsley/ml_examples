@@ -6,7 +6,7 @@ from objective_magnitude import *
 from calc_cost import *
 from cost_function import *
 
-#	You must comment out one of the method and keep the other, the stochastic approach is faster
+#	You must comment out one of the method and keep the other
 #from W_optimize_Gaussian import *
 #from W_optimize_Gaussian_stochastic import *
 #from W_optimize_Gaussian_ADMM import *
@@ -29,10 +29,10 @@ def optimize_gaussian_kernel(db):
 	db['lowest_cost'] = float("inf")
 	db['lowest_gradient'] = float("inf")
 
+	cf = cost_function(db)
+	db['cf'] = cf
 
 	while WU_converge == False: 	
-		cf = cost_function(db)
-		db['cf'] = cf
 
 		if db['data_type'] == 'Feature Matrix': 
 			db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
@@ -46,9 +46,12 @@ def optimize_gaussian_kernel(db):
 
 		U_optimize(db)
 
+
 		if db['prev_clust'] == 0: return
+		#print '\nAfter U cost : ' , cf.calc_cost_function(db['W_matrix'])
 		cf.initialize_constants()
-		W_optimize_Gaussian(db)
+		W_optimize_Gaussian_SDG(db)
+		#W_optimize_Gaussian(db)
 
 
 

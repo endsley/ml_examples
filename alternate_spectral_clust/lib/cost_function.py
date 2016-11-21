@@ -28,7 +28,6 @@ class cost_function:
 		self.exp = np.zeros((self.N, self.N))
 		self.A = np.empty((self.N,self.N,self.d, self.d))
 		self.Aw = np.empty((self.N,self.N,self.d, self.q))
-		self.last_used_W = np.empty((self.d, self.q))
 		self.gamma_exp = np.empty((self.N, self.N))
 
 		self.create_A()
@@ -55,12 +54,13 @@ class cost_function:
 	def create_gamma(self):
 		db = self.db
 		yt = db['y_tilde']
+		U = db['H_matrix'].dot(db['U_matrix'])
 
 		for i in self.iv:
 			for j in self.jv:
 				degree_of_vertex = np.diag(db['D_matrix'])
-				ith_row = db['U_matrix'][i,:]
-				jth_row = db['U_matrix'][j,:]
+				ith_row = U[i,:]
+				jth_row = U[j,:]
 			
 				u_dot = np.dot(ith_row,jth_row)
 				part_1 = u_dot*degree_of_vertex[i]*degree_of_vertex[j]
@@ -96,10 +96,6 @@ class cost_function:
 
 		return kernel
 
-	def create_gamma_exps(self, W):
-		exp_wAw = self.create_Kernel(W)
-		self.gamma_exp = self.gamma*exp_wAw
-		return self.gamma_exp
 
 	def create_gamma_exp_A(self, W):
 		gamma_exp = self.create_gamma_exps(W)
@@ -111,6 +107,10 @@ class cost_function:
 		matrix_sum = matrix_sum/float(self.sigma2)
 		return matrix_sum
 
+	def create_gamma_exps(self, W):
+		exp_wAw = self.create_Kernel(W)
+		self.gamma_exp = self.gamma*exp_wAw
+		return self.gamma_exp
 
 	def calc_cost_function(self, W):
 		self.create_gamma_exps(W)
