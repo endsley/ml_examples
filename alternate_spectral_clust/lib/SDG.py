@@ -78,8 +78,8 @@ class SDG:
 #			else:
 ##		My way
 #			use_frank = not use_frank
+			#matrix_sum = matrix_sum.dot(matrix_sum)
 
-			matrix_sum = matrix_sum.dot(matrix_sum)
 			[U,S,V] = np.linalg.svd(matrix_sum)
 			W = np.fliplr(U)[:,0:self.q]
 	
