@@ -26,11 +26,15 @@ class cost_function:
 		self.W = None
 		self.gamma = np.zeros((self.N, self.N))
 		self.exp = np.zeros((self.N, self.N))
-		self.A = np.empty((self.N,self.N,self.d, self.d))
-		self.Aw = np.empty((self.N,self.N,self.d, self.q))
 		self.gamma_exp = np.empty((self.N, self.N))
+		self.A_memory_feasible = True
 
-		self.create_A()
+		try:
+			self.A = np.empty((self.N,self.N,self.d, self.d))
+			self.Aw = np.empty((self.N,self.N,self.d, self.q))
+			self.create_A()
+		except:
+			self.A_memory_feasible = False
 
 
 	def initialize_constants(self):
@@ -67,6 +71,15 @@ class cost_function:
 			
 				self.gamma[i][j] = part_1 - db['lambda'] * yt[i,j]
 
+	def get_A(self, i, j):
+		if self.A_memory_feasible:
+			return self.A[i][j]
+		else:
+			x_dif = self.db['data'][i] - self.db['data'][j]
+			x_dif = x_dif[np.newaxis]
+			return np.dot(x_dif.T, x_dif)
+		
+
 	def create_A(self):
 		db = self.db
 		for i in self.iv:
@@ -75,11 +88,21 @@ class cost_function:
 				x_dif = x_dif[np.newaxis]
 				self.A[i][j] = np.dot(x_dif.T, x_dif)
 
+	def get_Aw(self, i, j, W):
+		if self.A_memory_feasible: 
+			return self.Aw[i][j]
+		else:
+			A = self.get_A(i,j)
+			return A.dot(W)
+
 	def create_Aw(self,W):
+		if not self.A_memory_feasible: return
+
 		db = self.db
 		for i in self.iv:
 			for j in self.jv:
-				self.Aw[i][j] = self.A[i][j].dot(W)
+				A = self.get_A(i,j)
+				self.Aw[i][j] = A.dot(W)
 
 	def create_D_matrix(self, kernel):
 		d_matrix = np.diag(1/np.sqrt(np.sum(kernel,axis=1))) # 1/sqrt(D)
@@ -92,7 +115,8 @@ class cost_function:
 
 		for i in self.iv:
 			for j in self.jv:
-				kernel[i][j] = np.exp(np.sum(-W*self.Aw[i][j])/(2*self.sigma2))
+				Aw = self.get_Aw(i,j, W)
+				kernel[i][j] = np.exp(np.sum(-W*Aw)/(2*self.sigma2))
 
 		return kernel
 
@@ -102,7 +126,8 @@ class cost_function:
 		matrix_sum = np.zeros((self.d, self.d))
 		for i in self.iv:
 			for j in self.jv:
-				matrix_sum += gamma_exp[i][j]*self.A[i][j]
+				A = self.get_A(i, j)
+				matrix_sum += gamma_exp[i][j]*A
 		
 		matrix_sum = matrix_sum/float(self.sigma2)
 		return matrix_sum

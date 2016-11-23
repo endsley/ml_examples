@@ -55,7 +55,7 @@ class SDG:
 		use_frank = False
 		new_cost = float("inf")
 
-		for m in range(15):
+		for m in range(2):
 			matrix_sum = db['cf'].create_gamma_exp_A(W)
 
 			#if(new_cost == db['lowest_cost']):
@@ -78,8 +78,9 @@ class SDG:
 #			else:
 ##		My way
 #			use_frank = not use_frank
-			matrix_sqrt = matrix_sum.dot(matrix_sum)
-			[U,S,V] = np.linalg.svd(matrix_sqrt)
+
+			matrix_sum = matrix_sum.dot(matrix_sum)
+			[U,S,V] = np.linalg.svd(matrix_sum)
 			W = np.fliplr(U)[:,0:self.q]
 	
 

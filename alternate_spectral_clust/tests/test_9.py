@@ -15,8 +15,8 @@ from cost_function import *
 import matplotlib.pyplot as plt
 
 
-#data = genfromtxt('data_sets/moon.csv', delimiter=',')		
-data = genfromtxt('data_sets/moon_164x7.csv', delimiter=',')		
+data = genfromtxt('data_sets/moon.csv', delimiter=',')		
+#data = genfromtxt('data_sets/moon_164x7.csv', delimiter=',')		
 
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
