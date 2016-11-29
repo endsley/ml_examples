@@ -8,9 +8,9 @@ from cost_function import *
 
 #	You must comment out one of the method and keep the other
 #from W_optimize_Gaussian import *
-#from W_optimize_Gaussian_stochastic import *
+from W_optimize_Gaussian_stochastic import *
 #from W_optimize_Gaussian_ADMM import *
-from SDG import *
+#from SDG import *
 #from direct_GD import *
 
 
@@ -50,8 +50,8 @@ def optimize_gaussian_kernel(db):
 		if db['prev_clust'] == 0: return
 		#print '\nAfter U cost : ' , cf.calc_cost_function(db['W_matrix'])
 		cf.initialize_constants()
-		W_optimize_Gaussian_SDG(db)
-		#W_optimize_Gaussian(db)
+		#W_optimize_Gaussian_SDG(db)
+		W_optimize_Gaussian(db)
 
 
 
@@ -63,7 +63,7 @@ def optimize_gaussian_kernel(db):
 			U_change = np.linalg.norm(db['previous_U_matrix'] - db['U_matrix'])
 			W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])
 
-			print '\t\tU change ratio : ' , U_change/matrix_mag
+			#print '\t\tU change ratio : ' , U_change/matrix_mag
 			if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
 
 
@@ -72,7 +72,7 @@ def optimize_gaussian_kernel(db):
 		loop_count += 1
 		
 		#print db['updated_magnitude']
-		print 'Loop count = ' , loop_count
+		#print 'Loop count = ' , loop_count
 		if loop_count > 10:
 			WU_converge = True
 

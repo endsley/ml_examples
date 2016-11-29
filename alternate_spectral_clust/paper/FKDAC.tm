@@ -94,10 +94,9 @@
 
   The ideal condition value is when the ratio is equal to 1 and the
   convergence rate slows down very quickly as we increase the condition value
-  beyond 10. Given this fact, we can derive the Hessian to study if the
-  convergence behavior matches experiemental observations.\ 
-
-  The Hessian for each column <math|r> has the following form :\ 
+  beyond 10. Given this fact, it would be instructive to study the Hessian
+  matrix to potentially explain the slow convergence of gradient methods. The
+  Hessian for each column <math|r> has the following form :\ 
 
   <\equation*>
     \<nabla\><rsup|2>f<around*|(|w|)>=<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
@@ -105,10 +104,49 @@
     \<sigma\><rsup|2>>><around*|[|A<rsub|i,j>-<frac|1|\<sigma\><rsup|2>>A<rsub|i,j>w<rsub|r>w<rsub|r><rsup|T>A<rsub|i,j>|]>
   </equation*>
 
-  From the Hessian, we see that the condition value depends on the summation
-  of matrix <math|A<rsub|i,j>> and <math|A<rsub|i,j>w>. At this point, let's
-  take a step back and ask how the eigenvalues of <math|A<rsub|i,j>> and
-  <math|A<rsub|i,j> w<rsub|r>> behave depending on the type of data we
+  From the Hessian matrix, we see that the condition value depends on the
+  summation of matrix <math|A<rsub|i,j>> and <math|A<rsub|i,j>w> multiplied
+  by some constant term, <math|<frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+  e<rsup|- <frac|w<rsub|r><rsup|T>A<rsub|i,j>w<rsub|r>|2
+  \<sigma\><rsup|2>>>>. From this form, it is intuitive to find clues to size
+  of the conditional value from the individual behaviors of
+  <math|A<rsub|i,j>> and <math|A<rsub|i,j>w>.\ 
+
+  \;
+
+  Due to the complexity of the Hessian form, it may be sufficiently
+  instructive to simply look for an approximation of the Hessian to study its
+  conditional value behavior. Given the problem :\ 
+
+  <\equation>
+    f<around*|(|w|)>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j> e<rsup|-
+    <frac|w<rsup|T>A<rsub|i,j>w|2 \<sigma\><rsup|2>>>
+  </equation>
+
+  We could approximate the equation (2), by using the Taylor Expansion around
+  0 up to the first order.\ 
+
+  <\equation>
+    f<around*|(|w|)>\<approx\>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
+    <around*|(|1-<frac|w<rsup|T>A<rsub|i,j>w|2\<sigma\><rsup|2>>|)>
+  </equation>
+
+  At this point, we can achieve an approximation of the Hessian by finding
+  its Hessian.\ 
+
+  <\equation*>
+    \<nabla\>f<around*|(|w|)>\<approx\><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>A<rsub|i,j>
+    w
+  </equation*>
+
+  <\equation*>
+    \<nabla\><rsup|2>f<around*|(|w|)>\<approx\><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>A<rsub|i,j>
+    </equation*>
+
+  From this form, we further simplied the Hessian by concluding the dominant
+  influence of the summation of the <math|A<rsub|i,j>> matrix. At this point,
+  let's take a step back and ask how the eigenvalues of <math|A<rsub|i,j>>
+  and <math|A<rsub|i,j> w<rsub|r>> behave depending on the type of data we
   handle. \ We first note that the <math|A<rsub|i,j>> matrix is formed with
   the following equation.
 
@@ -132,15 +170,7 @@
     condition value=<frac|eig<rsub|max><around*|(|A|)>|eig<rsub|min><around*|(|A|)>>
   </equation*>
 
-  <\with|font-series|bold>
-    Note :\ 
-
-    \ \ \ \ \ \ \ \ I would like to say that from bunch of experimental
-    results, we have shown that <math|A=<big|sum>A<rsub|i,j>> produces high
-    max min ratio. Therefore, the Hessian of our problem is ill -
-    conditioned. \ An ill condition problem, therefore, has a slow
-    convergence.\ 
-  </with>
+  \;
 
   \ \ \ \ 
 
@@ -276,3 +306,20 @@
     <associate|auto-3|<tuple|2|?>>
   </collection>
 </references>
+
+<\auxiliary>
+  <\collection>
+    <\associate|figure>
+      <tuple|normal||<pageref|auto-1>>
+    </associate>
+    <\associate|toc>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Fast
+      KDAC> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-2><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Using
+      Frank Wolfe> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-3><vspace|0.5fn>
+    </associate>
+  </collection>
+</auxiliary>
