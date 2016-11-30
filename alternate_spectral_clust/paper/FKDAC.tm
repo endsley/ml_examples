@@ -144,12 +144,17 @@
     \<nabla\><rsup|2>f<around*|(|w|)>\<approx\><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>A<rsub|i,j>
   </equation*>
 
-  From this form, we further simplied the Hessian. And the simplified Hessian
-  suggests a dominant influence of the summation of the <math|A<rsub|i,j>>
-  matrix. At this point, let's take a step back and ask how the eigenvalues
-  of <math|A<rsub|i,j>> and <math|A<rsub|i,j> w<rsub|r>> behave depending on
-  the type of data we handle. \ We first note that the <math|A<rsub|i,j>>
-  matrix is formed with the following equation.
+  From this form, we further simplied the Hessian matrix. And the simplified
+  Hessian suggests a dominant influence of the summation of the
+  <math|A<rsub|i,j>> matrix with some constant value
+  <math|\<gamma\><rsub|i,j>/\<sigma\><rsup|2>>.
+
+  \;
+
+  At this point, let's take a step back and ask how the eigenvalues of
+  <math|A<rsub|i,j>> and <math|A<rsub|i,j> w<rsub|r>> influence the
+  conditional value depending on the type of data we handle. \ We first note
+  that the <math|A<rsub|i,j>> matrix is formed with the following equation.
 
   <\equation*>
     A<rsub|i,j>=<around*|(|x<rsub|i>-x<rsub|j>|)><around*|(|x<rsub|i>-x<rsub|j>|)><rsup|T>
@@ -291,24 +296,43 @@
 
   <\equation*>
     <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
-    e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2 \<sigma\><rsup|2>>>A<rsub|i,j>
-    \ |]>+\<lambda\> |]>w<rsup|\<ast\>>=0
+    e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>A<rsub|i,j>w<rsup|\<ast\>>|2
+    \<sigma\><rsup|2>>>A<rsub|i,j> \ |]>+\<lambda\> I|]>w<rsup|\<ast\>>=0
+  </equation*>
+
+  If we let :\ 
+
+  <\equation*>
+    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>A<rsub|i,j>w<rsup|\<ast\>>|2
+    \<sigma\><rsup|2>>>A<rsub|i,j> \ |]>
+  </equation*>
+
+  We can rewrite the equation : \ 
+
+  <\equation*>
+    <around*|[|\<Phi\>+\<lambda\> I|]> w<rsup|\<ast\>>=0
   </equation*>
 
   In other words, the optimal solution <math|w<rsup|\<ast\>>> is in the null
-  space of the matrix :\ 
+  space of the matrix <math|\<Gamma\>=<around*|[|\<Phi\>+\<lambda\> I|]>>.
+  \ Or, from another perspective, we could rewrite the equation such that :
 
-  <\equation*>
-    \<Phi\>=<around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
-    e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2 \<sigma\><rsup|2>>>A<rsub|i,j>
-    \ |]>+\<lambda\> |]>
-  </equation*>
+  <\equation>
+    \<Phi\>w<rsup|\<ast\>> =-\<lambda\>w<rsup|\<ast\>>
+  </equation>
 
-  In order for the matrix <math|\<Phi\>> to have a null space,
-  <math|\<lambda\>> must be one of its eigenvalue. Unfortunately,
-  <math|w<rsup|\<ast\>>> is not know, and we do not have the matrix
-  <math|\<Phi\>>. However, it is possible to estimate the original cost
-  function to remove this requirement. We start with the Lagrangian :
+  From the equation above, <math|w<rsup|\<ast\>>> is an eigenvector of
+  <math|\<Phi\>>. \ From this perspective, it would be extremely easy to find
+  <math|w<rsup|\<ast\>>> if we know <math|\<Phi\>>. \ But, of course,
+  <math|\<Phi\>> includes the variable <math|w<rsup|\<ast\>>>. If we already
+  know <math|w<rsup|\<ast\>>>, there would be no point of finding it again.\ 
+
+  \;
+
+  To work around the requirement of <math|w<rsup|\<ast\>>> in <math|\<Phi\>>,
+  we could redefine an approximated version of the original cost function. We
+  start with the Lagrangian again :
 
   <\equation*>
     \<cal-L\>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
@@ -340,26 +364,42 @@
   </equation*>
 
   <\equation*>
-    \<nabla\><wide|f|\<bar\>><around*|(|w|)>=\<Phi\> w=0
+    <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|
+    \<sigma\><rsup|2>>A<rsub|i,j>|]> w=-\<lambda\> w
   </equation*>
 
-  If we assume to use one of the eigenvalue as <math|\<lambda\>>,
-  \ <math|\<Phi\>> is now a known matrix and therefore <math|w> is a solvable
-  variable. From this point, we are able to find an approximate of the
-  <math|w> by finding the null space of <math|\<Phi\>.> Alternatively, we
-  could also find the SVD of <math|\<Phi\>> and set <math|w<rsup|\<ast\>>> as
-  the singular vector corresponding to a 0 singular value. \ 
+  <\equation*>
+    \<Phi\> w=-\<lambda\> w
+  </equation*>
+
+  From this point, we could approximate the optimal <math|w<rsup|\<ast\>>> by
+  simply finding the eigenvector of <math|\<Phi\>>. \ To extrapolate this
+  idea to <math|W\<in\>\<bbb-R\><rsup|d\<times\>q>> instead of
+  <math|W\<in\>\<bbb-R\><rsup|d\<times\>1>>, we could simply pick <math|q>
+  eigenvectors. Since they are orthogonal with a magnitude of 1, these
+  solutions are automatically within the constraint space. Once we have found
+  the initial <math|w<rsub|k>>, we could plug it back into the original
+  gradient equation to find a better approximation of
+  <math|\<Phi\><rsub|k+1>>. Using the new <math|\<Phi\><rsub|k+1>>, we can
+  once again approximate and find <math|w<rsub|k+1>>.\ 
+
+  <\equation*>
+    eig <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|w<rsub|k><rsup|T>A<rsub|i,j>w<rsub|k>|2
+    \<sigma\><rsup|2>>>A<rsub|i,j> \ |]>=w<rsub|k+1>
+  </equation*>
 
   \;
 
-  At this point, it is reasonable to wonder that given so many singular
-  values, which singular value would be the most reasonable to pick? \ The
-  following section explores the theoretic reason to choose the singular
-  value.\ 
+  \ At this point, it is reasonable to wonder that given so many singular
+  values, which singular value would be the most reasonable to pick? \ One
+  reasonable approach is to use the greedy algorithm to find <math|q>
+  eigenvectors that produces the lowest cost. \ The following section
+  explores the theoretic motivation to choose the singular value.\ 
 
   \;
 
-  <section|Using Frank Wolfe>
+  <section|Frank Wolfe Method>
 
   We start by borrowing the idea of Frank Wolfe method by taking the 1st
   order Taylor Expansion around some <math|w<rsub|k>>.\ 
@@ -369,30 +409,72 @@
     e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
     \<sigma\><rsup|2>>>+2<around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
     e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>w<rsub|k>|]><rsup|T><around*|(|w-w<rsub|k>|)>
+    \<sigma\><rsup|2>>>A<rsub|i,j>w<rsub|k>|]><rsup|T><around*|(|w<rsub|k+1>-w<rsub|k>|)>
   </equation>
 
-  Looking at the right side of equation 3, the first term is identical to the
+  The Frank Wolfe method assume that the constraint space is convex. For our
+  case, since our constraint space is not convex, we must assume at least
+  that the constraint space is convex within a certain radius.\ 
+
+  <\equation*>
+    w\<in\>S<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|s.t>|<cell|>|<cell|S>|<cell|is>|<cell|convex>|<cell|>|<cell|\<forall\>>|<cell|>>>>><around*|\<\|\|\>|w-w<rsub|k>|\<\|\|\>>\<leq\>\<varepsilon\>
+  </equation*>
+
+  Looking at the right side of equation 6, the first term is identical to the
   current cost at <math|w<rsub|k>>. \ If we assume that higher order terms
-  are insignificant, we can achieve a lower cost as long as we pick <math|w>
-  such that the 2nd term is a negative value. Let's look at the 2nd term more
-  closely.\ 
+  are insignificant, we can achieve a lower cost as long as we pick
+  <math|w<rsub|k+1>> such that the 2nd term is a negative value. Let's look
+  at the 2nd term more closely.\ 
 
   <\equation*>
     2<around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
     e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>w<rsub|k>|]><rsup|T><around*|(|w-w<rsub|k>|)>\<leq\>0
+    \<sigma\><rsup|2>>>A<rsub|i,j>w<rsub|k>|]><rsup|T><around*|(|w<rsub|k+1>-w<rsub|k>|)>\<leq\>0
   </equation*>
 
-  We can rewrite this expression :
+  Note that <math|A<rsub|i,j>> are symmetric. We can rewrite this expression
+  :
 
-  <\equation*>
+  <\equation>
     w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
     e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>|]><rsup|T>w\<leq\>w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
+    \<sigma\><rsup|2>>>A<rsub|i,j>|]>w<rsub|k+1>\<leq\>w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
     e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>|]><rsup|T>w<rsub|k>
+    \<sigma\><rsup|2>>>A<rsub|i,j>|]>w<rsub|k>
+  </equation>
+
+  Looking at the eqution above 2 conclusions could be drawn. First, by
+  realizing that the quation :\ 
+
+  <\equation*>
+    v<rsup|T> =w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
+    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
+    \<sigma\><rsup|2>>>A<rsub|i,j>|]>
   </equation*>
+
+  is a vector, we could rewrite equation (7) as :
+
+  <\equation*>
+    v<rsup|T> w<rsub|k+1>\<leq\>v <rsup|T>w<rsub|k>
+  </equation*>
+
+  The first conclusion, we could draw is that if <math|v<rsup|T>w<rsub|k+1>>
+  \ is minimized when <math|w<rsub|k+1>=-v>. From this, approach, we can
+  iteratively pick <math|w<rsub|k+1>> by setting <math|w<rsub|k+1>=-v>. This
+  approach allows us to iterate towards convergence, however, it would be
+  faster to simply approximate the solution at convergence. The second
+  conclusion requires us to realize that at convergence,
+  <math|w<rsub|k>=w<rsub|k+1>>. \ Therefore, we could approximate the
+  solution at convergence by minimizing the left hand side of (7) assuming
+  convergence.\ 
+
+  <\equation*>
+    <tabular|<tformat|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k+1><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
+    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
+    \<sigma\><rsup|2>>>A<rsub|i,j>|]>w<rsub|k+1>
+  </equation*>
+
+  From this perspective, we\ 
 </body>
 
 <\initial>
@@ -416,15 +498,19 @@
   <\collection>
     <\associate|figure>
       <tuple|normal||<pageref|auto-1>>
+
+      <tuple|normal||<pageref|auto-2>>
+
+      <tuple|normal||<pageref|auto-3>>
     </associate>
     <\associate|toc>
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Fast
       KDAC> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-2><vspace|0.5fn>
+      <no-break><pageref|auto-4><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Using
       Frank Wolfe> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-3><vspace|0.5fn>
+      <no-break><pageref|auto-5><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
