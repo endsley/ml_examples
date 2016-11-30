@@ -1,6 +1,6 @@
 <TeXmacs|1.0.7.18>
 
-<style|generic>
+<style|<tuple|generic|american>>
 
 <\body>
   <doc-data|<doc-title|Fast KDAC>>
@@ -469,17 +469,99 @@
   convergence.\ 
 
   <\equation*>
-    <tabular|<tformat|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k+1><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
+    <tabular|<tformat|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>f<around*|(|w|)>=<tabular|<tformat|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k+1><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
     e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
     \<sigma\><rsup|2>>>A<rsub|i,j>|]>w<rsub|k+1>
   </equation*>
 
-  From this perspective, we\ 
+  From this perspective, we realize that the FKDAC approximation is
+  simultaneously approximating the convergence point of the Frank Wolfe
+  Method. Except in Frank Wolfe, it provides an objective of minimizing
+  <math|f<around*|(|w|)>>. This insight tells us that the best eigenvectors
+  to represent <math|w<rsup|\<ast\>>> should correspond to the smallest
+  eigenvalue of the matrix :
+
+  <\equation*>
+    <around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
+    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
+    \<sigma\><rsup|2>>>A<rsub|i,j>|]>\<approx\><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
+    A<rsub|i,j>|]>
+  </equation*>
+
+  <\equation*>
+    \;
+  </equation*>
+
+  <section|Optimality condition>
+
+  The Frank Wolfe method corresponds directly with the optimality condition
+  with a convex constrained space. Given a problem of :
+
+  <\equation*>
+    <tabular|<tformat|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|min>|<cell|f<around*|(|x|)>>>|<row|<cell|x\<in\>X>|<cell|>>>>>
+  </equation*>
+
+  We know that given <math|x<rsup|\<ast\>>> as a local minimum in a convex
+  constrained space of <math|X>, the following condition must be satisfied.\ 
+
+  <\equation*>
+    \<nabla\>f<around*|(|x<rsup|\<ast\>>|)><rsup|T><around*|(|x-x<rsup|\<ast\>>|)>\<geq\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>\<forall\>
+    x\<in\>X
+  </equation*>
+
+  Given that we have a non-convex constraint space, we must make a more
+  strict assumption that :
+
+  <\equation*>
+    \<nabla\>f<around*|(|x<rsup|\<ast\>>|)><rsup|T><around*|(|x-x<rsup|\<ast\>>|)>\<geq\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>\<forall\>
+    x\<in\>X<tabular|<tformat|<table|<row|<cell|>|<cell|and>|<cell|>>>>><around*|\<\|\|\>|x-x<rsup|\<ast\>>|\<\|\|\>>\<leq\>\<varepsilon\>
+  </equation*>
+
+  Given a function of :
+
+  <\equation*>
+    f<around*|(|w|)>=-<big|sum>\<gamma\><rsub|i,j>e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2
+    \<sigma\><rsup|2>>>
+  </equation*>
+
+  We create an approximate of the function :\ 
+
+  <\equation*>
+    f<around*|(|w|)>\<approx\>-<big|sum>\<gamma\><rsub|i,j><around*|(|1-<frac|1|2\<sigma\><rsup|2>>w<rsup|T>A<rsub|i,j>w|)>
+  </equation*>
+
+  From the approximation, we find the gradient :\ 
+
+  <\equation*>
+    \<nabla\>f<around*|(|w|)>\<approx\><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>A<rsub|i,j>w
+  </equation*>
+
+  Using the approximated gradient, we could now check for the optimality
+  condition.\ 
+
+  <\equation*>
+    w<rsup|\<ast\>T><around*|[|<big|sum>\<gamma\><rsub|i,j>A<rsub|i,j>|]><rsup|T><around*|(|w-w<rsup|\<ast\>>|)>\<geq\>0
+  </equation*>
+
+  <\equation*>
+    w<rsup|\<ast\><rsup|T>><around*|[|<big|sum>\<gamma\><rsub|i,j>A<rsub|i,j>|]><rsup|T>w\<geq\>w<rsup|\<ast\>><around*|[|<big|sum>\<gamma\><rsub|i,j>A<rsub|i,j>|]><rsup|T>w<rsup|\<ast\>>
+  </equation*>
+
+  From the equation above, we see that in order for <math|w<rsup|\<ast\>>> to
+  be a local minimum, <math|w<rsup|\<ast\>>> must be chosen such that the
+  left hand side is always larger than the right hand side for any <math|w>.
+  This is only possible when <math|w<rsup|\<ast\>>> is the least dominant
+  eigenvector of <math|<big|sum>\<gamma\><rsub|i,j>A<rsub|i,j>> matrix. \ 
+
+  \;
+
+  From this perspective, we conclude that picking the least dominant
+  eigenvector is a reasonable approximation for the local minimum of the
+  original cost function.
 </body>
 
 <\initial>
   <\collection>
-    <associate|language|american>
     <associate|page-type|letter>
   </collection>
 </initial>
@@ -491,6 +573,7 @@
     <associate|auto-3|<tuple|3|?>>
     <associate|auto-4|<tuple|1|?>>
     <associate|auto-5|<tuple|2|?>>
+    <associate|auto-6|<tuple|3|?>>
   </collection>
 </references>
 
@@ -508,9 +591,13 @@
       KDAC> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-4><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Using
-      Frank Wolfe> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Frank
+      Wolfe Method> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-5><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Optimality
+      condition> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-6><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
