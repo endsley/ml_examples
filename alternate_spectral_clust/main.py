@@ -29,9 +29,9 @@ np.set_printoptions(linewidth=300)
 #import test_6_alternative
 #import test_7_polynomial
 #import test_7_polynomial
-#import test_8
+import test_8
 #import test_9
 #import test_10
 #import test_11
-import test_12
+#import test_12
 #import gene_data_test

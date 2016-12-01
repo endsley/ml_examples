@@ -33,9 +33,11 @@ def optimize_gaussian_kernel(db):
 	db['cf'] = cf
 
 	while WU_converge == False: 	
-
+		print 'a'
 		if db['data_type'] == 'Feature Matrix': 
+			print 'b'
 			db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
+			print 'c'
 			db['D_matrix'] = cf.create_D_matrix(db['Kernel_matrix'])
 			#calc_gaussian_kernel(db)	#-> calculates the same thing, but other is more efficient
 
@@ -44,6 +46,7 @@ def optimize_gaussian_kernel(db):
 			db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
 
 
+		print 'd'
 		U_optimize(db)
 
 
