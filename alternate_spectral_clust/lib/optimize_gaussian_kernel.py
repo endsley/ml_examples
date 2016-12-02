@@ -42,10 +42,7 @@ def optimize_gaussian_kernel(db):
 			db['Kernel_matrix'] = db['data']
 			db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
 
-
-		print 'd'
 		U_optimize(db)
-
 
 		if db['prev_clust'] == 0: return
 		#print '\nAfter U cost : ' , cf.calc_cost_function(db['W_matrix'])

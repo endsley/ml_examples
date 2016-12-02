@@ -14,27 +14,35 @@ import time
 from cost_function import *
 import matplotlib.pyplot as plt
 from Y_2_allocation import *
+import matplotlib 
+colors = matplotlib.colors.cnames
 
 #np.set_printoptions(suppress=True)
 data = genfromtxt('data_sets/data_4.csv', delimiter=',')
 Y_original = genfromtxt('data_sets/data_4_Y_original.csv', delimiter=',')
+U_original = genfromtxt('data_sets/data_4_U_original.csv', delimiter=',')
 
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
 
-if False: #	Calculating the original clustering
+if True: #	Calculating the original clustering
 	ASC.set_values('q',1)
 	ASC.set_values('C_num',2)
 	ASC.set_values('sigma',1)
 	ASC.set_values('kernel_type','Gaussian Kernel')
 	ASC.run()
 	a = db['allocation']
-else: #	Predefining the original clustering
+	
+	#np.savetxt('data_4_U_original.csv', db['U_matrix'], delimiter=',', fmt='%d')
+
+else: #	Predefining the original clustering, the following are the required settings
 	ASC.set_values('q',1)
 	ASC.set_values('C_num',2)
 	ASC.set_values('sigma',1)
 	ASC.set_values('kernel_type','Gaussian Kernel')
+	ASC.set_values('W_matrix',np.identity(db['d']))
+
 	db['Y_matrix'] = Y_original
 	db['U_matrix'] = Y_original
 	db['prev_clust'] = 1
@@ -69,10 +77,11 @@ plt.title('data_4.csv original plot')
 
 #plt.figure(2)
 plt.subplot(312)
-group1 = X[a == 1]
-group2 = X[a == 2]
-plt.plot(group1[:,0], group1[:,1], 'bo')
-plt.plot(group2[:,0], group2[:,1], 'ro')
+idx = np.unique(a)
+for mm in idx:
+	subgroup = X[a == mm]
+	plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.title('Original Clustering by FKDAC')
