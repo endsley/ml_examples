@@ -55,6 +55,7 @@ else: #	Predefining the original clustering, the following are the required sett
 start_time = time.time() 
 ASC.run()
 b = db['allocation']
+
 #print 'Alternate allocation :', b
 #print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -65,38 +66,96 @@ b = db['allocation']
 #print db['Y_matrix']
 
 
+if False:	#	plot the clustering result
+	X = db['data']
+	plt.figure(1)
+	
+	plt.subplot(311)
+	plt.plot(X[:,0], X[:,1], 'bo')
+	plt.xlabel('Feature 1')
+	plt.ylabel('Feature 2')
+	plt.title('data_4.csv original plot')
+	
+	#plt.figure(2)
+	plt.subplot(312)
+	idx = np.unique(a)
+	for mm in idx:
+		subgroup = X[a == mm]
+		plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+	plt.xlabel('Feature 1')
+	plt.ylabel('Feature 2')
+	plt.title('Original Clustering by FKDAC')
+	
+	
+	plt.subplot(313)
+	idx = np.unique(b)
+	for mm in idx:
+		subgroup = X[b == mm]
+		plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+	plt.xlabel('Feature 1')
+	plt.ylabel('Feature 2')
+	plt.title('Alternative Clustering by FKDAC')
+	
+	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+	plt.show()
 
-X = db['data']
-plt.figure(1)
-
-plt.subplot(311)
-plt.plot(X[:,0], X[:,1], 'bo')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('data_4.csv original plot')
-
-#plt.figure(2)
-plt.subplot(312)
-idx = np.unique(a)
-for mm in idx:
-	subgroup = X[a == mm]
-	plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
-
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('Original Clustering by FKDAC')
 
 
-plt.subplot(313)
-group1 = X[b == 1]
-group2 = X[b == 2]
-plt.plot(group1[:,0], group1[:,1], 'bo')
-plt.plot(group2[:,0], group2[:,1], 'ro')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('Alternative Clustering by FKDAC')
+if False:	# save or load db to and from a pickle file
+	plot_info = {}
+	plot_info['debug_costVal'] = db['debug_costVal']
+	plot_info['debug_gradient'] = db['debug_gradient']
+	plot_info['debug_debug_Wchange'] = db['debug_debug_Wchange']
+	pickle.dump( plot_info, open( "tmp_db.pk", "wb" ) )
 
-plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
-plt.show()
+
+	#db= pickle.load( open( "tmp_db.pk", "rb" ) )
+
+
+
+if True:	# plot the W convergence results
+	X = db['data']
+	plt.figure(2)
+	
+	plt.suptitle('data_4.csv',fontsize=24)
+	plt.subplot(311)
+	inc = 0
+	for costs in db['debug_costVal']: 
+		xAxis = np.array(range(len(costs))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, costs, 'b')
+		plt.plot(inc, costs[-1], 'bo', markersize=10)
+		plt.title('Cost vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('cost')
+		
+	plt.subplot(312)
+	inc = 0
+	for gradient in db['debug_gradient']: 
+		xAxis = np.array(range(len(gradient))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, gradient, 'b')
+		plt.plot(inc, gradient[-1], 'bo', markersize=10)
+		plt.title('Gradient vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('gradient')
+
+
+	plt.subplot(313)
+	inc = 0
+	for wchange in db['debug_debug_Wchange']: 
+		xAxis = np.array(range(len(wchange))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, wchange, 'b')
+		plt.plot(inc, wchange[-1], 'bo', markersize=10)
+		plt.title('|w_old - w_new|/|w| vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('|w_old - w_new|/|w| ')
+
+	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+	plt.subplots_adjust(top=0.85)
+	plt.show()
+
+
 
 import pdb; pdb.set_trace()

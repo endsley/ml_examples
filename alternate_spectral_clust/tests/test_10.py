@@ -15,66 +15,124 @@ from cost_function import *
 import matplotlib.pyplot as plt
 
 
-data = genfromtxt('data_sets/moon.csv', delimiter=',')		
-#data = genfromtxt('data_sets/moon_164x7.csv', delimiter=',')		
+#data = genfromtxt('data_sets/moon.csv', delimiter=',')		
+data = genfromtxt('data_sets/moon_164x7.csv', delimiter=',')		
 
+#	Constructor
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
 
+
+#	Run the original clustering
 ASC.set_values('q',2)
 ASC.set_values('C_num',2)
 ASC.set_values('sigma',2)
 ASC.set_values('kernel_type','Gaussian Kernel')
-
 ASC.run()
 a = db['allocation']
 
 
+#	Run the alternative clustering
 ASC.set_values('sigma',0.3)
 start_time = time.time() 
 ASC.run()
-print("--- %s seconds ---" % (time.time() - start_time))
+db['run_alternative_time'] = (time.time() - start_time)
+print("--- %s seconds ---" % db['run_alternative_time'])
 b = db['allocation']
 
-X = db['data']
-
-plt.figure(1)
-
-plt.subplot(221)
-plt.plot(X[:,0], X[:,1], 'bo')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('Moon dataset')
-
-plt.subplot(222)
-plt.plot(X[:,2], X[:,3], 'bo')
-plt.xlabel('Feature 3')
-plt.ylabel('Feature 4')
-plt.title('Moon dataset')
 
 
-#plt.figure(2)
-plt.subplot(224)
-group1 = X[a == 1]
-group2 = X[a == 2]
-plt.plot(group1[:,2], group1[:,3], 'bo')
-plt.plot(group2[:,2], group2[:,3], 'ro')
-plt.xlabel('Feature 3')
-plt.ylabel('Feature 4')
-plt.title('Original Clustering by FKDAC')
+if False:	# plot the clustering results
+	X = db['data']
+	plt.figure(1)
+	
+	plt.subplot(221)
+	plt.plot(X[:,0], X[:,1], 'bo')
+	plt.xlabel('Feature 1')
+	plt.ylabel('Feature 2')
+	plt.title('Moon dataset')
+	
+	plt.subplot(222)
+	plt.plot(X[:,2], X[:,3], 'bo')
+	plt.xlabel('Feature 3')
+	plt.ylabel('Feature 4')
+	plt.title('Moon dataset')
+	
+	
+	#plt.figure(2)
+	plt.subplot(224)
+	group1 = X[a == 1]
+	group2 = X[a == 2]
+	plt.plot(group1[:,2], group1[:,3], 'bo')
+	plt.plot(group2[:,2], group2[:,3], 'ro')
+	plt.xlabel('Feature 3')
+	plt.ylabel('Feature 4')
+	plt.title('Original Clustering by FKDAC')
+	
+	
+	plt.subplot(223)
+	group1 = X[b == 1]
+	group2 = X[b == 2]
+	plt.plot(group1[:,0], group1[:,1], 'bo')
+	plt.plot(group2[:,0], group2[:,1], 'ro')
+	plt.xlabel('Feature 1')
+	plt.ylabel('Feature 2')
+	plt.title('Alternative Clustering by FKDAC')
+	
+	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+	plt.show()
 
 
-plt.subplot(223)
-group1 = X[b == 1]
-group2 = X[b == 2]
-plt.plot(group1[:,0], group1[:,1], 'bo')
-plt.plot(group2[:,0], group2[:,1], 'ro')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('Alternative Clustering by FKDAC')
 
-plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
-plt.show()
+if True:	# plot the W convergence results
+	X = db['data']
+	plt.figure(2)
+	
+	plt.suptitle('The moon experiment with 3 dimension Noise',fontsize=24)
+	plt.subplot(311)
+	inc = 0
+	for costs in db['debug_costVal']: 
+		xAxis = np.array(range(len(costs))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, costs, 'b')
+		plt.plot(inc, costs[-1], 'bo', markersize=10)
+		plt.title('Cost vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('cost')
+		
+	plt.subplot(312)
+	inc = 0
+	for gradient in db['debug_gradient']: 
+		xAxis = np.array(range(len(gradient))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, gradient, 'b')
+		plt.plot(inc, gradient[-1], 'bo', markersize=10)
+		plt.title('Gradient vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('gradient')
+
+
+	plt.subplot(313)
+	inc = 0
+	for wchange in db['debug_debug_Wchange']: 
+		xAxis = np.array(range(len(wchange))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, wchange, 'b')
+		plt.plot(inc, wchange[-1], 'bo', markersize=10)
+		plt.title('|w_old - w_new|/|w| vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('|w_old - w_new|/|w| ')
+
+	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+	plt.subplots_adjust(top=0.85)
+	plt.show()
+
+
+
+	#self.db['debug_costVal'] = []
+	#self.db['debug_gradient'] = []
+	#self.db['debug_debug_Wchange'] = []
+
 
 import pdb; pdb.set_trace()

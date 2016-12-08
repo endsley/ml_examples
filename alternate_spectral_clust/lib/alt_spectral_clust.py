@@ -37,7 +37,6 @@ class alt_spectral_clust:
 		#self.db['kernel_type'] = 'Linear Kernel'
 		self.db['data_type'] = 'Feature Matrix'
 
-
 		#outputs from U_optimize
 		self.db['D_matrix'] = np.array([])
 		self.db['U_matrix'] = np.array([])	
@@ -51,7 +50,10 @@ class alt_spectral_clust:
 		self.db['maximum_W_update_count'] = 400
 		self.db['data'] = data_set
 
-
+		# debug db
+		self.db['debug_costVal'] = []
+		self.db['debug_gradient'] = []
+		self.db['debug_debug_Wchange'] = []
 
 
 	def set_values(self, key, val):

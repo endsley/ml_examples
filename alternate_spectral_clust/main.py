@@ -8,7 +8,14 @@
 
 import sys
 sys.path.append('./tests')
-import numpy as np
+try: import numpy as np
+except: 'numpy is missing from the python library, please import it first'
+try: import matplotlib
+except: 'matplotlib is missing from the python library, please import it first'
+try: import sklearn
+except: 'sklearn is missing from the python library, please import it first'
+try: import scipy
+except: 'scipy is missing from the python library, please import it first'
 
 #	numpy settings
 np.set_printoptions(precision=4)

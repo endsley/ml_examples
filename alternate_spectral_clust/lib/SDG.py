@@ -20,8 +20,32 @@ class SDG:
 		self.sigma2 = np.power(db['sigma'],2)
 		self.gamma_array = None
 
+		self.costVal_list = []
+		self.gradient_list = []
+		self.Wchange_list = []
+
 		self.y_tilde = None
 		self.W = None
+
+		self.debug_mode = True
+
+	def run_debug_1(self, new_gradient_mag, new_cost, lowest_cost, exit_condition):
+		if self.debug_mode:
+			self.costVal_list.append(new_cost)
+			self.gradient_list.append(new_gradient_mag)
+			self.Wchange_list.append(exit_condition)
+	
+			print 'Sum(Aw) : ' , new_gradient_mag, 'New cost :', new_cost, 'lowest Cost :' , lowest_cost, 'Exit cond :' , exit_condition 
+
+	def run_debug_2(self, db, lowest_gradient, lowest_cost):
+		if self.debug_mode:
+			print 'Best : '
+			print 'Gradient ' , lowest_gradient
+			print 'Cost  ' , lowest_cost
+
+			self.db['debug_costVal'].append(self.costVal_list)
+			self.db['debug_gradient'].append(self.gradient_list)
+			self.db['debug_debug_Wchange'].append(self.Wchange_list)
 
 
 	def check_positive_hessian(self, w):
@@ -96,7 +120,7 @@ class SDG:
 
 			#pdb.set_trace()
 			#new_cost = -db['cf'].calc_cost_function(W)
-			cost_ratio = np.abs(new_cost - db['lowest_cost'])/np.abs(new_cost)
+			#cost_ratio = np.abs(new_cost - db['lowest_cost'])/np.abs(new_cost)
 
 			exit_condition = np.linalg.norm(W - db['W_matrix'])/np.linalg.norm(W)
 			if(new_cost < db['lowest_cost']):
@@ -106,15 +130,15 @@ class SDG:
 				db['W_matrix'] = W
 				#import pdb; pdb.set_trace()
 
-			print 'Sum(Aw) : ' , new_gradient_mag, 'New cost :', new_cost, 'lowest Cost :' , db['lowest_cost'], 'Exit cond :' , exit_condition , 'Cost ratio : ' , cost_ratio
+
+			self.run_debug_1(new_gradient_mag, new_cost, db['lowest_cost'], exit_condition)
 			if exit_condition < 0.0001: break;
 			#except: pass
 
 
 
-		print 'Best : '
-		print 'Gradient ' , db['lowest_gradient'] 
-		print 'Cost  ' , db['lowest_cost']
+		self.run_debug_2(db, db['lowest_gradient'], db['lowest_cost'])
+
 		self.W = db['W_matrix']
 		return db['W_matrix']
 
