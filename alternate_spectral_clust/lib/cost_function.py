@@ -115,6 +115,7 @@ class cost_function:
 
 		for i in self.iv:
 			for j in self.jv:
+				#print i, j
 				Aw = self.get_Aw(i,j, W)
 				kernel[i][j] = np.exp(np.sum(-W*Aw)/(2*self.sigma2))
 

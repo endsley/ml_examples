@@ -55,7 +55,7 @@ class SDG:
 		use_frank = False
 		new_cost = float("inf")
 
-		for m in range(10):
+		for m in range(20):
 			matrix_sum = db['cf'].create_gamma_exp_A(W)
 
 			#if(new_cost == db['lowest_cost']):
@@ -63,9 +63,6 @@ class SDG:
 			#		db['lowest_cost'] = new_cost
 			#		db['lowest_gradient'] = new_gradient
 			#		db['W_matrix'] = W
-
-
-
 
 			new_gradient = matrix_sum.dot(W)
 			new_gradient_mag = np.sum(new_gradient)
@@ -84,16 +81,16 @@ class SDG:
 			W = np.fliplr(U)[:,0:self.q]
 			W_max = U[:,0:self.q]
 	
-			cost_W_max = -db['cf'].calc_cost_function(W_max)
+			#cost_W_max = -db['cf'].calc_cost_function(W_max)
 			new_cost = -db['cf'].calc_cost_function(W)
 
-			if cost_W_max < new_cost:
-				print 'W max wins'
-				W = W_max
-				new_cost = cost_W_max
-			else:
-				pass
-				#print 'W max loses'
+			#if cost_W_max < new_cost:
+			#	print 'W max wins'
+			#	W = W_max
+			#	new_cost = cost_W_max
+			#else:
+			#	pass
+			#	#print 'W max loses'
 
 
 

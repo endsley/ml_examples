@@ -13,22 +13,41 @@ import sklearn
 import time 
 from cost_function import *
 import matplotlib.pyplot as plt
+from Y_2_allocation import *
+import matplotlib 
+colors = matplotlib.colors.cnames
 
 #np.set_printoptions(suppress=True)
 data = genfromtxt('data_sets/data_4.csv', delimiter=',')
-#data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')		# -0.0858 , -0.9
+Y_original = genfromtxt('data_sets/data_4_Y_original.csv', delimiter=',')
+U_original = genfromtxt('data_sets/data_4_U_original.csv', delimiter=',')
 
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
 
-ASC.set_values('q',1)
-ASC.set_values('C_num',2)
-ASC.set_values('sigma',1)
-ASC.set_values('kernel_type','Gaussian Kernel')
-ASC.run()
-a = db['allocation']
-print 'Original allocation :' , a
+if True: #	Calculating the original clustering
+	ASC.set_values('q',1)
+	ASC.set_values('C_num',2)
+	ASC.set_values('sigma',1)
+	ASC.set_values('kernel_type','Gaussian Kernel')
+	ASC.run()
+	a = db['allocation']
+	
+	#np.savetxt('data_4_U_original.csv', db['U_matrix'], delimiter=',', fmt='%d')
+
+else: #	Predefining the original clustering, the following are the required settings
+	ASC.set_values('q',1)
+	ASC.set_values('C_num',2)
+	ASC.set_values('sigma',1)
+	ASC.set_values('kernel_type','Gaussian Kernel')
+	ASC.set_values('W_matrix',np.identity(db['d']))
+
+	db['Y_matrix'] = Y_original
+	db['U_matrix'] = Y_original
+	db['prev_clust'] = 1
+	db['allocation'] = Y_2_allocation(Y_original)
+	a = db['allocation']
 
 #b = np.concatenate((np.zeros(200), np.ones(200)))
 #print "NMI : " , normalized_mutual_info_score(a,b)
@@ -36,9 +55,8 @@ print 'Original allocation :' , a
 start_time = time.time() 
 ASC.run()
 b = db['allocation']
-print 'Alternate allocation :', b
-
-print("--- %s seconds ---" % (time.time() - start_time))
+#print 'Alternate allocation :', b
+#print("--- %s seconds ---" % (time.time() - start_time))
 
 #print "NMI : " , normalized_mutual_info_score(a,b)
 #g_truth = np.concatenate((np.ones(100), np.zeros(100),np.ones(100), np.zeros(100)))
@@ -49,7 +67,6 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 
 X = db['data']
-
 plt.figure(1)
 
 plt.subplot(311)
@@ -60,10 +77,11 @@ plt.title('data_4.csv original plot')
 
 #plt.figure(2)
 plt.subplot(312)
-group1 = X[a == 1]
-group2 = X[a == 2]
-plt.plot(group1[:,0], group1[:,1], 'bo')
-plt.plot(group2[:,0], group2[:,1], 'ro')
+idx = np.unique(a)
+for mm in idx:
+	subgroup = X[a == mm]
+	plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.title('Original Clustering by FKDAC')
