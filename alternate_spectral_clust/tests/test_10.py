@@ -43,7 +43,7 @@ b = db['allocation']
 
 
 
-if False:	# plot the clustering results
+if True:	# plot the clustering results
 	X = db['data']
 	plt.figure(1)
 	

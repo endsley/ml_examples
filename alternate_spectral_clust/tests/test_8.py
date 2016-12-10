@@ -66,7 +66,7 @@ b = db['allocation']
 #print db['Y_matrix']
 
 
-if False:	#	plot the clustering result
+if True:	#	plot the clustering result
 	X = db['data']
 	plt.figure(1)
 	

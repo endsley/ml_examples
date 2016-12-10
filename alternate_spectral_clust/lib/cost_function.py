@@ -35,6 +35,7 @@ class cost_function:
 			self.create_A()
 		except:
 			self.A_memory_feasible = False
+			raise
 
 
 	def initialize_constants(self):

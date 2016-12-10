@@ -274,8 +274,42 @@
   \;
 
   A standard approach to find the optimal solution is to set the derivative
-  of the Lagrangian to zero and solve for <math|w>. This could be written as
+  of the Lagrangian to zero and solve for <math|w>. According to Bertsekas,
+  the first order necessary condition of the Lagrange Multipliers states that
   :\ 
+
+  <\proposition>
+    Let <math|x<rsup|\<ast\>>> be a local minimum of f s.t h(x)=0, and assume
+    that the constraint gradient <math|\<nabla\>h<rsub|1><around*|(|x<rsup|\<ast\>>|)>,
+    \<nabla\>h<rsub|2><around*|(|x<rsup|\<ast\>>|)>,\<ldots\>> are linearly
+    independent. Then there exists a unique vector
+    <math|\<lambda\><rsup|\<ast\>>=<around*|(|\<lambda\><rsub|1><rsup|\<ast\>>,\<lambda\><rsub|2><rsup|\<ast\>>,\<ldots\>,|)>>,
+    called the Lagrange multiplier such that :\ 
+
+    <\equation*>
+      \<nabla\>f<around*|(|x<rsup|\<ast\>>|)>+<big|sum><rsub|i=1><rsup|m>
+      \<lambda\><rsup|\<ast\>><rsub|i>\<nabla\>h<rsub|i><around*|(|x<rsup|\<ast\>>|)>=0
+    </equation*>
+  </proposition>
+
+  \;
+
+  Notice that the only assumption of the Lagrange multiplier theorem is the
+  linear independence of constraint functions. In our case, since the
+  constraint is :\ 
+
+  <\equation*>
+    h<around*|(|w|)>=w<rsup|T>w-1=0
+  </equation*>
+
+  <\equation*>
+    \<nabla\>h<around*|(|w|)>=2 w
+  </equation*>
+
+  In the single vector case, the constraint gradient produces only a single
+  vector, and therefore the independence is automatically satisfied. Given
+  that we meet the assumption, we can apply the theorem on our problem and
+  yield :\ 
 
   <\equation*>
     \<cal-L\>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
@@ -292,7 +326,7 @@
   \;
 
   Let's for a moment assume that we magically know the optimal solution,
-  <math|w<rsup|\<ast\>>>, then the problem could also be rewritten as :\ 
+  <math|w<rsup|\<ast\>>>, then the problem could be rewritten as :\ 
 
   <\equation*>
     <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
@@ -509,8 +543,12 @@
     x\<in\>X
   </equation*>
 
-  Given that we have a non-convex constraint space, we must make a more
-  strict assumption that :
+  Given that we have a non-convex constraint space, we must make more strict
+  assumptions. Suppose <math|x<rsup|\<ast\>>> is a local minimum within a
+  ball defined as <math|\<cal-B\><around*|(|x,\<varepsilon\>|)>\<assign\><around*|{|x:<around*|\<\|\|\>|x-x<rsup|\<ast\>>|\<\|\|\>>\<less\>\<varepsilon\>|}>>.
+  Assume <math|\<cal-B\><around*|(|x,\<varepsilon\>|)>\<cap\>X> is convex and
+  <math|f> is convex within <math|\<cal-B\><around*|(|x,\<varepsilon\>|)>\<cap\>X>,
+  then we state the following as the optimality condition.\ 
 
   <\equation*>
     \<nabla\>f<around*|(|x<rsup|\<ast\>>|)><rsup|T><around*|(|x-x<rsup|\<ast\>>|)>\<geq\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>\<forall\>
