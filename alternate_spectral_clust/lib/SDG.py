@@ -102,19 +102,20 @@ class SDG:
 			#matrix_sum = matrix_sum.dot(matrix_sum)
 
 			[U,S,V] = np.linalg.svd(matrix_sum)
-			W = -np.fliplr(U)[:,0:self.q]
-			#W_max = U[:,0:self.q]
+			W = np.fliplr(U)[:,0:self.q]
 	
-			#cost_W_max = -db['cf'].calc_cost_function(W_max)
 			new_cost = -db['cf'].calc_cost_function(W)
 
-			#if cost_W_max < new_cost:
-			#	print 'W max wins'
-			#	W = W_max
-			#	new_cost = cost_W_max
-			#else:
-			#	pass
-			#	#print 'W max loses'
+			if False:	# also check for max
+				W_max = U[:,0:self.q]
+				cost_W_max = -db['cf'].calc_cost_function(W_max)
+				if cost_W_max < new_cost:
+					print 'W max wins'
+					W = W_max
+					new_cost = cost_W_max
+				else:
+					pass
+					#print 'W max loses'
 
 
 

@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 data = genfromtxt('data_sets/facial.csv', delimiter=',')		
 label = genfromtxt('data_sets/facial_true_labels.csv', delimiter=',')		
 sunglass_label = genfromtxt('data_sets/facial_sunglasses_labels.csv', delimiter=',')		
+pose_label = genfromtxt('data_sets/facial_pose_labels.csv', delimiter=',')		
 original_Y = genfromtxt('data_sets/facial_original_Y.csv', delimiter=',')		
 name_file = open('data_sets/facial_names.csv', 'r')
 
@@ -47,14 +48,15 @@ if True: 		# run preset original clustering
 
 if True:	# run alternative clustering
 	ASC.set_values('q',10)
-	ASC.set_values('sigma',80)
+	ASC.set_values('sigma',20)
 	ASC.set_values('C_num',4)
-	ASC.set_values('lambda',2)
+	ASC.set_values('lambda',1)
 	start_time = time.time() 
 	ASC.run()
 	print("--- %s seconds ---" % (time.time() - start_time))
 	alternative = db['allocation']	
 	print "Alternative aginst original: " , normalized_mutual_info_score(label, alternative)
+	print "Alternative aginst truth : " , normalized_mutual_info_score(pose_label, alternative)
 	
 
 ##print "NMI Against Sunglasses label : " , normalized_mutual_info_score(sunglass_label,alternative)
@@ -65,7 +67,7 @@ if True:	# run alternative clustering
 #print names[alternative == 4].shape
 #
 ##for m in names[original== 1]: print m, 
-for m in names[alternative == 1]: print m, 
+#for m in names[alternative == 1]: print m, 
 ##for m in names[alternative == 2]: print m, 
 
 
