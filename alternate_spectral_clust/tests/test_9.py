@@ -74,7 +74,6 @@ if True:	#	Plot clustering results
 	plt.show()
 
 
-
 if False:	# save or load db to and from a pickle file
 	plot_info = {}
 	plot_info['debug_costVal'] = db['debug_costVal']
