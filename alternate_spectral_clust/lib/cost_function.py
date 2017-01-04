@@ -8,6 +8,7 @@ from create_y_tilde import *
 from create_gamma_ij import *
 from StringIO import StringIO
 from scipy.optimize import minimize
+import time 
 
 
 class cost_function:
@@ -110,6 +111,17 @@ class cost_function:
 		return d_matrix
 
 	def create_Kernel(self, W):
+		db = self.db
+		sigma = db['sigma']
+		X = db['data'].dot(W)
+		gamma_V = 1.0/(2*np.power(sigma,2))
+		kernel = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma_V)
+		return kernel
+
+
+
+#	Deprecated version
+	def create_Kernel_depr(self, W):
 		db = self.db
 		self.create_Aw(W)
 		kernel = np.zeros((db['N'], db['N']))

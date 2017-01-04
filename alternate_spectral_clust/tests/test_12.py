@@ -15,8 +15,8 @@ from cost_function import *
 import matplotlib.pyplot as plt
 
 
-#data = genfromtxt('data_sets/facial_960.csv', delimiter=',')		
-data = genfromtxt('data_sets/facial.csv', delimiter=',')		
+data = genfromtxt('data_sets/facial_960.csv', delimiter=',')		
+#data = genfromtxt('data_sets/facial.csv', delimiter=',')		
 label = genfromtxt('data_sets/facial_true_labels.csv', delimiter=',')		
 sunglass_label = genfromtxt('data_sets/facial_sunglasses_labels.csv', delimiter=',')		
 pose_label = genfromtxt('data_sets/facial_pose_labels.csv', delimiter=',')		

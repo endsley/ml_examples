@@ -13,6 +13,7 @@ import sklearn
 import time 
 from cost_function import *
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')	
@@ -33,15 +34,16 @@ if True:	#	initial clustering
 	print "NMI : " , normalized_mutual_info_score(a,b)
 
 if True:	#	Alterntive clustering
-	start_time = time.time() 
 	ASC.set_values('sigma',1)
+
+	start_time = time.time() 
 	ASC.run()
-	b = db['allocation']
-	print 'Alternate allocation :', b
 	print("--- %s seconds ---" % (time.time() - start_time))
 	print "NMI : " , normalized_mutual_info_score(a,b)
 	g_truth = np.concatenate((np.ones(100), np.zeros(100),np.ones(100), np.zeros(100)))
 	print "NMI : " , normalized_mutual_info_score(b,g_truth)
+	b = db['allocation']
+	print 'Alternate allocation :', b
 
 
 

@@ -3,7 +3,6 @@ import numpy as np
 from calc_gaussian_kernel import *
 from U_optimize import *
 from objective_magnitude import *
-from calc_cost import *
 from cost_function import *
 
 #	You must comment out one of the method and keep the other

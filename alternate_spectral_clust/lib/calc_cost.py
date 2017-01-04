@@ -1,5 +1,6 @@
 from create_gamma_ij import *
 		
+#	This is deprecated function
 
 def calc_cost_function(db, W):
 	#	Calculate dL/dw gradient

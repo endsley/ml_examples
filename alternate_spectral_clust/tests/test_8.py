@@ -57,7 +57,7 @@ ASC.run()
 b = db['allocation']
 
 #print 'Alternate allocation :', b
-#print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s seconds ---" % (time.time() - start_time))
 
 #print "NMI : " , normalized_mutual_info_score(a,b)
 #g_truth = np.concatenate((np.ones(100), np.zeros(100),np.ones(100), np.zeros(100)))
