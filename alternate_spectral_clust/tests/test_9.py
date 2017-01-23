@@ -14,13 +14,18 @@ import time
 from cost_function import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from Y_2_allocation import *
 
 
 data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')	
+label_1 = genfromtxt('data_sets/Four_gaussian_label_1.csv', delimiter=',')	
+label_2 = genfromtxt('data_sets/Four_gaussian_label_2.csv', delimiter=',')	
 
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
+
+#np.savetxt('facial_sunglasses_labels.csv', sunglasses_labels, delimiter=',', fmt='%d')
 
 if True:	#	initial clustering
 	ASC.set_values('q',1)
@@ -28,10 +33,28 @@ if True:	#	initial clustering
 	ASC.set_values('sigma',2)
 	ASC.set_values('kernel_type','Gaussian Kernel')
 	ASC.run()
+
+	#np.savetxt('Four_gaussian_label_1.csv', db['Y_matrix'], delimiter=',', fmt='%d')
+
 	a = db['allocation']
 	print 'Original allocation :' , a
 	b = np.concatenate((np.zeros(200), np.ones(200)))
 	print "NMI : " , normalized_mutual_info_score(a,b)
+else: #	Predefining the original clustering, the following are the required settings
+	ASC.set_values('q',1)
+	ASC.set_values('C_num',2)
+	ASC.set_values('sigma',4)
+	ASC.set_values('kernel_type','Gaussian Kernel')
+	ASC.set_values('W_matrix',np.identity(db['d']))
+
+	db['Y_matrix'] = label_2
+	db['U_matrix'] = label_2
+	db['prev_clust'] = 1
+	db['allocation'] = Y_2_allocation(label_2)
+	a = db['allocation']
+	b = np.concatenate((np.zeros(200), np.ones(200)))
+	print 'Predefined allocation :' , a , '\n'
+
 
 if True:	#	Alterntive clustering
 	ASC.set_values('sigma',1)
@@ -45,15 +68,16 @@ if True:	#	Alterntive clustering
 	b = db['allocation']
 	print 'Alternate allocation :', b
 
-
+	#np.savetxt('Four_gaussian_label_2.csv', db['Y_matrix'][:,2:4], delimiter=',', fmt='%d')
 
 if True:	#	Plot clustering results
 	X = db['data']
 	fig = plt.figure()
 	ax = fig.add_subplot(211, projection='3d')
+	Uq_a = np.unique(a)
 	
-	group1 = X[a == 1]
-	group2 = X[a == 2]
+	group1 = X[a == Uq_a[0]]
+	group2 = X[a == Uq_a[1]]
 	
 	ax.scatter(group1[:,0], group1[:,1], group1[:,2], c='b', marker='o')
 	ax.scatter(group2[:,0], group2[:,1], group2[:,2], c='r', marker='x')
@@ -63,8 +87,9 @@ if True:	#	Plot clustering results
 	ax.set_title('FKDAC Original Clustering Four_gaussian_3D.csv')
 	
 	ax = fig.add_subplot(212, projection='3d')
-	group1 = X[b == 1]
-	group2 = X[b == 2]
+	Uq_b = np.unique(b)
+	group1 = X[b == Uq_b[0]]
+	group2 = X[b == Uq_b[1]]
 	
 	ax.scatter(group1[:,0], group1[:,1], group1[:,2], c='b', marker='o')
 	ax.scatter(group2[:,0], group2[:,1], group2[:,2], c='r', marker='x')
@@ -88,7 +113,7 @@ if False:	# save or load db to and from a pickle file
 
 
 
-if False:	# plot the W convergence results
+if True:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	

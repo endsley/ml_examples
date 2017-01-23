@@ -2,6 +2,7 @@
 
 import numpy as np
 import pdb
+import time
 import csv
 from create_y_tilde import *
 from create_gamma_ij import *
@@ -70,6 +71,15 @@ class SDG:
 			print 'Negative'
 			pass
 
+	def update_best_W(self, new_cost, new_gradient_mag, W):
+		db = self.db
+
+		if(new_cost < db['lowest_cost']):
+			db['lowest_U'] = db['U_matrix']
+			db['lowest_cost'] = new_cost
+			db['lowest_gradient'] = new_gradient_mag
+			db['W_matrix'] = W
+			#import pdb; pdb.set_trace()
 
 	def run(self):
 		db = self.db
@@ -79,14 +89,20 @@ class SDG:
 		use_frank = False
 		new_cost = float("inf")
 
-		for m in range(10):
-			matrix_sum = db['cf'].create_gamma_exp_A(W)
 
-			#if(new_cost == db['lowest_cost']):
-			#	if np.abs(new_gradient) < np.abs(db['lowest_gradient']):	# This gives us the most room for GD improvement
-			#		db['lowest_cost'] = new_cost
-			#		db['lowest_gradient'] = new_gradient
-			#		db['W_matrix'] = W
+		for m in range(5): 
+			[cost, matrix_sum] = db['cf'].calc_cost_function(W, also_calc_Phi=True)
+
+			##	Testing the new Phi matrix
+			#start_time = time.time() 
+			#[cost, matrix_sum_1] = db['cf'].calc_cost_function(W, also_calc_Phi=True)
+			#print matrix_sum_1
+			#print("--- 1 : %s seconds ---" % (time.time() - start_time))
+
+			#start_time = time.time() 
+			#matrix_sum = db['cf'].create_gamma_exp_A(W)
+			#print matrix_sum
+			#print("--- 2 : %s seconds ---" % (time.time() - start_time))
 
 			new_gradient = matrix_sum.dot(W)
 			new_gradient_mag = np.sum(new_gradient)
@@ -99,16 +115,35 @@ class SDG:
 #			else:
 ##		My way
 #			use_frank = not use_frank
-			#matrix_sum = matrix_sum.dot(matrix_sum)
 
 			[U,S,V] = np.linalg.svd(matrix_sum)
+			#print 'Smallest eigenvalue : ' , np.min(S)
+			#print 'Coef :' , U.T.dot(W) , '\n'
+			reverse_S = S[::-1]
+			eigsValues = reverse_S[0:self.q]
+
+			# Check if descending
+			#print "Before :" , np.trace(W.T.dot(matrix_sum).dot(W))
+			#W_before = W
 			W = np.fliplr(U)[:,0:self.q]
+			#print "After :" , np.trace(W_before.T.dot(matrix_sum).dot(W))
+
+
+
+			#	This is the Lagrangian gradient
+			#print '\n\nGrad : ' , np.linalg.norm(new_gradient - W*eigsValues) ,'\n\n'
+			#import pdb; pdb.set_trace()
 	
-			new_cost = -db['cf'].calc_cost_function(W)
+			new_cost = db['cf'].calc_cost_function(W)
+
+			#import pdb; pdb.set_trace()
+			##	Frank Wolfe
+			#if use_frank:
+			#	W = -new_gradient/np.linalg.norm(new_gradient)
 
 			if False:	# also check for max
 				W_max = U[:,0:self.q]
-				cost_W_max = -db['cf'].calc_cost_function(W_max)
+				cost_W_max = db['cf'].calc_cost_function(W_max)
 				if cost_W_max < new_cost:
 					print 'W max wins'
 					W = W_max
@@ -118,18 +153,8 @@ class SDG:
 					#print 'W max loses'
 
 
-
-			#pdb.set_trace()
-			#new_cost = -db['cf'].calc_cost_function(W)
-			#cost_ratio = np.abs(new_cost - db['lowest_cost'])/np.abs(new_cost)
-
 			exit_condition = np.linalg.norm(W - db['W_matrix'])/np.linalg.norm(W)
-			if(new_cost < db['lowest_cost']):
-				db['lowest_U'] = db['U_matrix']
-				db['lowest_cost'] = new_cost
-				db['lowest_gradient'] = new_gradient_mag
-				db['W_matrix'] = W
-				#import pdb; pdb.set_trace()
+			self.update_best_W(new_cost, new_gradient_mag, W)
 
 
 			self.run_debug_1(new_gradient_mag, new_cost, db['lowest_cost'], exit_condition)
@@ -137,22 +162,12 @@ class SDG:
 			#except: pass
 
 
-
+		#self.run_debug_2(db, db['lowest_gradient'], Lowest_cost)
 		self.run_debug_2(db, db['lowest_gradient'], db['lowest_cost'])
-
+		Lowest_cost = db['cf'].calc_cost_function(db['W_matrix'])
+		print 'Lowest cost ' , Lowest_cost , '\n\n'
 		self.W = db['W_matrix']
 		return db['W_matrix']
-
-
-def get_cost(db, W):
-	iv = np.arange(db['N'])
-	jv = np.arange(db['N'])
-
-	sdg = SDG(db, iv, jv)
-	sdg.y_tilde = create_y_tilde(db)
-
-	import pdb; pdb.set_trace()
-	return sdg.calc_cost_function(W)
 
 
 def W_optimize_Gaussian_SDG(db):
@@ -160,8 +175,7 @@ def W_optimize_Gaussian_SDG(db):
 	jv = np.arange(db['N'])
 
 	sdg = SDG(db, iv, jv)
-	sdg.y_tilde = create_y_tilde(db)
-	
+	#sdg.y_tilde = create_y_tilde(db)	
 	sdg.run()
 	
 

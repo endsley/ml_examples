@@ -10,6 +10,27 @@ from StringIO import StringIO
 from scipy.optimize import minimize
 import time 
 
+import autograd.numpy as np
+from autograd import grad
+
+## Define a function Tr(WTA W), we know that gradient = (A+AT)W
+#def cost_foo(W, db): 
+#	K = db['Kernel_matrix']
+#	U = db['U_matrix']
+#	H = db['H_matrix']
+#	D = db['D_matrix']
+#	l = db['lambda']
+#	Y = db['Y_matrix']
+#
+#	s1 = np.dot(np.dot(D,H),U)
+#	HSIC_1 = np.dot(s1, np.transpose(s1))*K
+#
+#	s2 = np.dot(np.dot(D,H),Y)
+#	HSIC_2 = l*np.dot(s2, np.transpose(s2))*K
+#
+#	return np.sum(HSIC_2 - HSIC_1)
+#
+#grad_foo = grad(cost_foo)       # Obtain its gradient function
 
 class cost_function:
 	def __init__(self, db):
@@ -30,130 +51,199 @@ class cost_function:
 		self.gamma_exp = np.empty((self.N, self.N))
 		self.A_memory_feasible = True
 
+		self.psi = None			# This is the middle term that doesn't change unless U or Y update
+		self.Q = None			# This is the tensor term of ( X tensor 1 ) - (1 tensor X)
+
+		#try:
+		#	self.A = np.empty((self.N,self.N,self.d, self.d))
+		#	self.Aw = np.empty((self.N,self.N,self.d, self.q))
+		#	self.create_A()
+		#except:
+		#	self.A_memory_feasible = False
+		#	raise
+	
+		self.calc_Q()
+
+	def calc_Q(self):
 		try:
-			self.A = np.empty((self.N,self.N,self.d, self.d))
-			self.Aw = np.empty((self.N,self.N,self.d, self.q))
-			self.create_A()
+			X = self.db['data']
+			one_vector = np.ones((self.N,1))
+			self.Q = np.kron(X,one_vector) - np.kron(one_vector, X)
 		except:
 			self.A_memory_feasible = False
-			raise
-
-
-	def initialize_constants(self):
-		self.create_y_tilde()
-		self.create_gamma()
-
-	def create_y_tilde(self):
-		#	tr(H K_y H D K D)
-		#	tr((D H K_y H D) K)
-		#	tr(M K)
-
+	
+	def calc_psi(self): # psi = H(UU'-l YY')H
 		db = self.db
 		Y = db['Y_matrix']
+		U = db['U_matrix']
 		H = db['H_matrix']
-		D = db['D_matrix']
 
-		K_y = Y.dot(Y.T)
-		inner_p = H.dot(K_y).dot(H)
-		db['y_tilde'] = D.dot(inner_p).dot(D)
-
-	def create_gamma(self):
-		db = self.db
-		yt = db['y_tilde']
-		U = db['H_matrix'].dot(db['U_matrix'])
-
-		for i in self.iv:
-			for j in self.jv:
-				degree_of_vertex = np.diag(db['D_matrix'])
-				ith_row = U[i,:]
-				jth_row = U[j,:]
-			
-				u_dot = np.dot(ith_row,jth_row)
-				part_1 = u_dot*degree_of_vertex[i]*degree_of_vertex[j]
-			
-				self.gamma[i][j] = part_1 - db['lambda'] * yt[i,j]
-
-	def get_A(self, i, j):
-		if self.A_memory_feasible:
-			return self.A[i][j]
-		else:
-			x_dif = self.db['data'][i] - self.db['data'][j]
-			x_dif = x_dif[np.newaxis]
-			return np.dot(x_dif.T, x_dif)
-		
-
-	def create_A(self):
-		db = self.db
-		for i in self.iv:
-			for j in self.jv:
-				x_dif = db['data'][i] - db['data'][j]
-				x_dif = x_dif[np.newaxis]
-				self.A[i][j] = np.dot(x_dif.T, x_dif)
-
-	def get_Aw(self, i, j, W):
-		if self.A_memory_feasible: 
-			return self.Aw[i][j]
-		else:
-			A = self.get_A(i,j)
-			return A.dot(W)
-
-	def create_Aw(self,W):
-		if not self.A_memory_feasible: return
-
-		db = self.db
-		for i in self.iv:
-			for j in self.jv:
-				A = self.get_A(i,j)
-				self.Aw[i][j] = A.dot(W)
+		self.psi = H.dot(U.dot(U.T) - db['lambda']*Y.dot(Y.T)).dot(H)
+		return self.psi
 
 	def create_D_matrix(self, kernel):
 		d_matrix = np.diag(1/np.sqrt(np.sum(kernel,axis=1))) # 1/sqrt(D)
 		return d_matrix
+
+
+
 
 	def create_Kernel(self, W):
 		db = self.db
 		sigma = db['sigma']
 		X = db['data'].dot(W)
 		gamma_V = 1.0/(2*np.power(sigma,2))
-		kernel = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma_V)
-		return kernel
+		db['Kernel_matrix'] = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma_V)
+		db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
 
+		return db['Kernel_matrix']
+
+
+
+
+	def calc_cost_function(self, W, also_calc_Phi=False, update_D_matrix=False): #Phi = the matrix we perform SVD on
+		db = self.db
+
+		#start_time = time.time() 
+		K = self.create_Kernel(W)
+		D = np.diag(db['D_matrix'])
+		DD = np.outer(D,D)
+		const_matrix = DD*self.psi*K
+		cost = -np.sum(const_matrix)
+
+
+
+		#print(cost)
+		#print("--- 1 : %s seconds ---" % (time.time() - start_time))
+
+
+		#start_time = time.time() 
+		#depr_cost = self.calc_cost_function_depre(W)
+		#print(depr_cost)
+		#print("--- 2 : %s seconds ---" % (time.time() - start_time))
+		#import pdb; pdb.set_trace()
+
+		if not also_calc_Phi: return cost
+		if self.A_memory_feasible:
+			O = np.reshape(const_matrix, (1,const_matrix.size))
+			Phi = ((self.Q.T*O).dot(self.Q))/self.sigma2
+			return [cost, Phi]
+		else:
+			print '\n\nYou still need to write the part where memory is not feasible.\n\n'
+			#	You will have to multiply each A and add them up
+			raise
+
+
+#
+#	def create_gamma_exp_A(self, W):
+#		self.create_y_tilde()
+#		self.create_gamma()
+#
+#		gamma_exp = self.create_gamma_exps(W)
+#		matrix_sum = np.zeros((self.d, self.d))
+#		for i in self.iv:
+#			for j in self.jv:
+#				A = self.get_A(i, j)
+#				matrix_sum += gamma_exp[i][j]*A
+#		
+#		matrix_sum = matrix_sum/float(self.sigma2)
+#		return matrix_sum
+#
+#	def create_gamma_exps(self, W):
+#		exp_wAw = self.create_Kernel(W)
+#		self.gamma_exp = self.gamma*exp_wAw
+#		return self.gamma_exp
+#
+#	def create_y_tilde(self):
+#		#	tr(H K_y H D K D)
+#		#	tr((D H K_y H D) K)
+#		#	tr(M K)
+#
+#		db = self.db
+#		Y = db['Y_matrix']
+#		H = db['H_matrix']
+#		D = db['D_matrix']
+#
+#		K_y = Y.dot(Y.T)
+#		inner_p = H.dot(K_y).dot(H)
+#		db['y_tilde'] = D.dot(inner_p).dot(D)
+#
+#	def create_gamma(self):
+#		db = self.db
+#		yt = db['y_tilde']
+#		U = db['H_matrix'].dot(db['U_matrix'])
+#
+#		for i in self.iv:
+#			for j in self.jv:
+#				degree_of_vertex = np.diag(db['D_matrix'])
+#				ith_row = U[i,:]
+#				jth_row = U[j,:]
+#			
+#				u_dot = np.dot(ith_row,jth_row)
+#				part_1 = u_dot*degree_of_vertex[i]*degree_of_vertex[j]
+#			
+#				self.gamma[i][j] = part_1 - db['lambda'] * yt[i,j]
 
 
 #	Deprecated version
-	def create_Kernel_depr(self, W):
-		db = self.db
-		self.create_Aw(W)
-		kernel = np.zeros((db['N'], db['N']))
+#	def create_Kernel_depr(self, W):
+#		db = self.db
+#		self.create_Aw(W)
+#		kernel = np.zeros((db['N'], db['N']))
+#
+#		for i in self.iv:
+#			for j in self.jv:
+#				#print i, j
+#				Aw = self.get_Aw(i,j, W)
+#				kernel[i][j] = np.exp(np.sum(-W*Aw)/(2*self.sigma2))
+#
+#		return kernel
 
-		for i in self.iv:
-			for j in self.jv:
-				#print i, j
-				Aw = self.get_Aw(i,j, W)
-				kernel[i][j] = np.exp(np.sum(-W*Aw)/(2*self.sigma2))
 
-		return kernel
+#	This function is now deprecated
+#	def initialize_constants(self):
+#		self.create_y_tilde()
+#		self.create_gamma()
 
+##	Deprecated version
+#	def calc_cost_function_depre(self, W):
+#		self.initialize_constants()
+#		self.create_gamma_exps(W)
+#		return np.sum(self.gamma_exp)
 
-	def create_gamma_exp_A(self, W):
-		gamma_exp = self.create_gamma_exps(W)
-		matrix_sum = np.zeros((self.d, self.d))
-		for i in self.iv:
-			for j in self.jv:
-				A = self.get_A(i, j)
-				matrix_sum += gamma_exp[i][j]*A
-		
-		matrix_sum = matrix_sum/float(self.sigma2)
-		return matrix_sum
+#	def get_A(self, i, j):
+#		if self.A_memory_feasible:
+#			return self.A[i][j]
+#		else:
+#			x_dif = self.db['data'][i] - self.db['data'][j]
+#			x_dif = x_dif[np.newaxis]
+#			return np.dot(x_dif.T, x_dif)
+#		
+#
+#	def create_A(self):
+#		db = self.db
+#		for i in self.iv:
+#			for j in self.jv:
+#				x_dif = db['data'][i] - db['data'][j]
+#				x_dif = x_dif[np.newaxis]
+#				self.A[i][j] = np.dot(x_dif.T, x_dif)
+#
+#	def get_Aw(self, i, j, W):
+#		if self.A_memory_feasible: 
+#			return self.Aw[i][j]
+#		else:
+#			A = self.get_A(i,j)
+#			return A.dot(W)
+#
+#	def create_Aw(self,W):
+#		if not self.A_memory_feasible: return
+#
+#		db = self.db
+#		for i in self.iv:
+#			for j in self.jv:
+#				A = self.get_A(i,j)
+#				self.Aw[i][j] = A.dot(W)
 
-	def create_gamma_exps(self, W):
-		exp_wAw = self.create_Kernel(W)
-		self.gamma_exp = self.gamma*exp_wAw
-		return self.gamma_exp
-
-	def calc_cost_function(self, W):
-		self.create_gamma_exps(W)
-		return np.sum(self.gamma_exp)
 
 def test_1():		# optimal = 2.4309
 	np.set_printoptions(precision=4)

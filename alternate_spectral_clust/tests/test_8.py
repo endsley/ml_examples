@@ -22,6 +22,8 @@ data = genfromtxt('data_sets/data_4.csv', delimiter=',')
 Y_original = genfromtxt('data_sets/data_4_Y_original.csv', delimiter=',')
 U_original = genfromtxt('data_sets/data_4_U_original.csv', delimiter=',')
 
+
+
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
@@ -29,7 +31,7 @@ db = ASC.db
 if True: #	Calculating the original clustering
 	ASC.set_values('q',1)
 	ASC.set_values('C_num',2)
-	ASC.set_values('sigma',1)
+	ASC.set_values('sigma',0.5)
 	ASC.set_values('kernel_type','Gaussian Kernel')
 	ASC.run()
 	a = db['allocation']

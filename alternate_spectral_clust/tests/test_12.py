@@ -13,6 +13,7 @@ import sklearn
 import time 
 from cost_function import *
 import matplotlib.pyplot as plt
+from Y_2_allocation import *
 
 
 data = genfromtxt('data_sets/facial_960.csv', delimiter=',')		
@@ -39,25 +40,38 @@ if False:	# run original spectral clustering
 	original = db['allocation']
 	print original
 
-if True: 		# run preset original clustering
+else: 		# run preset original clustering
+	print ':::::   USE PRE-DEFINED CLUSTERING :::::::::\n\n'
+	ASC.set_values('q',10)
+	ASC.set_values('C_num',4)
+	ASC.set_values('sigma',20)
+	ASC.set_values('kernel_type','Gaussian Kernel')
+	ASC.set_values('W_matrix',np.identity(db['d']))
+
 	db['Y_matrix'] = original_Y
 	db['U_matrix'] = original_Y
 	db['prev_clust'] = 1
-	ASC.set_values('W_matrix',np.identity(db['d']))
+	db['allocation'] = Y_2_allocation(original_Y)
+	a = db['allocation']
+	#print 'Predefined allocation :' , a , '\n'
+
+
 
 
 if True:	# run alternative clustering
 	ASC.set_values('q',10)
-	ASC.set_values('sigma',20)
 	ASC.set_values('C_num',4)
-	ASC.set_values('lambda',1)
+	ASC.set_values('sigma',20)
+	ASC.set_values('lambda',2)
 	start_time = time.time() 
 	ASC.run()
 	print("--- %s seconds ---" % (time.time() - start_time))
 	alternative = db['allocation']	
-	print "Alternative aginst original: " , normalized_mutual_info_score(label, alternative)
-	print "Alternative aginst truth : " , normalized_mutual_info_score(pose_label, alternative)
+	print "Alternative aginst original: " , normalized_mutual_info_score(pose_label, alternative)
+	print "Alternative aginst truth : " , normalized_mutual_info_score(label, alternative)
 	
+
+import pdb; pdb.set_trace()
 
 ##print "NMI Against Sunglasses label : " , normalized_mutual_info_score(sunglass_label,alternative)
 #
