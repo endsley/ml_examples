@@ -78,11 +78,14 @@ if True:	# run alternative clustering
 	#print("--- %s seconds ---" % (time.time() - start_time))
 	alternative = db['allocation']	
 	alternative_Y = Allocation_2_Y(alternative)
+	pose_Y = Allocation_2_Y(pose_label)
 
-	against_alternative = normalized_mutual_info_score(pose_label, alternative)
-	against_truth = normalized_mutual_info_score(label, alternative)
+
+	against_truth = normalized_mutual_info_score(pose_label, alternative)
+	against_alternative = normalized_mutual_info_score(label, alternative)
 
 	alternative_HSIC = HSIC_rbf(data, alternative_Y, sigma)
+	pose_HSIC = HSIC_rbf(data, pose_Y, sigma)
 
 
 
@@ -92,8 +95,10 @@ if True:	# run alternative clustering
 		random_Y = Allocation_2_Y(random_allocation)
 		H = HSIC_rbf(data, random_Y, sigma)
 		random_HSIC = np.hstack((random_HSIC,H))
-	
-	percent_diff = (related_HSIC - mean_RHSIC)/related_HSIC
+
+	mean_RHSIC = np.mean(random_HSIC)
+	percent_diff = (alternative_HSIC - mean_RHSIC)/alternative_HSIC
+	pose_percent_diff = (pose_HSIC - mean_RHSIC)/pose_HSIC
 
 
 
@@ -103,6 +108,7 @@ if True:	# run alternative clustering
 	txt = '\tLabel against alternative : ' + str(against_alternative) + '\n'
 	txt += '\tLabel against truth : ' + str(against_truth) + '\n'
 	txt += '\tAlternative HSIC % diff from random : ' + str(percent_diff) + '\n'
+	txt += '\tPose HSIC % diff from random : ' + str(pose_percent_diff) + '\n'
 	txt += '\tLambda used : ' + str(rand_lambda) + '\n'
 	txt += '\tLowest Cost : ' + str(db['lowest_cost']) + '\n'
 

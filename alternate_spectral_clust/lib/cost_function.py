@@ -10,8 +10,8 @@ from StringIO import StringIO
 from scipy.optimize import minimize
 import time 
 
-import autograd.numpy as np
-from autograd import grad
+#import autograd.numpy as np
+#from autograd import grad
 
 ## Define a function Tr(WTA W), we know that gradient = (A+AT)W
 #def cost_foo(W, db): 
