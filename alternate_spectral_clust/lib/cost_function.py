@@ -112,7 +112,6 @@ class cost_function:
 		cost = -np.sum(const_matrix)
 
 
-
 		#print(cost)
 		#print("--- 1 : %s seconds ---" % (time.time() - start_time))
 

@@ -14,8 +14,7 @@ class SDG:
 	def __init__(self, db, iv, jv):
 		self.db = db
 		self.N = db['data'].shape[0]
-		self.d = db['data'].shape[1]
-		self.q = db['W_matrix'].shape[1]
+		self.d = db['data'].shape[1]	
 		self.iv = iv
 		self.jv = jv
 		self.sigma2 = np.power(db['sigma'],2)
@@ -41,7 +40,6 @@ class SDG:
 	def run_debug_2(self, db, lowest_gradient, lowest_cost):
 		if self.debug_mode:
 			print 'Best : '
-			print 'Gradient ' , lowest_gradient
 			print 'Cost  ' , lowest_cost
 
 			self.db['debug_costVal'].append(self.costVal_list)
@@ -90,55 +88,28 @@ class SDG:
 		new_cost = float("inf")
 
 
-		for m in range(5): 
+		for m in range(2): 
 			[cost, matrix_sum] = db['cf'].calc_cost_function(W, also_calc_Phi=True)
 
-			##	Testing the new Phi matrix
-			#start_time = time.time() 
-			#[cost, matrix_sum_1] = db['cf'].calc_cost_function(W, also_calc_Phi=True)
-			#print matrix_sum_1
-			#print("--- 1 : %s seconds ---" % (time.time() - start_time))
+			if True:# Use eig
+				[S2,U2] = np.linalg.eigh(matrix_sum)
+				eigsValues = S2[0:db['q']]
+				W = U2[:,0:db['q']]
+			else:
+				# Use svd
+				[U,S,V] = np.linalg.svd(matrix_sum)
+				reverse_S = S[::-1]
+				eigsValues = reverse_S[0:db['q']]
+				W = np.fliplr(U)[:,0:db['q']]
 
-			#start_time = time.time() 
-			#matrix_sum = db['cf'].create_gamma_exp_A(W)
-			#print matrix_sum
-			#print("--- 2 : %s seconds ---" % (time.time() - start_time))
 
 			new_gradient = matrix_sum.dot(W)
-			new_gradient_mag = np.sum(new_gradient)
-
-#			if use_frank:
-##		Frank Wolfe
-#				W = -new_gradient/np.linalg.norm(new_gradient)
-#				use_frank = not use_frank
-#				print '\t\tTrace : ' , np.trace(new_gradient.T.dot(W))
-#			else:
-##		My way
-#			use_frank = not use_frank
-
-			[U,S,V] = np.linalg.svd(matrix_sum)
-			#print 'Smallest eigenvalue : ' , np.min(S)
-			#print 'Coef :' , U.T.dot(W) , '\n'
-			reverse_S = S[::-1]
-			eigsValues = reverse_S[0:self.q]
-
-			# Check if descending
-			#print "Before :" , np.trace(W.T.dot(matrix_sum).dot(W))
-			#W_before = W
-			W = np.fliplr(U)[:,0:self.q]
-			#print "After :" , np.trace(W_before.T.dot(matrix_sum).dot(W))
-
-
-
-			#	This is the Lagrangian gradient
-			#print '\n\nGrad : ' , np.linalg.norm(new_gradient - W*eigsValues) ,'\n\n'
-			#import pdb; pdb.set_trace()
+			Lagrange_gradient = new_gradient - W*eigsValues
+			new_gradient_mag = np.linalg.norm(Lagrange_gradient)
 	
 			new_cost = db['cf'].calc_cost_function(W)
 
-			#import pdb; pdb.set_trace()
 			##	Frank Wolfe
-			#if use_frank:
 			#	W = -new_gradient/np.linalg.norm(new_gradient)
 
 			if False:	# also check for max

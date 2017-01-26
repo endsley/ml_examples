@@ -10,6 +10,7 @@ def Y_2_allocation(Y):
 
 	return allocation
 
+
 def Allocation_2_Y(allocation):
 	
 	N = np.size(allocation)
@@ -25,7 +26,8 @@ def Allocation_2_Y(allocation):
 		a_row[class_label] = 1
 		Y = np.hstack((Y, a_row))
 
-	Y = np.reshape(Y, (N+1,4))
+	Y = np.reshape(Y, (N+1,num_of_classes))
 	Y = np.delete(Y, 0, 0)
 
 	return Y
+

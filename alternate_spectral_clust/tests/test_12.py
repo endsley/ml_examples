@@ -14,64 +14,106 @@ import time
 from cost_function import *
 import matplotlib.pyplot as plt
 from Y_2_allocation import *
+from HSIC import *
+from file_writing import *
 
 
-data = genfromtxt('data_sets/facial_960.csv', delimiter=',')		
+
+#data = genfromtxt('data_sets/facial_960.csv', delimiter=',')		
 #data = genfromtxt('data_sets/facial.csv', delimiter=',')		
-label = genfromtxt('data_sets/facial_true_labels.csv', delimiter=',')		
-sunglass_label = genfromtxt('data_sets/facial_sunglasses_labels.csv', delimiter=',')		
-pose_label = genfromtxt('data_sets/facial_pose_labels.csv', delimiter=',')		
-original_Y = genfromtxt('data_sets/facial_original_Y.csv', delimiter=',')		
-name_file = open('data_sets/facial_names.csv', 'r')
+#sunglass_label = genfromtxt('data_sets/facial_sunglasses_labels.csv', delimiter=',')		
+#pose_label = genfromtxt('data_sets/facial_pose_labels.csv', delimiter=',')		
+#original_Y = genfromtxt('data_sets/facial_original_Y.csv', delimiter=',')		
+
+data = genfromtxt('data_sets/facial_98.csv', delimiter=',')		
+label = genfromtxt('data_sets/facial_true_labels_98.csv', delimiter=',')		
+pose_label = genfromtxt('data_sets/facial_pose_labels_98.csv', delimiter=',')		
+original_Y = Allocation_2_Y(label)
+name_file = open('data_sets/facial_names_98.csv', 'r')
+
+
+#	Use the median of the pairwise distance as sigma
+#d_matrix = sklearn.metrics.pairwise.pairwise_distances(data, Y=None, metric='euclidean')
+#sigma = np.median(d_matrix)
+sigma = 18   # HSIC(true pose,data) = 78.8 
+
 
 names = np.array(name_file.readlines())
 name_file.close()
-
 
 ASC = alt_spectral_clust(data)
 db = ASC.db
 
 if False:	# run original spectral clustering
-	ASC.set_values('q',10)
-	ASC.set_values('C_num',4)
-	ASC.set_values('sigma',20)
+	ASC.set_values('q',30)
+	ASC.set_values('C_num',20)
+	ASC.set_values('sigma',sigma)
 	ASC.set_values('kernel_type','Gaussian Kernel')
 	ASC.run()
 	original = db['allocation']
-	print original
+	print "Original Clustering Vs Truth NMI: " , normalized_mutual_info_score(label, original)
 
 else: 		# run preset original clustering
 	print ':::::   USE PRE-DEFINED CLUSTERING :::::::::\n\n'
-	ASC.set_values('q',10)
-	ASC.set_values('C_num',4)
-	ASC.set_values('sigma',20)
 	ASC.set_values('kernel_type','Gaussian Kernel')
-	ASC.set_values('W_matrix',np.identity(db['d']))
 
 	db['Y_matrix'] = original_Y
-	db['U_matrix'] = original_Y
 	db['prev_clust'] = 1
 	db['allocation'] = Y_2_allocation(original_Y)
-	a = db['allocation']
+	#a = db['allocation']
 	#print 'Predefined allocation :' , a , '\n'
 
 
 
 
 if True:	# run alternative clustering
+	rand_lambda = 3*np.random.random()
+
 	ASC.set_values('q',10)
 	ASC.set_values('C_num',4)
-	ASC.set_values('sigma',20)
-	ASC.set_values('lambda',2)
-	start_time = time.time() 
+	ASC.set_values('sigma',sigma)
+	ASC.set_values('lambda',rand_lambda)
+	#start_time = time.time() 
 	ASC.run()
-	print("--- %s seconds ---" % (time.time() - start_time))
+	#print("--- %s seconds ---" % (time.time() - start_time))
 	alternative = db['allocation']	
-	print "Alternative aginst original: " , normalized_mutual_info_score(pose_label, alternative)
-	print "Alternative aginst truth : " , normalized_mutual_info_score(label, alternative)
+	alternative_Y = Allocation_2_Y(alternative)
+
+	against_alternative = normalized_mutual_info_score(pose_label, alternative)
+	against_truth = normalized_mutual_info_score(label, alternative)
+
+	alternative_HSIC = HSIC_rbf(data, alternative_Y, sigma)
+
+
+
+	random_HSIC = np.array([])
+	for m in range(10):
+		random_allocation = np.floor(alternative_Y.shape[1]*np.random.random(data.shape[0]))
+		random_Y = Allocation_2_Y(random_allocation)
+		H = HSIC_rbf(data, random_Y, sigma)
+		random_HSIC = np.hstack((random_HSIC,H))
+	
+	percent_diff = (related_HSIC - mean_RHSIC)/related_HSIC
+
+
+
+
+
+
+	txt = '\tLabel against alternative : ' + str(against_alternative) + '\n'
+	txt += '\tLabel against truth : ' + str(against_truth) + '\n'
+	txt += '\tAlternative HSIC % diff from random : ' + str(percent_diff) + '\n'
+	txt += '\tLambda used : ' + str(rand_lambda) + '\n'
+	txt += '\tLowest Cost : ' + str(db['lowest_cost']) + '\n'
+
+
+	append_txt('./output.txt', txt)
+
+	#print "Alternative aginst original: " , normalized_mutual_info_score(pose_label, alternative)
+	#print "Alternative aginst truth : " , normalized_mutual_info_score(label, alternative)
 	
 
-import pdb; pdb.set_trace()
+
 
 ##print "NMI Against Sunglasses label : " , normalized_mutual_info_score(sunglass_label,alternative)
 #
@@ -101,7 +143,7 @@ if False:	# save or load db to and from a pickle file
 
 
 
-if True:	# plot the W convergence results
+if False:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	
@@ -147,4 +189,4 @@ if True:	# plot the W convergence results
 
 
 
-import pdb; pdb.set_trace()
+
