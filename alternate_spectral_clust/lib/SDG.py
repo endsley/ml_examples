@@ -25,8 +25,6 @@ class SDG:
 		self.Wchange_list = []
 
 		self.y_tilde = None
-		self.W = None
-
 		self.debug_mode = True
 
 	def run_debug_1(self, new_gradient_mag, new_cost, lowest_cost, exit_condition):
@@ -84,60 +82,55 @@ class SDG:
 		exponent_term = 1
 		W = db['W_matrix']
 		#W = np.zeros((db['d'], db['q']) )
-		use_frank = False
 		new_cost = float("inf")
+		W_hold = W
 
 
-		for m in range(2): 
+		for m in range(10): 
 			[cost, matrix_sum] = db['cf'].calc_cost_function(W, also_calc_Phi=True)
 
 			if True:# Use eig
 				[S2,U2] = np.linalg.eigh(matrix_sum)
 				eigsValues = S2[0:db['q']]
+				#print W
+				#print eigsValues , '\n'
+				new_gradient = matrix_sum.dot(W)
+				Lagrange_gradient = new_gradient - W*eigsValues
+				new_gradient_mag = np.linalg.norm(Lagrange_gradient)
+
 				W = U2[:,0:db['q']]
 			else:
 				# Use svd
 				[U,S,V] = np.linalg.svd(matrix_sum)
 				reverse_S = S[::-1]
 				eigsValues = reverse_S[0:db['q']]
+
+				new_gradient = matrix_sum.dot(W)
+				Lagrange_gradient = new_gradient - W*eigsValues
+				new_gradient_mag = np.linalg.norm(Lagrange_gradient)
+
 				W = np.fliplr(U)[:,0:db['q']]
 
 
-			new_gradient = matrix_sum.dot(W)
-			Lagrange_gradient = new_gradient - W*eigsValues
-			new_gradient_mag = np.linalg.norm(Lagrange_gradient)
 	
 			new_cost = db['cf'].calc_cost_function(W)
 
 			##	Frank Wolfe
 			#	W = -new_gradient/np.linalg.norm(new_gradient)
 
-			if False:	# also check for max
-				W_max = U[:,0:self.q]
-				cost_W_max = db['cf'].calc_cost_function(W_max)
-				if cost_W_max < new_cost:
-					print 'W max wins'
-					W = W_max
-					new_cost = cost_W_max
-				else:
-					pass
-					#print 'W max loses'
 
-
-			exit_condition = np.linalg.norm(W - db['W_matrix'])/np.linalg.norm(W)
+			exit_condition = np.linalg.norm(W - W_hold)/np.linalg.norm(W)
 			self.update_best_W(new_cost, new_gradient_mag, W)
 
 
 			self.run_debug_1(new_gradient_mag, new_cost, db['lowest_cost'], exit_condition)
 			if exit_condition < 0.0001: break;
-			#except: pass
+			W_hold = W
 
 
 		#self.run_debug_2(db, db['lowest_gradient'], Lowest_cost)
 		self.run_debug_2(db, db['lowest_gradient'], db['lowest_cost'])
-		Lowest_cost = db['cf'].calc_cost_function(db['W_matrix'])
-		print 'Lowest cost ' , Lowest_cost , '\n\n'
-		self.W = db['W_matrix']
+		db['cf'].create_Kernel(db['W_matrix']) # make sure K and D are updated
 		return db['W_matrix']
 
 

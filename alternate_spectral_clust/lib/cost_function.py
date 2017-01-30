@@ -37,7 +37,6 @@ class cost_function:
 		self.db = db
 		self.N = db['data'].shape[0]
 		self.d = db['data'].shape[1]
-		self.q = db['W_matrix'].shape[1]
 
 		self.iv = np.array(range(self.N))
 		self.jv = self.iv
@@ -99,7 +98,58 @@ class cost_function:
 		return db['Kernel_matrix']
 
 
+	def derivative_test(self, db):
+		W = db['W_matrix']
+		K = self.create_Kernel(W)
+		H = db['H_matrix']
+		U = db['U_matrix']
 
+		K = self.create_Kernel(W)
+		D = np.diag(db['D_matrix'])
+		DD = np.outer(D,D)
+		const_matrix = DD*self.psi*K
+
+		A = np.zeros((self.d, self.d))
+		for i in self.iv:
+			for j in self.jv:
+				x_dif = db['data'][i] - db['data'][j]
+				x_dif = x_dif[np.newaxis]
+				A_ij = np.dot(x_dif.T, x_dif)
+				A += const_matrix[i,j]*A_ij
+
+		if True:# Use eig
+			[S2,U2] = np.linalg.eigh(A)
+			eigsValues = S2[0:db['q']]
+			W = U2[:,0:db['q']]
+		else:
+			# Use svd
+			[U,S,V] = np.linalg.svd(A)
+			reverse_S = S[::-1]
+			eigsValues = reverse_S[0:db['q']]
+			W = np.fliplr(U)[:,0:db['q']]
+
+		new_gradient = A.dot(W)
+		Lagrange_gradient = new_gradient - W*eigsValues
+		new_gradient_mag = np.linalg.norm(Lagrange_gradient)
+		return new_gradient_mag
+
+	def cluster_quality(self, db):
+		W = db['W_matrix']
+		K = self.create_Kernel(W)
+		D = db['D_matrix']
+		H = db['H_matrix']
+		U = db['U_matrix']
+
+		return np.trace( H.dot(D).dot(K).dot(D).dot(H).dot(U).dot(U.T) ) 
+
+	def alternative_quality(self, db):
+		W = db['W_matrix']
+		K = self.create_Kernel(W)
+		D = db['D_matrix']
+		H = db['H_matrix']
+		Y = db['Y_matrix']
+
+		return np.trace( H.dot(D).dot(K).dot(D).dot(H).dot(Y).dot(Y.T) ) 
 
 	def calc_cost_function(self, W, also_calc_Phi=False, update_D_matrix=False): #Phi = the matrix we perform SVD on
 		db = self.db

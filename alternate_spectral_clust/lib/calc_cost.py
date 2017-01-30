@@ -1,23 +1,39 @@
-from create_gamma_ij import *
-		
+
+from HSIC import *
 #	This is deprecated function
 
-def calc_cost_function(db, W):
-	#	Calculate dL/dw gradient
-	iv_all = np.array(range(db['N']))
-	jv_all = iv_all
+def calc_cost_function(db):
+	W = db['W_matrix']
+	X = db['data']
+	XW = X.dot(W)
+	U = db['U_matrix']
+	Y = db['Y_matrix'][:,0:db['C_num']]
+	sigma = db['sigma']
+	l = db['lambda']
+
+	cost = l*HSIC_rbf(XW, Y, sigma, Y_kernel='linear') - HSIC_rbf(XW, U, sigma, Y_kernel='linear') 
+
+	#print 'Changed'
+	#print l*HSIC_rbf(XW, Y, sigma, Y_kernel='linear')
+	#print HSIC_rbf(XW, U, sigma, Y_kernel='linear') 
+
+	return cost
 
 
-	#	Calc Base
-	cost = 0
-	for i in iv_all:
-		for j in jv_all:
-			
-			x_dif = db['data'][i] - db['data'][j]
-			x_dif = x_dif[np.newaxis]
 
-			gamma_ij = create_gamma_ij(db, db['y_tilde'], i, j)
-			cost = cost -  gamma_ij*np.exp(-x_dif.dot(W).dot(W.T).dot(x_dif.T))
+def cost_2(db, W):
+	X = db['data']
+	XW = X.dot(W)
+	U = db['U_matrix']
+	Y = db['Y_matrix']
+	sigma = db['sigma']
+	l = db['lambda']
+
+	cost = l*HSIC_rbf(XW, Y, sigma, Y_kernel='linear') - HSIC_rbf(XW, U, sigma, Y_kernel='linear') 
+
+	print 'Changed'
+	print l*HSIC_rbf(XW, Y, sigma, Y_kernel='linear')
+	print HSIC_rbf(XW, U, sigma, Y_kernel='linear') 
 
 	return cost
 

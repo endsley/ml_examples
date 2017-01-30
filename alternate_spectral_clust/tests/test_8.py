@@ -15,6 +15,7 @@ from cost_function import *
 import matplotlib.pyplot as plt
 from Y_2_allocation import *
 import matplotlib 
+import calc_cost
 colors = matplotlib.colors.cnames
 
 #np.set_printoptions(suppress=True)
@@ -67,6 +68,10 @@ print("--- %s seconds ---" % (time.time() - start_time))
 #print "NMI Against Ground Truth : " , normalized_mutual_info_score(b,a_truth)
 #print db['Y_matrix']
 
+if True:	# some HSIC debug stuff
+	cf = db['cf']
+	print 'My cost : ' , cf.calc_cost_function(db['W_matrix'])
+	print 'test cost : ' , calc_cost.calc_cost_function(db)
 
 if True:	#	plot the clustering result
 	X = db['data']
@@ -115,7 +120,7 @@ if False:	# save or load db to and from a pickle file
 
 
 
-if True:	# plot the W convergence results
+if False:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	

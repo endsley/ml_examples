@@ -24,12 +24,14 @@ from file_writing import *
 #sunglass_label = genfromtxt('data_sets/facial_sunglasses_labels.csv', delimiter=',')		
 #pose_label = genfromtxt('data_sets/facial_pose_labels.csv', delimiter=',')		
 #original_Y = genfromtxt('data_sets/facial_original_Y.csv', delimiter=',')		
+#data = genfromtxt('data_sets/facial_98.csv', delimiter=',')		
 
-data = genfromtxt('data_sets/facial_98.csv', delimiter=',')		
-label = genfromtxt('data_sets/facial_true_labels_98.csv', delimiter=',')		
-pose_label = genfromtxt('data_sets/facial_pose_labels_98.csv', delimiter=',')		
+data = genfromtxt('data_sets/facial_95.csv', delimiter=',')		
+label = genfromtxt('data_sets/facial_true_labels_624x960.csv', delimiter=',')		
+pose_label = genfromtxt('data_sets/facial_pose_labels_624x960.csv', delimiter=',')		
 original_Y = Allocation_2_Y(label)
-name_file = open('data_sets/facial_names_98.csv', 'r')
+name_file = open('data_sets/facial_names_624x960.csv', 'r')
+
 
 
 #	Use the median of the pairwise distance as sigma
@@ -67,7 +69,8 @@ else: 		# run preset original clustering
 
 
 if True:	# run alternative clustering
-	rand_lambda = 3*np.random.random()
+	#rand_lambda = 3*np.random.random()
+	rand_lambda = 0.00001
 
 	ASC.set_values('q',10)
 	ASC.set_values('C_num',4)
