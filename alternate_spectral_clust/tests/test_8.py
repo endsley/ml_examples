@@ -70,7 +70,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 if True:	# some HSIC debug stuff
 	cf = db['cf']
-	print 'My cost : ' , cf.calc_cost_function(db['W_matrix'])
+	print 'My cost : ' , cf.calc_cost_function(db['W_matrix'], Y_columns=db['C_num'])
 	print 'test cost : ' , calc_cost.calc_cost_function(db)
 
 if True:	#	plot the clustering result

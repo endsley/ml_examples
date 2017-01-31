@@ -8,8 +8,8 @@ import time
 
 #	You must comment out one of the method and keep the other
 #from W_optimize_Gaussian import *
-#from W_optimize_Gaussian_stochastic import *
 #from W_optimize_Gaussian_ADMM import *
+from W_optimize_Gaussian_stochastic import *
 from SDG import *
 #from direct_GD import *
 
@@ -71,6 +71,7 @@ def FKDAC_implementation(db):
 		db['lowest_gradient'] = float("inf")
 
 		db['W_matrix'] = np.zeros((db['d'], db['q']) )
+		#db['W_matrix'] = np.eye(db['d'], db['q']) #This must be commented out if running together with FKDAC
 		#db['W_matrix'], R = np.linalg.qr(np.random.normal(0,1, (db['d'], db['q']) ))
 		#print db['W_matrix']
 
@@ -106,8 +107,12 @@ def DongLing_implementation(db):
 		db['lowest_cost'] = float("inf")
 		db['lowest_gradient'] = float("inf")
 
-		db['W_matrix'] = np.eye(db['d'], db['q']) 
-		#db['W_matrix'] = np.zeros((db['d'], db['q']) )
+		if False: # running both
+			if db['Y_matrix'].size > 0:
+				db['Y_matrix'] = db['Y_matrix'][:,0:db['C_num']]
+		else:
+			db['W_matrix'] = np.eye(db['d'], db['q']) #This must be commented out if running together with FKDAC
+
 		if db['data_type'] == 'Feature Matrix': 
 			db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
 		elif db['data_type'] == 'Graph matrix': 
@@ -117,7 +122,6 @@ def DongLing_implementation(db):
 		while WU_converge == False: 	
 			W_optimize_Gaussian(db)
 			U_optimize(db)
-			Update_latest_UW(db)
 	
 			WU_converge = exit_condition(db, loop_count)
 			loop_count += 1

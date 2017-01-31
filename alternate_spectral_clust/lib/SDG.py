@@ -70,12 +70,22 @@ class SDG:
 	def update_best_W(self, new_cost, new_gradient_mag, W):
 		db = self.db
 
-		if(new_cost < db['lowest_cost']):
-			db['lowest_U'] = db['U_matrix']
-			db['lowest_cost'] = new_cost
-			db['lowest_gradient'] = new_gradient_mag
-			db['W_matrix'] = W
-			#import pdb; pdb.set_trace()
+		#if(new_cost < db['lowest_cost']):
+		#	db['lowest_U'] = db['U_matrix']
+		#	db['lowest_cost'] = new_cost
+		#	db['lowest_gradient'] = new_gradient_mag
+		#	db['W_matrix'] = W
+		#	#import pdb; pdb.set_trace()
+
+
+		#	Trying always update
+		db['lowest_U'] = db['U_matrix']
+		db['lowest_cost'] = new_cost
+		db['lowest_gradient'] = new_gradient_mag
+		db['W_matrix'] = W
+
+
+
 
 	def run(self):
 		db = self.db

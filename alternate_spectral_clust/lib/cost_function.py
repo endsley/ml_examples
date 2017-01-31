@@ -71,9 +71,12 @@ class cost_function:
 		except:
 			self.A_memory_feasible = False
 	
-	def calc_psi(self): # psi = H(UU'-l YY')H
+	def calc_psi(self, Y_columns=None): # psi = H(UU'-l YY')H
 		db = self.db
 		Y = db['Y_matrix']
+
+		if(Y_columns != None): 
+			Y = Y[:,0:Y_columns]
 		U = db['U_matrix']
 		H = db['H_matrix']
 
@@ -120,13 +123,13 @@ class cost_function:
 		if True:# Use eig
 			[S2,U2] = np.linalg.eigh(A)
 			eigsValues = S2[0:db['q']]
-			W = U2[:,0:db['q']]
+			#W = U2[:,0:db['q']]
 		else:
 			# Use svd
 			[U,S,V] = np.linalg.svd(A)
 			reverse_S = S[::-1]
 			eigsValues = reverse_S[0:db['q']]
-			W = np.fliplr(U)[:,0:db['q']]
+			#W = np.fliplr(U)[:,0:db['q']]
 
 		new_gradient = A.dot(W)
 		Lagrange_gradient = new_gradient - W*eigsValues
@@ -151,13 +154,15 @@ class cost_function:
 
 		return np.trace( H.dot(D).dot(K).dot(D).dot(H).dot(Y).dot(Y.T) ) 
 
-	def calc_cost_function(self, W, also_calc_Phi=False, update_D_matrix=False): #Phi = the matrix we perform SVD on
+	def calc_cost_function(self, W, also_calc_Phi=False, update_D_matrix=False, Y_columns=None): #Phi = the matrix we perform SVD on
 		db = self.db
+		if self.psi == None: self.calc_psi(Y_columns)
 
 		#start_time = time.time() 
 		K = self.create_Kernel(W)
 		D = np.diag(db['D_matrix'])
 		DD = np.outer(D,D)
+
 		const_matrix = DD*self.psi*K
 		cost = -np.sum(const_matrix)
 

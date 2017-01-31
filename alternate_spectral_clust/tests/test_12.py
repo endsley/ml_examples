@@ -76,9 +76,9 @@ if True:	# run alternative clustering
 	ASC.set_values('C_num',4)
 	ASC.set_values('sigma',sigma)
 	ASC.set_values('lambda',rand_lambda)
-	#start_time = time.time() 
+	start_time = time.time() 
 	ASC.run()
-	#print("--- %s seconds ---" % (time.time() - start_time))
+	print("--- Time took : %s seconds ---" % (time.time() - start_time))
 	alternative = db['allocation']	
 	alternative_Y = Allocation_2_Y(alternative)
 	pose_Y = Allocation_2_Y(pose_label)
