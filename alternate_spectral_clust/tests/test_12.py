@@ -25,8 +25,9 @@ from file_writing import *
 #pose_label = genfromtxt('data_sets/facial_pose_labels.csv', delimiter=',')		
 #original_Y = genfromtxt('data_sets/facial_original_Y.csv', delimiter=',')		
 #data = genfromtxt('data_sets/facial_98.csv', delimiter=',')		
+#data = genfromtxt('data_sets/facial_95.csv', delimiter=',')		
 
-data = genfromtxt('data_sets/facial_95.csv', delimiter=',')		
+data = genfromtxt('data_sets/facial_85.csv', delimiter=',')		
 label = genfromtxt('data_sets/facial_true_labels_624x960.csv', delimiter=',')		
 pose_label = genfromtxt('data_sets/facial_pose_labels_624x960.csv', delimiter=',')		
 original_Y = Allocation_2_Y(label)
@@ -35,9 +36,9 @@ name_file = open('data_sets/facial_names_624x960.csv', 'r')
 
 
 #	Use the median of the pairwise distance as sigma
-#d_matrix = sklearn.metrics.pairwise.pairwise_distances(data, Y=None, metric='euclidean')
-#sigma = np.median(d_matrix)
-sigma = 18   # HSIC(true pose,data) = 78.8 
+d_matrix = sklearn.metrics.pairwise.pairwise_distances(data, Y=None, metric='euclidean')
+sigma = np.median(d_matrix)
+#sigma = 18   # HSIC(true pose,data) = 78.8 
 
 
 names = np.array(name_file.readlines())
@@ -70,12 +71,14 @@ else: 		# run preset original clustering
 
 if True:	# run alternative clustering
 	#rand_lambda = 3*np.random.random()
-	rand_lambda = 0.00001
+	rand_lambda = 0.1
 
-	ASC.set_values('q',10)
+	ASC.set_values('q',4)
 	ASC.set_values('C_num',4)
 	ASC.set_values('sigma',sigma)
 	ASC.set_values('lambda',rand_lambda)
+	#ASC.set_values('kernel_type','Linear Kernel')
+	ASC.set_values('kernel_type','Gaussian Kernel')
 	start_time = time.time() 
 	ASC.run()
 	print("--- Time took : %s seconds ---" % (time.time() - start_time))
@@ -115,8 +118,9 @@ if True:	# run alternative clustering
 	txt += '\tLambda used : ' + str(rand_lambda) + '\n'
 	txt += '\tLowest Cost : ' + str(db['lowest_cost']) + '\n'
 
+	print txt
 
-	append_txt('./output.txt', txt)
+	#append_txt('./output.txt', txt)
 
 	#print "Alternative aginst original: " , normalized_mutual_info_score(pose_label, alternative)
 	#print "Alternative aginst truth : " , normalized_mutual_info_score(label, alternative)
@@ -196,6 +200,6 @@ if False:	# plot the W convergence results
 	plt.show()
 
 
-
+import pdb; pdb.set_trace()
 
 

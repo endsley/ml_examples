@@ -156,7 +156,7 @@ class cost_function:
 
 	def calc_cost_function(self, W, also_calc_Phi=False, update_D_matrix=False, Y_columns=None): #Phi = the matrix we perform SVD on
 		db = self.db
-		if self.psi == None: self.calc_psi(Y_columns)
+		if type(self.psi) == type(None): self.calc_psi(Y_columns)
 
 		#start_time = time.time() 
 		K = self.create_Kernel(W)
