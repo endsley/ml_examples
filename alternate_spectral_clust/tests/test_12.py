@@ -71,7 +71,8 @@ else: 		# run preset original clustering
 
 if True:	# run alternative clustering
 	#rand_lambda = 3*np.random.random()
-	rand_lambda = 1
+	rand_lambda = 0.1 # this one works with KDAC
+	#rand_lambda = 1
 
 	ASC.set_values('q',4)
 	ASC.set_values('C_num',4)
@@ -156,7 +157,7 @@ if False:	# save or load db to and from a pickle file
 
 
 
-if False:	# plot the W convergence results
+if True:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	

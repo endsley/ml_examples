@@ -1,9 +1,10 @@
 <TeXmacs|1.0.7.18>
 
-<style|<tuple|generic|american>>
+<style|article>
 
 <\body>
-  <doc-data|<doc-title|Fast KDAC>>
+  <doc-data|<doc-title|Fast KDAC>|<doc-author-data|<author-name|Chieh Wu
+  <tmaffiliation|12/24/2016> >>|<doc-date|<date|>>>
 
   Given the objective function :
 
@@ -256,275 +257,389 @@
   method as an optimization approach. This allows us to lead into using a
   different optimization all together.
 
-  \;
-
   <section|Fast KDAC>
 
   FKDAC is an alternative approach to KDAC that estimates the optimal result
   without using gradient methods. Similar to DG, we start by looking at a
-  single column of <math|W> at a time.\ 
+  single column of <math|W> at a time.
 
   <\equation>
-    <tabular|<tformat|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|min>|<cell|-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2
-    \<sigma\><rsup|2>>>>>|<row|<cell|W>|<cell|>>|<row|<cell|s.t>|<cell|w<rsup|T>w=1>>|<row|<cell|>|<cell|W\<in\>\<bbb-R\><rsup|d
-    \<times\> 1>>>|<row|<cell|>|<cell|A\<in\>\<bbb-R\><rsup|d\<times\>d>>>|<row|<cell|>|<cell|\<gamma\><rsub|i,j>\<in\>\<bbb-R\>>>>>>
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<table|<row|<cell|min>|<cell|-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>>>|<row|<cell|W>|<cell|>>|<row|<cell|s.*t>|<cell|w<rsup|T>*w=1>>|<row|<cell|>|<cell|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>1>>>|<row|<cell|>|<cell|A\<in\><with|math-font|Bbb*|R><rsup|d\<times\>d>>>|<row|<cell|>|<cell|\<gamma\><rsub|i,j>\<in\><with|math-font|Bbb*|R>>>>>>
   </equation>
-
-  \;
 
   A standard approach to find the optimal solution is to set the derivative
   of the Lagrangian to zero and solve for <math|w>. According to Bertsekas,
   the first order necessary condition of the Lagrange Multipliers states that
-  :\ 
+  :
 
   <\proposition>
     Let <math|x<rsup|\<ast\>>> be a local minimum of f s.t h(x)=0, and assume
-    that the constraint gradient <math|\<nabla\>h<rsub|1><around*|(|x<rsup|\<ast\>>|)>,
-    \<nabla\>h<rsub|2><around*|(|x<rsup|\<ast\>>|)>,\<ldots\>> are linearly
-    independent. Then there exists a unique vector
-    <math|\<lambda\><rsup|\<ast\>>=<around*|(|\<lambda\><rsub|1><rsup|\<ast\>>,\<lambda\><rsub|2><rsup|\<ast\>>,\<ldots\>,|)>>,
-    called the Lagrange multiplier such that :\ 
+    that the constraint gradient <math|\<nabla\>*h<rsub|1><around|(|x<rsup|\<ast\>>|)>,\<nabla\>*h<rsub|2><around|(|x<rsup|\<ast\>>|)>,\<ldots\>>
+    are linearly independent. Then there exists a unique vector
+    <math|\<lambda\><rsup|\<ast\>>=<around|(|\<lambda\><rsub|1><rsup|\<ast\>>,\<lambda\><rsub|2><rsup|\<ast\>>,\<ldots\>,|)>>,
+    called the Lagrange multiplier such that :
 
     <\equation*>
-      \<nabla\>f<around*|(|x<rsup|\<ast\>>|)>+<big|sum><rsub|i=1><rsup|m>
-      \<lambda\><rsup|\<ast\>><rsub|i>\<nabla\>h<rsub|i><around*|(|x<rsup|\<ast\>>|)>=0
+      \<nabla\>*f<around|(|x<rsup|\<ast\>>|)>+<big|sum><rsub|i=1><rsup|m>\<lambda\><rsup|\<ast\>><rsub|i>*\<nabla\>*h<rsub|i><around|(|x<rsup|\<ast\>>|)>=0
     </equation*>
   </proposition>
 
-  \;
-
-  Notice that the only assumption of the Lagrange multiplier theorem is the
+  \ Notice that the only assumption of the Lagrange multiplier theorem is the
   linear independence of constraint functions. In our case, since the
-  constraint is :\ 
+  constraint is :
 
   <\equation*>
-    h<around*|(|w|)>=w<rsup|T>w-1=0
+    h<around|(|w|)>=w<rsup|T>*w-1=0
   </equation*>
 
   <\equation*>
-    \<nabla\>h<around*|(|w|)>=2 w
+    \<nabla\>*h<around|(|w|)>=2*w
   </equation*>
 
   In the single vector case, the constraint gradient produces only a single
   vector, and therefore the independence is automatically satisfied. Given
   that we meet the assumption, we can apply the theorem on our problem and
-  yield :\ 
+  yield :
 
   <\equation*>
-    \<cal-L\>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2 \<sigma\><rsup|2>>>
-    +<frac|\<lambda\>|2><around*|(|w<rsup|T>w-1|)>
+    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>+<frac|\<lambda\>|2>*<around|(|w<rsup|T>*w-1|)>
   </equation*>
 
   <\equation*>
-    <frac|\<partial\>\<cal-L\>|\<partial\>w>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
-    e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2 \<sigma\><rsup|2>>>A<rsub|i,j> w
-    |]>+\<lambda\> w=0
+    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*w>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*w|]>+\<lambda\>*w=0
   </equation*>
-
-  \;
 
   Let's for a moment assume that we magically know the optimal solution,
-  <math|w<rsup|\<ast\>>>, then the problem could be rewritten as :\ 
+  <math|w<rsup|\<ast\>>>, then the problem could be rewritten as :
 
   <\equation*>
-    <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
-    e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>A<rsub|i,j>w<rsup|\<ast\>>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j> \ |]>+\<lambda\> I|]>w<rsup|\<ast\>>=0
+    <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>*A<rsub|i,j>*w<rsup|\<ast\>>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>+\<lambda\>*I|]>*w<rsup|\<ast\>>=0
   </equation*>
 
-  If we let :\ 
+  If we let :
 
   <\equation*>
-    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
-    e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>A<rsub|i,j>w<rsup|\<ast\>>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j> \ |]>
+    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>*A<rsub|i,j>*w<rsup|\<ast\>>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
   </equation*>
 
-  We can rewrite the equation : \ 
+  We can rewrite the equation :\ 
 
   <\equation*>
-    <around*|[|\<Phi\>+\<lambda\> I|]> w<rsup|\<ast\>>=0
+    <around|[|\<Phi\>+\<lambda\>*I|]>*w<rsup|\<ast\>>=0
   </equation*>
 
   In other words, the optimal solution <math|w<rsup|\<ast\>>> is in the null
-  space of the matrix <math|\<Gamma\>=<around*|[|\<Phi\>+\<lambda\> I|]>>.
+  space of the matrix <math|\<Gamma\>=<around|[|\<Phi\>+\<lambda\>*I|]>>.
   \ Or, from another perspective, we could rewrite the equation such that :
 
   <\equation>
-    \<Phi\>w<rsup|\<ast\>> =-\<lambda\>w<rsup|\<ast\>>
+    \<Phi\>*w<rsup|\<ast\>>=-\<lambda\>*w<rsup|\<ast\>>
   </equation>
 
   From the equation above, <math|w<rsup|\<ast\>>> is an eigenvector of
   <math|\<Phi\>>. \ From this perspective, it would be extremely easy to find
   <math|w<rsup|\<ast\>>> if we know <math|\<Phi\>>. \ But, of course,
   <math|\<Phi\>> includes the variable <math|w<rsup|\<ast\>>>. If we already
-  know <math|w<rsup|\<ast\>>>, there would be no point of finding it again.\ 
+  know <math|w<rsup|\<ast\>>>, there would be no point of finding it again.
 
-  \;
+  \ To work around the requirement of <math|w<rsup|\<ast\>>> in
+  <math|\<Phi\>>, we could approximate the cost function with a simpler cost
+  function.
 
-  To work around the requirement of <math|w<rsup|\<ast\>>> in <math|\<Phi\>>,
-  we could redefine an approximated version of the original cost function. We
-  start with the Lagrangian again :
+  <\proposition>
+    Assuming Lipschitz condition, the problem
+    <math|w<rsup|\<ast\>>=<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|argmin>>|<row|<cell|w>>>>>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>>
+    can be approximated with the eigenvectors of the marix :
+    <math|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>>
+    .
+  </proposition>
+
+  <\proof>
+    \ 
+  </proof>
+
+  We start with the Lagrangian again :
 
   <\equation*>
-    \<cal-L\>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2 \<sigma\><rsup|2>>>
-    +<frac|\<lambda\>|2><around*|(|w<rsup|T>w-1|)>
+    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>+<frac|\<lambda\>|2>*<around|(|w<rsup|T>*w-1|)>
   </equation*>
 
   Using the Taylor expansion around 0, we approximate
-  <math|e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2 \<sigma\><rsup|2>>>> up to the
-  first order.\ 
+  <math|e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>> up to
+  the first order.
 
   <\equation*>
-    f<around*|(|w|)>\<approx\><wide|f|\<bar\>><around*|(|w|)>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    <around*|(|1-<frac|w<rsup|T>A<rsub|i,j>w|2
-    \<sigma\><rsup|2>>|)>+<frac|\<lambda\>|2><around*|(|w<rsup|T>w-1|)>
+    f<around|(|w|)>\<approx\><wide|f|\<bar\>><around|(|w|)>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*<around*|(|1-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>|)>+<frac|\<lambda\>|2>*<around|(|w<rsup|T>*w-1|)>
   </equation*>
 
-  Given the approximation function of <math|<wide|f|\<bar\>><around*|(|w|)>>,
-  we again find the derivate and set it to zero.\ 
+  Given the approximation function of <math|<wide|f|\<bar\>><around|(|w|)>>,
+  we again find the derivate and set it to zero.
 
   <\equation*>
-    \<nabla\><wide|f|\<bar\>><around*|(|w|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|
-    \<sigma\><rsup|2>>A<rsub|i,j>|]>w+\<lambda\>w=0
+    \<nabla\><wide|f|\<bar\>><around|(|w|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>*w+\<lambda\>*w=0
   </equation*>
 
   <\equation*>
-    \<nabla\><wide|f|\<bar\>><around*|(|w|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|
-    \<sigma\><rsup|2>>A<rsub|i,j>+\<lambda\> I|]>w=0
+    \<nabla\><wide|f|\<bar\>><around|(|w|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>+\<lambda\>*I|]>*w=0
   </equation*>
 
   <\equation*>
-    <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|
-    \<sigma\><rsup|2>>A<rsub|i,j>|]> w=-\<lambda\> w
+    <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>*w=-\<lambda\>*w
   </equation*>
 
   <\equation*>
-    \<Phi\> w=-\<lambda\> w
+    \<Phi\>*w=-\<lambda\>*w
   </equation*>
 
-  From this point, we could approximate the optimal <math|w<rsup|\<ast\>>> by
-  simply finding the eigenvector of <math|\<Phi\>>. \ To extrapolate this
-  idea to <math|W\<in\>\<bbb-R\><rsup|d\<times\>q>> instead of
-  <math|W\<in\>\<bbb-R\><rsup|d\<times\>1>>, we could simply pick <math|q>
-  eigenvectors. Since they are orthogonal with a magnitude of 1, these
-  solutions are automatically within the constraint space. Once we have found
-  the initial <math|w<rsub|k>>, we could plug it back into the original
-  gradient equation to find a better approximation of
+  Once we have found the initial <math|w<rsub|k>>, we could plug it back into
+  the original gradient equation to find a better approximation of
   <math|\<Phi\><rsub|k+1>>. Using the new <math|\<Phi\><rsub|k+1>>, we can
-  once again approximate and find <math|w<rsub|k+1>>.\ 
+  once again approximate and find <math|w<rsub|k+1>>. This process could be
+  repeated until some satisfactory condition is met.
 
   <\equation*>
-    eig <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
-    e<rsup|-<frac|w<rsub|k><rsup|T>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j> \ |]>=w<rsub|k+1>
+    eig<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsub|k><rsup|T>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>=w<rsub|k+1>
   </equation*>
 
-  \;
+  \ From this point, we could approximate the optimal <math|w<rsup|\<ast\>>>
+  by simply finding the eigenvector of <math|\<Phi\>>. \ To extrapolate this
+  idea to <math|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>q>> instead of
+  <math|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>1>>, we could simply
+  pick <math|q> eigenvectors. Since they are orthogonal with a magnitude of
+  1, these solutions are automatically within the constraint space.
 
-  \ At this point, it is reasonable to wonder that given so many singular
+  \ 
+
+  <section|Solving problem with multiple <math|w> columns :>
+
+  We now expand our understanding to solve problems where <math|W> is a
+  <math|d> <math|\<times\>> <math|q> matrix instead of a single vector. We
+  now deal with the problem :
+
+  <\equation*>
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|W>>>>>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>
+  </equation*>
+
+  <\equation*>
+    s.*t<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|3|3|cell-rborder|0ln>|<table|<row|<cell|>|<cell|>|<cell|>>>>>W<rsup|T>*W=I
+  </equation*>
+
+  Writing out the Larangian :
+
+  <\equation*>
+    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>+<frac|1|2>*Tr<around|(|\<Lambda\>*<around|(|W<rsup|T>*W-I|)>|)>
+  </equation*>
+
+  We also similarly use the Taylor approximation on the exponential term up
+  to the first term and yield :
+
+  <\equation*>
+    <with|math-font|cal|L>\<approx\>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*<around*|(|1-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>|)>+<frac|1|2>*Tr<around|(|\<Lambda\>*<around|(|W<rsup|T>*W-I|)>|)>
+  </equation*>
+
+  Following the similar procedure by finding the derivative of
+  <math|<with|math-font|cal|L>> and setting it to zero.
+
+  <\equation*>
+    \<nabla\><with|math-font|cal|L>\<approx\><big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>*W+W*\<Lambda\>=0
+  </equation*>
+
+  We arrange the problem into standard eigenvalue/eigenvector problem.
+
+  <\equation*>
+    <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>*W=-W*\<Lambda\>
+  </equation*>
+
+  From this, we see that if <math|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>q>>,
+  the <math|W> is <math|q> eigenvectors of the matrix :
+
+  <\equation*>
+    \<Phi\><rsub|0>=<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>
+  </equation*>
+
+  And <math|\<Lambda\>> is the eigenvalue matrix.
+
+  <\equation*>
+    \<Lambda\>=eig<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>
+  </equation*>
+
+  Using the <math|W<rsub|0>> discovered from this initialization point, we
+  could similarly form an updated <math|\<Phi\><rsub|n+1>> using the original
+  cost derivative without any approximation.
+
+  <\equation*>
+    \<Phi\><rsub|n+1>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around|(|W<rsub|n><rsup|T>*A<rsub|i,j>*W<rsub|n>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
+  </equation*>
+
+  At this point, it is reasonable to wonder that given so many singular
   values, which singular value would be the most reasonable to pick? \ One
   reasonable approach is to use the greedy algorithm to find <math|q>
   eigenvectors that produces the lowest cost. \ The following section
-  explores the theoretic motivation to choose the singular value.\ 
+  explores the theoretic motivation for choosing the optimal singular values.
 
-  \;
+  <section|Single Column Frank Wolfe Method>
 
-  <section|Frank Wolfe Method>
-
-  We start by borrowing the idea of Frank Wolfe method by taking the 1st
-  order Taylor Expansion around some <math|w<rsub|k>>.\ 
+  Let <math|q> be the reduced the dimension and <math|d> as the original
+  dimension. We have seen from the previous section that the stationary poins
+  could be found by picking <math|q> eigenvectors from the <math|\<Phi\>>
+  marix. However, since <math|q> could be significantly smaller than
+  <math|d>, using the appropriate eigenvectors could effect the outcome.
+  \ Without any prior knowledge, the problems requires the optimal solution
+  to choose from potenial large outcomes of
+  <math|<around*|(|<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|d>>|<row|<cell|q>>>>>|)>>.
+  To simpliy the selection process, this section provides a theoretical
+  argument on how these vectors could be chosen intelligently. To demonstrate
+  the idea, we start by simplifying the problem into a single column <math|w>
+  vector. This is without much loss of generality since the idea could be
+  generalized into higher dimensions. Again, assuming that the Lipschitz
+  condition holds, we start by borrowing the idea of Frank Wolfe method by
+  taking the 1st order Taylor Expansion around some <math|w<rsub|k>>.
 
   <\equation>
-    f<around*|(|w|)>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>+2<around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>w<rsub|k>|]><rsup|T><around*|(|w<rsub|k+1>-w<rsub|k>|)>
+    f<around|(|w|)>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>+2<around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*w<rsub|k>|]><rsup|T>*<around|(|w<rsub|k+1>-w<rsub|k>|)>
   </equation>
 
   The Frank Wolfe method assume that the constraint space is convex. For our
   case, since our constraint space is not convex, we must assume at least
-  that the constraint space is convex within a certain radius.\ 
+  that the constraint space is convex within a certain radius.
 
   <\equation*>
-    w\<in\>S<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|s.t>|<cell|>|<cell|S>|<cell|is>|<cell|convex>|<cell|>|<cell|\<forall\>>|<cell|>>>>><around*|\<\|\|\>|w-w<rsub|k>|\<\|\|\>>\<leq\>\<varepsilon\>
+    w\<in\>S<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|4|4|cell-halign|l>|<cwith|1|-1|5|5|cell-halign|l>|<cwith|1|-1|6|6|cell-halign|l>|<cwith|1|-1|7|7|cell-halign|l>|<cwith|1|-1|8|8|cell-halign|l>|<cwith|1|-1|9|9|cell-halign|l>|<cwith|1|-1|10|10|cell-halign|l>|<cwith|1|-1|10|10|cell-rborder|0ln>|<table|<row|<cell|>|<cell|>|<cell|s.*t>|<cell|>|<cell|S>|<cell|is>|<cell|convex>|<cell|>|<cell|\<forall\>>|<cell|>>>>><around|\<\|\|\>|w-w<rsub|k>|\<\|\|\>>\<leq\>\<varepsilon\>
   </equation*>
 
   Looking at the right side of equation 6, the first term is identical to the
   current cost at <math|w<rsub|k>>. \ If we assume that higher order terms
   are insignificant, we can achieve a lower cost as long as we pick
   <math|w<rsub|k+1>> such that the 2nd term is a negative value. Let's look
-  at the 2nd term more closely.\ 
+  at the 2nd term more closely.
 
   <\equation*>
-    2<around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>w<rsub|k>|]><rsup|T><around*|(|w<rsub|k+1>-w<rsub|k>|)>\<leq\>0
+    2<around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*w<rsub|k>|]><rsup|T>*<around|(|w<rsub|k+1>-w<rsub|k>|)>\<leq\>0
   </equation*>
 
   Note that <math|A<rsub|i,j>> are symmetric. We can rewrite this expression
   :
 
   <\equation>
-    w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>|]>w<rsub|k+1>\<leq\>w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>|]>w<rsub|k>
+    w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k+1>\<leq\>w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k>
   </equation>
 
-  Looking at the eqution above 2 conclusions could be drawn. First, by
-  realizing that the quation :\ 
+  Looking at the eqution above, variously conclusions could be drawn. First,
+  by realizing that the quation :
 
   <\equation*>
-    v<rsup|T> =w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>|]>
+    v<rsup|T>=w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
   </equation*>
 
   is a vector, we could rewrite equation (7) as :
 
   <\equation*>
-    v<rsup|T> w<rsub|k+1>\<leq\>v <rsup|T>w<rsub|k>
+    v<rsup|T>*w<rsub|k+1>\<leq\>v<rsup|T>*w<rsub|k>
   </equation*>
 
-  The first conclusion, we could draw is that if <math|v<rsup|T>w<rsub|k+1>>
-  \ is minimized when <math|w<rsub|k+1>=-v>. From this, approach, we can
-  iteratively pick <math|w<rsub|k+1>> by setting <math|w<rsub|k+1>=-v>. This
-  approach allows us to iterate towards convergence, however, it would be
-  faster to simply approximate the solution at convergence. The second
-  conclusion requires us to realize that at convergence,
-  <math|w<rsub|k>=w<rsub|k+1>>. \ Therefore, we could approximate the
-  solution at convergence by minimizing the left hand side of (7) assuming
-  convergence.\ 
+  To draw the first conclusion, we note that <math|v<rsup|T>*w<rsub|k+1>> is
+  a product of two vectors. To ensure that <math|v<rsup|T>*w<rsub|k+1>> is
+  always less than or equal to <math|v<rsup|T>*w<rsub|k>>, we simply pick
+  <math|w<rsub|k+1>> that minimizes the term <math|v<rsup|T>*w<rsub|k+1>>.
 
   <\equation*>
-    <tabular|<tformat|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>f<around*|(|w|)>=<tabular|<tformat|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k+1><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>|]>w<rsub|k+1>
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>v<rsup|T>*w<rsub|k+1>
   </equation*>
 
-  From this perspective, we realize that the FKDAC approximation is
-  simultaneously approximating the convergence point of the Frank Wolfe
-  Method. Except in Frank Wolfe, it provides an objective of minimizing
-  <math|f<around*|(|w|)>>. This insight tells us that the best eigenvectors
-  to represent <math|w<rsup|\<ast\>>> should correspond to the smallest
-  eigenvalue of the matrix :
+  We know from geometry that the product of two vectors is minimized when
+  they are opposite directions of each other. Therefore <math|w<rsub|k+1>> is
+  minimized when <math|w<rsub|k+1>=-v>. From this approach, we can
+  iteratively pick <math|w<rsub|k+1>> by setting <math|w<rsub|k+1>=-v> to
+  achieve a descending direction. However, this approach encounters the
+  problem of discovering the step length accompanying the descending
+  direction. Since the constraint space is not convex, the step length cannot
+  be discovered by methods of interpolation.
 
-  <\equation*>
-    <around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    e<rsup|-<frac|w<rsup|T><rsub|k>A<rsub|i,j>w<rsub|k>|2
-    \<sigma\><rsup|2>>>A<rsub|i,j>|]>\<approx\><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
-    A<rsub|i,j>|]>
-  </equation*>
+  \ Although solutions to these problems are not immediately obvious, the
+  Frank Wolfe derivation does provide another useful insight. Using Frank
+  Wolfe's method, the problem transforms into a different optimization
+  problem.
 
   <\equation*>
-    \;
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k+1>
   </equation*>
+
+  We note that although we cannot easily choose <math|w<rsub|k+1>> due to the
+  step length, we do know how the term is upper bounded if we re-examine the
+  inequality carefully :
+
+  <\equation>
+    w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k+1>\<leq\>w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k>
+  </equation>
+
+  By choosing the <math|w<rsub|k>> that minimizes the upper bound, we are
+  simultaneously minimizing the Frank Wolfe method. In other words, when
+  <math|w<rsub|k>> is minimized, <math|w<rsub|k+1>=w<rsub|k>>. From this
+  observation, we can again rewrite the objective function.
+
+  <\equation*>
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>f<around|(|w|)>=<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k+1><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k+1>
+  </equation*>
+
+  Linking this equation to FKDAC, we notice that they are in exact same form.
+  Except from Frank Wolfe interpretation, not only are we finding any
+  eigenvectors, we are specifically finding the eigenvectors that minimizes
+  quadratic term.
+
+  <\equation*>
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>f<around|(|w|)>=<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k+1><rsup|T>*\<Phi\><rsub|k>*w<rsub|k+1>
+  </equation*>
+
+  This observation tells us that the optimal vectors to solve the FKDAC
+  problem is the least dominant eigenvectors.
+
+  <section|Frank Wolfe with multiple columns>
+
+  After understanding the basic concept through the usage of a single column
+  example, we can now expand the same idea to a more general multiple column
+  case. Given the first order Taylor expansion.
+
+  <\equation>
+    f<around|(|W|)>=f<around|(|W<rsub|k>|)>+\<nabla\>*f<around|(|W<rsub|k>|)><rsup|T>*<around|(|W-W<rsub|k>|)>
+  </equation>
+
+  Applying this equation to our problem, we get :
+
+  <\equation*>
+    f<around|(|W|)>=f<around|(|w|)>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T><rsub|k>*A<rsub|i,j>*W<rsub|k>|)>|2*\<sigma\><rsup|2>>>+<around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T><rsub|k>*A<rsub|i,j>*W<rsub|k>|)>|2*\<sigma\><rsup|2>>>*Vec<around|(|A<rsub|i,j>*W<rsub|k>|)>|]><rsup|T>*Vec<around|(|W-W<rsub|k>|)>
+  </equation*>
+
+  Note that the notation <math|Vec<around|(|.|)>> is the vectorization of a
+  matrix. Similar to the single column case, we only need to concentrate on
+  making the 2nd term negative.
+
+  <\equation*>
+    <around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T><rsub|k>*A<rsub|i,j>*W<rsub|k>|)>|2*\<sigma\><rsup|2>>>*Vec<around|(|A<rsub|i,j>*W<rsub|k>|)>|]><rsup|T>*Vec<around|(|W-W<rsub|k>|)>\<leq\>0
+  </equation*>
+
+  Let :
+
+  <\equation*>
+    \<beta\><rsub|i,j>=\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T><rsub|k>*A<rsub|i,j>*W<rsub|k>|)>|2*\<sigma\><rsup|2>>>
+  </equation*>
+
+  <\equation*>
+    <around*|[|<big|sum><rsub|i,j>\<beta\><rsub|i,j>*<around|(|I\<otimes\>A<rsub|i,j>|)>*Vec<around|(|W<rsub|k>|)>|]><rsup|T>*<around|[|Vec<around|(|W|)>-Vec<around|(|W<rsub|k>|)>|]>\<leq\>0
+  </equation*>
+
+  We now rearrange the terms and get :
+
+  <\equation*>
+    <around*|[|<big|sum><rsub|i,j>\<beta\><rsub|i,j>*<around|(|I\<otimes\>A<rsub|i,j>|)>*Vec<around|(|W<rsub|k>|)>|]><rsup|T>*Vec<around|(|W|)>\<leq\><around*|[|<big|sum><rsub|i,j>\<beta\><rsub|i,j>*<around|(|I\<otimes\>A<rsub|i,j>|)>*Vec<around|(|W<rsub|k>|)>|]><rsup|T>*Vec<around|(|W<rsub|k>|)>
+  </equation*>
+
+  <\equation*>
+    Vec<around|(|W<rsub|k>|)><rsup|T><around*|[|<big|sum><rsub|i,j>\<beta\><rsub|i,j>*<around|(|I\<otimes\>A<rsub|i,j>|)>|]>*Vec<around|(|W|)>\<leq\>Vec<around|(|W<rsub|k>|)><rsup|T><around*|[|<big|sum><rsub|i,j>\<beta\><rsub|i,j>*<around|(|I\<otimes\>A<rsub|i,j>|)>|]>*Vec<around|(|W<rsub|k>|)>
+  </equation*>
+
+  Using the same logic to lower the upper bound, the <math|W<rsub|k>> that
+  minimizes the upper bound consists of the <math|q> least dominant
+  eigenvectors of the matrix <math|\<Phi\>>.
 
   <section|Optimality condition>
 
@@ -532,77 +647,69 @@
   with a convex constrained space. Given a problem of :
 
   <\equation*>
-    <tabular|<tformat|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|min>|<cell|f<around*|(|x|)>>>|<row|<cell|x\<in\>X>|<cell|>>>>>
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<table|<row|<cell|min>|<cell|f<around|(|x|)>>>|<row|<cell|x\<in\>X>|<cell|>>>>>
   </equation*>
 
   We know that given <math|x<rsup|\<ast\>>> as a local minimum in a convex
-  constrained space of <math|X>, the following condition must be satisfied.\ 
+  constrained space of <math|X>, the following condition must be satisfied.
 
   <\equation*>
-    \<nabla\>f<around*|(|x<rsup|\<ast\>>|)><rsup|T><around*|(|x-x<rsup|\<ast\>>|)>\<geq\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>\<forall\>
-    x\<in\>X
+    \<nabla\>*f<around|(|x<rsup|\<ast\>>|)><rsup|T>*<around|(|x-x<rsup|\<ast\>>|)>\<geq\>0<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|4|4|cell-halign|l>|<cwith|1|-1|5|5|cell-halign|l>|<cwith|1|-1|5|5|cell-rborder|0ln>|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>\<forall\>x\<in\>X
   </equation*>
 
   Given that we have a non-convex constraint space, we must make more strict
   assumptions. Suppose <math|x<rsup|\<ast\>>> is a local minimum within a
-  ball defined as <math|\<cal-B\><around*|(|x,\<varepsilon\>|)>\<assign\><around*|{|x:<around*|\<\|\|\>|x-x<rsup|\<ast\>>|\<\|\|\>>\<less\>\<varepsilon\>|}>>.
-  Assume <math|\<cal-B\><around*|(|x,\<varepsilon\>|)>\<cap\>X> is convex and
-  <math|f> is convex within <math|\<cal-B\><around*|(|x,\<varepsilon\>|)>\<cap\>X>,
-  then we state the following as the optimality condition.\ 
+  ball defined as <math|<with|math-font|cal|B><around|(|x,\<varepsilon\>|)>\<assign\><around|{|x:<around|\<\|\|\>|x-x<rsup|\<ast\>>|\<\|\|\>>\<less\>\<varepsilon\>|}>>.
+  Assume <math|<with|math-font|cal|B><around|(|x,\<varepsilon\>|)>\<cap\>X>
+  is convex and <math|f> is convex within
+  <math|<with|math-font|cal|B><around|(|x,\<varepsilon\>|)>\<cap\>X>, then we
+  state the following as the optimality condition.
 
   <\equation*>
-    \<nabla\>f<around*|(|x<rsup|\<ast\>>|)><rsup|T><around*|(|x-x<rsup|\<ast\>>|)>\<geq\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>\<forall\>
-    x\<in\>X<tabular|<tformat|<table|<row|<cell|>|<cell|and>|<cell|>>>>><around*|\<\|\|\>|x-x<rsup|\<ast\>>|\<\|\|\>>\<leq\>\<varepsilon\>
+    \<nabla\>*f<around|(|x<rsup|\<ast\>>|)><rsup|T>*<around|(|x-x<rsup|\<ast\>>|)>\<geq\>0<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|4|4|cell-halign|l>|<cwith|1|-1|5|5|cell-halign|l>|<cwith|1|-1|5|5|cell-rborder|0ln>|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>\<forall\>x\<in\>X<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|3|3|cell-rborder|0ln>|<table|<row|<cell|>|<cell|and>|<cell|>>>>><around|\<\|\|\>|x-x<rsup|\<ast\>>|\<\|\|\>>\<leq\>\<varepsilon\>
   </equation*>
 
   Given a function of :
 
   <\equation*>
-    f<around*|(|w|)>=-<big|sum>\<gamma\><rsub|i,j>e<rsup|-<frac|w<rsup|T>A<rsub|i,j>w|2
-    \<sigma\><rsup|2>>>
+    f<around|(|w|)>=-<big|sum>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>
   </equation*>
 
-  We create an approximate of the function :\ 
+  We create an approximate of the function :
 
   <\equation*>
-    f<around*|(|w|)>\<approx\>-<big|sum>\<gamma\><rsub|i,j><around*|(|1-<frac|1|2\<sigma\><rsup|2>>w<rsup|T>A<rsub|i,j>w|)>
+    f<around|(|w|)>\<approx\>-<big|sum>\<gamma\><rsub|i,j>*<around*|(|1-<frac|1|2*\<sigma\><rsup|2>>*w<rsup|T>*A<rsub|i,j>*w|)>
   </equation*>
 
-  From the approximation, we find the gradient :\ 
+  From the approximation, we find the gradient :
 
   <\equation*>
-    \<nabla\>f<around*|(|w|)>\<approx\><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>A<rsub|i,j>w
+    \<nabla\>*f<around|(|w|)>\<approx\><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>*w
   </equation*>
 
   Using the approximated gradient, we could now check for the optimality
-  condition.\ 
+  condition.
 
   <\equation*>
-    w<rsup|\<ast\>T><around*|[|<big|sum>\<gamma\><rsub|i,j>A<rsub|i,j>|]><rsup|T><around*|(|w-w<rsup|\<ast\>>|)>\<geq\>0
+    w<rsup|\<ast\>*T><around*|[|<big|sum>\<gamma\><rsub|i,j>*A<rsub|i,j>|]><rsup|T>*<around|(|w-w<rsup|\<ast\>>|)>\<geq\>0
   </equation*>
 
   <\equation*>
-    w<rsup|\<ast\><rsup|T>><around*|[|<big|sum>\<gamma\><rsub|i,j>A<rsub|i,j>|]><rsup|T>w\<geq\>w<rsup|\<ast\>><around*|[|<big|sum>\<gamma\><rsub|i,j>A<rsub|i,j>|]><rsup|T>w<rsup|\<ast\>>
+    w<rsup|\<ast\><rsup|T>><around*|[|<big|sum>\<gamma\><rsub|i,j>*A<rsub|i,j>|]><rsup|T>*w\<geq\>w<rsup|\<ast\>><around*|[|<big|sum>\<gamma\><rsub|i,j>*A<rsub|i,j>|]><rsup|T>*w<rsup|\<ast\>>
   </equation*>
 
   From the equation above, we see that in order for <math|w<rsup|\<ast\>>> to
   be a local minimum, <math|w<rsup|\<ast\>>> must be chosen such that the
   left hand side is always larger than the right hand side for any <math|w>.
   This is only possible when <math|w<rsup|\<ast\>>> is the least dominant
-  eigenvector of <math|<big|sum>\<gamma\><rsub|i,j>A<rsub|i,j>> matrix. \ 
-
-  \;
-
-  From this perspective, we conclude that picking the least dominant
-  eigenvector is a reasonable approximation for the local minimum of the
-  original cost function.
+  eigenvector of <math|<big|sum>\<gamma\><rsub|i,j>*A<rsub|i,j>> matrix. From
+  this perspective, we conclude that picking the least dominant eigenvector
+  is a reasonable approximation for the local minimum of the original cost
+  function.
 </body>
 
-<\initial>
-  <\collection>
-    <associate|page-type|letter>
-  </collection>
-</initial>
+<initial|<\collection>
+</collection>>
 
 <\references>
   <\collection>
@@ -612,6 +719,8 @@
     <associate|auto-4|<tuple|1|?>>
     <associate|auto-5|<tuple|2|?>>
     <associate|auto-6|<tuple|3|?>>
+    <associate|auto-7|<tuple|4|?>>
+    <associate|auto-8|<tuple|5|?>>
   </collection>
 </references>
 
@@ -625,17 +734,26 @@
       <tuple|normal||<pageref|auto-3>>
     </associate>
     <\associate|toc>
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Fast
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>Fast
       KDAC> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-4><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Frank
-      Wolfe Method> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Solving
+      problem with multiple <with|mode|<quote|math>|w> columns :>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-5><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Optimality
-      condition> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Single
+      Column Frank Wolfe Method> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-6><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Frank
+      Wolfe with multiple columns> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-7><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Optimality
+      condition> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-8><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
