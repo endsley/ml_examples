@@ -71,7 +71,7 @@ else: 		# run preset original clustering
 
 if True:	# run alternative clustering
 	#rand_lambda = 3*np.random.random()
-	rand_lambda = 0.1
+	rand_lambda = 1
 
 	ASC.set_values('q',4)
 	ASC.set_values('C_num',4)
