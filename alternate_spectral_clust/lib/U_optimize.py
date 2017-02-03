@@ -19,4 +19,8 @@ def U_optimize(db) :
 
 	db['U_matrix'] = eigenVectors[:,:db['C_num']]
 
+
+	if db['W_matrix'].size == db['d']*db['d']: # W should always be dxq except during initialization
+		W = np.zeros((db['d'], db['q']) )
+
 	#print 'UUUUUU : ' , db['U_matrix']

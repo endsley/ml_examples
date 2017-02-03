@@ -132,3 +132,77 @@ def W_optimize_Gaussian(db):
 
 	db['W_matrix'] = db['W_matrix'][:,0:db['q']]
 	#print db['W_matrix']
+
+#def W_optimize_Gaussian(db):
+#	y_tilde = create_y_tilde(db)
+#	db['y_tilde'] = y_tilde
+#	
+#	previous_gw = np.ones((db['N'],db['N']))
+#	w_converged = False
+#	last_W = None
+#
+#	for m in range(db['q']):
+#		db['W_matrix'][:,m] = get_orthogonal_vector(db, m, db['W_matrix'][:,m])
+#		counter = 0
+#		new_alpha = 1
+#		print 'Starting a new dimension'
+#		while not w_converged:
+#			w_l = db['W_matrix'][:,m]
+#
+#			i_values = np.random.permutation( np.array(range(db['N'])) )
+#			i_values = i_values[0:db['N']] #SGD_size
+#			j_values = np.random.permutation( np.array(range(db['N'])) )
+#			j_values = j_values[0:db['N']]
+#
+#			[update_direction, db['updated_magnitude']] = Stochastic_W_gradient(db, y_tilde, previous_gw, w_l, i_values, j_values)
+#			update_direction = get_orthogonal_vector(db, m+1, update_direction) # m+1 is to also remove the current dimension
+#
+#			#new_alpha = 1	# this is with back trace
+#			new_W = np.sqrt(1-new_alpha*new_alpha)*w_l + new_alpha*update_direction
+#			#import pdb; pdb.set_trace()
+#			
+#			[tmp_dir, new_mag] = Stochastic_W_gradient(db, y_tilde, previous_gw, new_W, i_values, j_values)
+#
+#			print 'Previous mag : ', db['updated_magnitude'], 'New mag : ' , new_mag, new_alpha
+#			while new_mag < db['updated_magnitude']:
+#				new_alpha = new_alpha * 0.4
+#				#print 'Alpha : ', new_alpha
+#				if new_alpha > 0.00001 :
+#					new_W = np.sqrt(1-new_alpha*new_alpha)*w_l + new_alpha*update_direction
+#					[tmp_dir, new_mag] = Stochastic_W_gradient(db, y_tilde, previous_gw, new_W, i_values, j_values)
+#					#import pdb; pdb.set_trace()
+#				else:
+#					new_alpha = 0
+#					break
+#
+#			print 'magnitude : ' , new_mag
+#
+#			if type(last_W) != type(None):
+#				relative_magnitude = np.linalg.norm(new_W)
+#				distance_change_since_last_update = np.linalg.norm(last_W - new_W)
+#
+#				print "\t\t\texit condition : " , distance_change_since_last_update/relative_magnitude
+#				if (distance_change_since_last_update/relative_magnitude) < 0.001 : 
+#					w_converged = True
+#					try:
+#						db.pop('previous_wolfe_direction')
+#						db.pop('previous_wolfe_magnitude')
+#					except: pass
+#
+#			#print new_W
+#			last_W = new_W/np.linalg.norm(new_W)
+#			db['W_matrix'][:,m] = last_W
+#			counter += 1
+#			if counter > db['maximum_W_update_count']: 
+#				print '\nExit due to maximum update reached'
+#				w_converged = True
+#				try:
+#					db.pop('previous_wolfe_direction')
+#					db.pop('previous_wolfe_magnitude')
+#				except: pass
+#
+#		w_converged = False
+#		previous_gw = update_previous_gw(db, last_W, previous_gw)
+#
+#	db['W_matrix'] = db['W_matrix'][:,0:db['q']]
+#	#print db['W_matrix']

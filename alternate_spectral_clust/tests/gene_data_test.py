@@ -21,13 +21,15 @@ ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
 
-ASC.set_values('q',118)
-ASC.set_values('C_num',4)
+ASC.set_values('q',2)
+ASC.set_values('C_num',2)
 ASC.set_values('lambda',1)
 ASC.set_values('kernel_type','Gaussian Kernel')
 ASC.set_values('sigma',15)
 ASC.run()
 a = db['allocation']
+print a
+import pdb; pdb.set_trace()
 
 #print db['Y_matrix']
 start_time = time.time() 

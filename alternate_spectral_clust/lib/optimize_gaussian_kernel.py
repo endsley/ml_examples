@@ -3,78 +3,131 @@ import numpy as np
 from calc_gaussian_kernel import *
 from U_optimize import *
 from objective_magnitude import *
-from calc_cost import *
 from cost_function import *
+import time 
 
 #	You must comment out one of the method and keep the other
 #from W_optimize_Gaussian import *
-#from W_optimize_Gaussian_stochastic import *
 #from W_optimize_Gaussian_ADMM import *
+from W_optimize_Gaussian_stochastic import *
 from SDG import *
 #from direct_GD import *
 
 
-def optimize_gaussian_kernel(db):
-	WU_converge = False
-	N = db['N']
+def Update_latest_UW(db):
+	if np.linalg.norm(db['W_matrix']) == 0: return
 
-	if db['W_matrix'].shape[0] == 0:
-		db['W_matrix'] = np.identity(db['d'])
+	new_cost = db['cf'].calc_cost_function(db['W_matrix'])
+
+	#import pdb; pdb.set_trace()
+	if(new_cost < db['lowest_cost']):
+		db['lowest_U'] = db['U_matrix']
+		db['lowest_cost'] = new_cost
+
+def exit_condition(db, loop_count):	
+	if not db.has_key('previous_U_matrix'): 
+		db['previous_U_matrix'] = db['U_matrix']
+		db['previous_W_matrix'] = db['W_matrix']
 	else:
-		db['W_matrix'] = db['W_matrix'][:,0:db['q']]
-		#W = np.random.normal(0,1, (db['d'], db['q']) )
-		#db['W_matrix'], r = np.linalg.qr(W)
+		matrix_mag = np.linalg.norm(db['U_matrix'])
+		U_change = np.linalg.norm(db['previous_U_matrix'] - db['U_matrix'])/matrix_mag
+		W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])/np.linalg.norm(db['W_matrix'])
 
-	loop_count = 0
-	db['lowest_cost'] = float("inf")
-	db['lowest_gradient'] = float("inf")
+		#print '\t\tU change ratio : ' , U_change/matrix_mag
+		#print '\t\tW change ratio : ' , W_change/np.linalg.norm(db['W_matrix'])
 
+		if U_change < 0.001 and W_change < 0.001: return True
+			
+	db['previous_U_matrix'] = db['U_matrix']
+	db['previous_W_matrix'] = db['W_matrix']
+	
+	if loop_count > 10: return True
+
+	return False
+
+def properly_initialize_U(db):
+	db['W_matrix'] = np.identity(db['d'])
+	if db['data_type'] == 'Feature Matrix': 
+		db['Kernel_matrix'] = db['cf'].create_Kernel(db['W_matrix'])
+	elif db['data_type'] == 'Graph matrix': 
+		db['Kernel_matrix'] = db['data']
+		db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
+
+	U_optimize(db)
+
+
+def FKDAC_implementation(db):
 	cf = cost_function(db)
 	db['cf'] = cf
 
-	while WU_converge == False: 	
+	if db['prev_clust'] == 0: 
+		properly_initialize_U(db)
+	else:
+		if db['U_matrix'].size == 0: properly_initialize_U(db)
+
+		WU_converge = False
+		loop_count = 0
+		db['lowest_cost'] = float("inf")
+		db['lowest_gradient'] = float("inf")
+
+		db['W_matrix'] = np.zeros((db['d'], db['q']) )
+		#db['W_matrix'] = np.eye(db['d'], db['q']) #This must be commented out if running together with FKDAC
+		#db['W_matrix'], R = np.linalg.qr(np.random.normal(0,1, (db['d'], db['q']) ))
+		#print db['W_matrix']
 
 		if db['data_type'] == 'Feature Matrix': 
 			db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
-			db['D_matrix'] = cf.create_D_matrix(db['Kernel_matrix'])
-			#calc_gaussian_kernel(db)	#-> calculates the same thing, but other is more efficient
-
 		elif db['data_type'] == 'Graph matrix': 
 			db['Kernel_matrix'] = db['data']
 			db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
+	
+		while WU_converge == False: 	
+			cf.calc_psi()	# need a better way to initializating
+			Update_latest_UW(db)
+			W_optimize_Gaussian_SDG(db)
+			#W_optimize_Gaussian(db)
+			U_optimize(db)
+	
+			WU_converge = exit_condition(db, loop_count)
+			loop_count += 1
 
+		cf.calc_psi()	# this make sure that cost function are accurate
 
-		U_optimize(db)
+def DongLing_implementation(db):
+	cf = cost_function(db)
+	db['cf'] = cf
 
+	if db['prev_clust'] == 0: 
+		properly_initialize_U(db)
+	else:
+		if db['U_matrix'].size == 0: properly_initialize_U(db)
 
-		if db['prev_clust'] == 0: return
-		#print '\nAfter U cost : ' , cf.calc_cost_function(db['W_matrix'])
-		cf.initialize_constants()
-		W_optimize_Gaussian_SDG(db)
-		#W_optimize_Gaussian(db)
+		WU_converge = False
+		loop_count = 0
+		db['lowest_cost'] = float("inf")
+		db['lowest_gradient'] = float("inf")
 
-
-
-		if not db.has_key('previous_U_matrix'): 
-			db['previous_U_matrix'] = db['U_matrix']
-			db['previous_W_matrix'] = db['W_matrix']
+		if False: # running both
+			if db['Y_matrix'].size > 0:
+				db['Y_matrix'] = db['Y_matrix'][:,0:db['C_num']]
 		else:
-			matrix_mag = np.linalg.norm(db['U_matrix'])
-			U_change = np.linalg.norm(db['previous_U_matrix'] - db['U_matrix'])
-			W_change = np.linalg.norm(db['previous_W_matrix'] - db['W_matrix'])
+			db['W_matrix'] = np.eye(db['d'], db['q']) #This must be commented out if running together with FKDAC
 
-			#print '\t\tU change ratio : ' , U_change/matrix_mag
-			if (U_change + W_change)/matrix_mag < 0.001: WU_converge = True
-
-
-		db['previous_U_matrix'] = db['U_matrix']
-		db['previous_W_matrix'] = db['W_matrix']
-		loop_count += 1
-		
-		#print db['updated_magnitude']
-		#print 'Loop count = ' , loop_count
-		if loop_count > 10:
-			WU_converge = True
+		if db['data_type'] == 'Feature Matrix': 
+			db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
+		elif db['data_type'] == 'Graph matrix': 
+			db['Kernel_matrix'] = db['data']
+			db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
+	
+		while WU_converge == False: 	
+			W_optimize_Gaussian(db)
+			U_optimize(db)
+	
+			WU_converge = exit_condition(db, loop_count)
+			loop_count += 1
 
 
-	print 'Major cost : ' , cf.calc_cost_function(db['W_matrix'])
+def optimize_gaussian_kernel(db):
+	FKDAC_implementation(db)
+	#DongLing_implementation(db)
+

@@ -1,0 +1,5 @@
+
+- Find out why using memory mode gives different answers
+- If the gradient is approaching 0, shouldn't W also stop changing ? 
+- Also study the 2 HSIC separately as we optimize and see how they are improving. 
+- Try HSIC for the heat map instead for pose information

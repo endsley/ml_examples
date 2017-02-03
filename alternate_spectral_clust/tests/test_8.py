@@ -13,22 +13,44 @@ import sklearn
 import time 
 from cost_function import *
 import matplotlib.pyplot as plt
+from Y_2_allocation import *
+import matplotlib 
+import calc_cost
+colors = matplotlib.colors.cnames
 
 #np.set_printoptions(suppress=True)
 data = genfromtxt('data_sets/data_4.csv', delimiter=',')
-#data = genfromtxt('data_sets/Four_gaussian_3D.csv', delimiter=',')		# -0.0858 , -0.9
+Y_original = genfromtxt('data_sets/data_4_Y_original.csv', delimiter=',')
+U_original = genfromtxt('data_sets/data_4_U_original.csv', delimiter=',')
+
+
 
 ASC = alt_spectral_clust(data)
 omg = objective_magnitude
 db = ASC.db
 
-ASC.set_values('q',1)
-ASC.set_values('C_num',2)
-ASC.set_values('sigma',1)
-ASC.set_values('kernel_type','Gaussian Kernel')
-ASC.run()
-a = db['allocation']
-print 'Original allocation :' , a
+if True: #	Calculating the original clustering
+	ASC.set_values('q',1)
+	ASC.set_values('C_num',2)
+	ASC.set_values('sigma',0.5)
+	ASC.set_values('kernel_type','Gaussian Kernel')
+	ASC.run()
+	a = db['allocation']
+	
+	#np.savetxt('data_4_U_original.csv', db['U_matrix'], delimiter=',', fmt='%d')
+
+else: #	Predefining the original clustering, the following are the required settings
+	ASC.set_values('q',1)
+	ASC.set_values('C_num',2)
+	ASC.set_values('sigma',1)
+	ASC.set_values('kernel_type','Gaussian Kernel')
+	ASC.set_values('W_matrix',np.identity(db['d']))
+
+	db['Y_matrix'] = Y_original
+	db['U_matrix'] = Y_original
+	db['prev_clust'] = 1
+	db['allocation'] = Y_2_allocation(Y_original)
+	a = db['allocation']
 
 #b = np.concatenate((np.zeros(200), np.ones(200)))
 #print "NMI : " , normalized_mutual_info_score(a,b)
@@ -36,8 +58,8 @@ print 'Original allocation :' , a
 start_time = time.time() 
 ASC.run()
 b = db['allocation']
-print 'Alternate allocation :', b
 
+#print 'Alternate allocation :', b
 print("--- %s seconds ---" % (time.time() - start_time))
 
 #print "NMI : " , normalized_mutual_info_score(a,b)
@@ -46,39 +68,101 @@ print("--- %s seconds ---" % (time.time() - start_time))
 #print "NMI Against Ground Truth : " , normalized_mutual_info_score(b,a_truth)
 #print db['Y_matrix']
 
+if True:	# some HSIC debug stuff
+	cf = db['cf']
+	print 'My cost : ' , cf.calc_cost_function(db['W_matrix'], Y_columns=db['C_num'])
+	print 'test cost : ' , calc_cost.calc_cost_function(db)
+
+if True:	#	plot the clustering result
+	X = db['data']
+	plt.figure(1)
+	
+	plt.subplot(311)
+	plt.plot(X[:,0], X[:,1], 'bo')
+	plt.xlabel('Feature 1')
+	plt.ylabel('Feature 2')
+	plt.title('data_4.csv original plot')
+	
+	#plt.figure(2)
+	plt.subplot(312)
+	idx = np.unique(a)
+	for mm in idx:
+		subgroup = X[a == mm]
+		plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+	plt.xlabel('Feature 1')
+	plt.ylabel('Feature 2')
+	plt.title('Original Clustering by FKDAC')
+	
+	
+	plt.subplot(313)
+	idx = np.unique(b)
+	for mm in idx:
+		subgroup = X[b == mm]
+		plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+	plt.xlabel('Feature 1')
+	plt.ylabel('Feature 2')
+	plt.title('Alternative Clustering by FKDAC')
+	
+	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+	plt.show()
 
 
-X = db['data']
 
-plt.figure(1)
-
-plt.subplot(311)
-plt.plot(X[:,0], X[:,1], 'bo')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('data_4.csv original plot')
-
-#plt.figure(2)
-plt.subplot(312)
-group1 = X[a == 1]
-group2 = X[a == 2]
-plt.plot(group1[:,0], group1[:,1], 'bo')
-plt.plot(group2[:,0], group2[:,1], 'ro')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('Original Clustering by FKDAC')
+if False:	# save or load db to and from a pickle file
+	plot_info = {}
+	plot_info['debug_costVal'] = db['debug_costVal']
+	plot_info['debug_gradient'] = db['debug_gradient']
+	plot_info['debug_debug_Wchange'] = db['debug_debug_Wchange']
+	pickle.dump( plot_info, open( "tmp_db.pk", "wb" ) )
 
 
-plt.subplot(313)
-group1 = X[b == 1]
-group2 = X[b == 2]
-plt.plot(group1[:,0], group1[:,1], 'bo')
-plt.plot(group2[:,0], group2[:,1], 'ro')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.title('Alternative Clustering by FKDAC')
+	#db= pickle.load( open( "tmp_db.pk", "rb" ) )
 
-plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
-plt.show()
+
+
+if True:	# plot the W convergence results
+	X = db['data']
+	plt.figure(2)
+	
+	plt.suptitle('data_4.csv',fontsize=24)
+	plt.subplot(311)
+	inc = 0
+	for costs in db['debug_costVal']: 
+		xAxis = np.array(range(len(costs))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, costs, 'b')
+		plt.plot(inc, costs[-1], 'bo', markersize=10)
+		plt.title('Cost vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('cost')
+		
+	plt.subplot(312)
+	inc = 0
+	for gradient in db['debug_gradient']: 
+		xAxis = np.array(range(len(gradient))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, gradient, 'b')
+		plt.plot(inc, gradient[-1], 'bo', markersize=10)
+		plt.title('Gradient vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('gradient')
+
+
+	plt.subplot(313)
+	inc = 0
+	for wchange in db['debug_debug_Wchange']: 
+		xAxis = np.array(range(len(wchange))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, wchange, 'b')
+		plt.plot(inc, wchange[-1], 'bo', markersize=10)
+		plt.title('|w_old - w_new|/|w| vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('|w_old - w_new|/|w| ')
+
+	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+	plt.subplots_adjust(top=0.85)
+	plt.show()
+
+
 
 import pdb; pdb.set_trace()
