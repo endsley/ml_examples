@@ -108,6 +108,14 @@ class SDG:
 				Lagrange_gradient = new_gradient - W*eigsValues
 				new_gradient_mag = np.linalg.norm(Lagrange_gradient)
 
+				sgma = U2.T.dot(W)
+				#print U2.T.dot(W)
+				#print '\n\n'
+				#print S2
+				#print sgma , '\n'
+				#print np.diag(S2.T*sgma)
+				#print U2
+
 				W = U2[:,0:db['q']]
 			else:
 				# Use svd
@@ -120,7 +128,6 @@ class SDG:
 				new_gradient_mag = np.linalg.norm(Lagrange_gradient)
 
 				W = np.fliplr(U)[:,0:db['q']]
-
 
 	
 			new_cost = db['cf'].calc_cost_function(W)

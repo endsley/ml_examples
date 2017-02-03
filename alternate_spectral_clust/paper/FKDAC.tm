@@ -477,7 +477,7 @@
   eigenvectors that produces the lowest cost. \ The following section
   explores the theoretic motivation for choosing the optimal singular values.
 
-  <section|Single Column Frank Wolfe Method>
+  <section|Single Column <math|w>>
 
   Let <math|q> be the reduced the dimension and <math|d> as the original
   dimension. We have seen from the previous section that the stationary poins

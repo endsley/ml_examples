@@ -63,6 +63,8 @@ class alt_spectral_clust:
 		self.translation['q'] = 'q'
 		self.translation['lambda'] = 'lambda'
 		self.translation['verbose'] = 'verbose'
+		self.translation['kernel_type'] = 'kernel'
+
 		print '\n\nRan inside GPU\n\n'
 
 	def set_values(self, key, val):
