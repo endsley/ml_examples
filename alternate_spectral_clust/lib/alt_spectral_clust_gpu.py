@@ -19,14 +19,13 @@ class alt_spectral_clust:
 		if type(data_set) == type({}):
 			data_set = np.array(data_set)
 
-		print data_set.shape , '\n'
-
 		data_dimension = data_set.shape
 		self.db['N'] = data_dimension[0]
 		self.db['d'] = data_dimension[1]
 
-		self.kdac = Nice4Py.KDAC()
+		self.kdac = Nice4Py.KDAC('gpu')
 
+		self.params = {}
 		self.db['sigma'] = 1
 		self.db['poly_order'] = 2
 		self.db['q'] = 1
@@ -54,24 +53,23 @@ class alt_spectral_clust:
 
 		self.db['H_matrix'] = None
 		self.db['maximum_W_update_count'] = 300
-		self.db['data'] = data_set
 
-		self.translateion = {}
-		self.translateion['C_num'] = 'c'
-		self.translateion['sigma'] = 'sigma'
-		self.translateion['q'] = 'q'
+		self.db['data'] = data_set.astype(np.float32)
+
+
+		self.translation = {}
+		self.translation['C_num'] = 'c'
+		self.translation['sigma'] = 'sigma'
+		self.translation['q'] = 'q'
+		self.translation['lambda'] = 'lambda'
+		self.translation['verbose'] = 'verbose'
 		print '\n\nRan inside GPU\n\n'
 
 	def set_values(self, key, val):
-		params = {}	
-		#import pdb; pdb.set_trace()
 
-		if key in self.translateion:
-			params[self.translateion[key]] = val
-			if(key == 'sigma'): params['kernel'] = 'Gaussian'
-
-			self.kdac.SetupParams(params)
-
+		if key in self.translation:
+			self.params[self.translation[key]] = val
+			if(key == 'sigma'): self.params['kernel'] = 'Gaussian'
 
 		self.db[key] = val
 
@@ -82,38 +80,30 @@ class alt_spectral_clust:
 		N = self.db['N']
 		centering_matrix = np.eye(N) - (1.0/N)*np.ones((N,N))
 
-
 		return np.dot(centering_matrix, data_set)
 
 	def run(self):
 		db = self.db
 		N = db['N']
 		
-		if db['data_type'] == 'Feature Matrix': 
-			db['data'] = self.center_data(db['data'])
-
 		if type(db['H_matrix']) == type(None):
 			db['H_matrix'] = np.eye(N) - np.ones((N,N))/N
 
 		if db['kernel_type'] == 'Linear Kernel':
 			optimize_linear_kernel(db)
 		elif db['kernel_type'] == 'Gaussian Kernel':
-			print 'a'
-			output = np.empty((N, 1))
+			output = np.empty((N, 1), dtype=np.float32)
 
 			if self.db['prev_clust'] == 0 : 
-				print 'b'
+				self.kdac.SetupParams(self.params)
+				print self.params
 				self.kdac.Fit(db['data'], N, db['d'])
 			else : 
-				print 'c'
 				#import pdb; pdb.set_trace()
+				self.kdac.SetupParams(self.params)
 				self.kdac.Fit()
-				print '2nd'
 
-			print 'd'
 			self.kdac.Predict(output, N, 1)
-			print 'e'
-
 
 			db['allocation'] = output.T[0]
 			db['allocation'].astype(np.int32)
@@ -131,7 +121,6 @@ class alt_spectral_clust:
 				db['Y_matrix'] = np.append( db['Y_matrix'] , db['binary_allocation'], axis=1)
 
 			self.db['prev_clust'] += 1
-			print 'd'
 			return
 
 
