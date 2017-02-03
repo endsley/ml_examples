@@ -96,7 +96,6 @@ class alt_spectral_clust:
 
 			if self.db['prev_clust'] == 0 : 
 				self.kdac.SetupParams(self.params)
-				print self.params
 				self.kdac.Fit(db['data'], N, db['d'])
 			else : 
 				#import pdb; pdb.set_trace()
