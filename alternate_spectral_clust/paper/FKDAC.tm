@@ -340,10 +340,23 @@
   <math|\<Phi\>>. \ From this perspective, it would be extremely easy to find
   <math|w<rsup|\<ast\>>> if we know <math|\<Phi\>>. \ But, of course,
   <math|\<Phi\>> includes the variable <math|w<rsup|\<ast\>>>. If we already
-  know <math|w<rsup|\<ast\>>>, there would be no point of finding it again.
+  know <math|w<rsup|\<ast\>>>, there would be no point of finding it again.\ 
+
+  \;
 
   \ To work around the requirement of <math|w<rsup|\<ast\>>> in
-  <math|\<Phi\>>, we could approximate the cost function with a simpler cost
+  <math|\<Phi\>>, we can treat <math|w<rsup|\<ast\>>> inside <math|\<Phi\>>
+  and <math|w<rsup|\<ast\>>> outside of <math|\<Phi\>> as 2 separate
+  variables. By initializing <math|w<rsup|\<ast\>>> inside <math|\<Phi\>>
+  ``intelligently'', we could use this <math|\<Phi\><rsub|0>> to estimate
+  <math|w<rsub|1>>. The newly calculated <math|w<rsub|1>> can then feed into
+  <math|\<Phi\><rsub|1>> to again calculate <math|w<rsub|2>>. By iterating
+  this process, we hope to arrive to a convergence.\ 
+
+  \;
+
+  Given this scheme, how do we ``intelligently'' initialize <math|w<rsub|0>>
+  ? The trick is to approximate the cost function with another simpler cost
   function.
 
   <\proposition>
@@ -388,8 +401,37 @@
   </equation*>
 
   <\equation*>
-    \<Phi\>*w=-\<lambda\>*w
+    \<Phi\><rsub|0>*w=-\<lambda\>*w
   </equation*>
+
+  By using the Taylor expansion, we have discovered a first order
+  approximation of the original function where <math|\<Phi\><rsub|0>> does
+  not include <math|w>. Given Lipschits condition, this approximate form a
+  relatively tight bound of the original function. It is interesting to note
+  that this initialization condition is equivalent to setting <math|w=0>.\ 
+
+  <\equation*>
+    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>*A<rsub|i,j>*w<rsup|\<ast\>>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
+    \<nocomma\><tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>>>>>with
+    w=0
+  </equation*>
+
+  <\equation*>
+    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|0>*A<rsub|i,j>|]>
+    \<nocomma\>
+  </equation*>
+
+  <\equation*>
+    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>**A<rsub|i,j>|]>
+    \<nocomma\>
+  </equation*>
+
+  \;
+
+  This observation implies that during implementation, it is sufficient to
+  simply set <math|w<rsub|0>> as 0 to kick off the iterative process.
+
+  \;
 
   Once we have found the initial <math|w<rsub|k>>, we could plug it back into
   the original gradient equation to find a better approximation of
@@ -477,7 +519,7 @@
   eigenvectors that produces the lowest cost. \ The following section
   explores the theoretic motivation for choosing the optimal singular values.
 
-  <section|Single Column <math|w>>
+  <section|Approximating <math|w<rsub|k+1>>>
 
   Let <math|q> be the reduced the dimension and <math|d> as the original
   dimension. We have seen from the previous section that the stationary poins
@@ -555,45 +597,71 @@
   direction. Since the constraint space is not convex, the step length cannot
   be discovered by methods of interpolation.
 
-  \ Although solutions to these problems are not immediately obvious, the
-  Frank Wolfe derivation does provide another useful insight. Using Frank
-  Wolfe's method, the problem transforms into a different optimization
-  problem.
+  \;
 
-  <\equation*>
-    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k+1>
-  </equation*>
-
-  We note that although we cannot easily choose <math|w<rsub|k+1>> due to the
-  step length, we do know how the term is upper bounded if we re-examine the
-  inequality carefully :
+  Another insight could be drawn by making some observations of the following
+  equation.\ 
 
   <\equation>
-    w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k+1>\<leq\>w<rsub|k><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k>
+    w<rsub|k><rsup|T>\<Phi\>*w<rsub|k+1>\<leq\>w<rsub|k><rsup|T>\<Phi\>
+    w<rsub|k>
   </equation>
 
-  By choosing the <math|w<rsub|k>> that minimizes the upper bound, we are
-  simultaneously minimizing the Frank Wolfe method. In other words, when
-  <math|w<rsub|k>> is minimized, <math|w<rsub|k+1>=w<rsub|k>>. From this
-  observation, we can again rewrite the objective function.
+  \;
 
-  <\equation*>
-    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>f<around|(|w|)>=<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k+1><rsup|T><around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>*w<rsub|k+1>
-  </equation*>
+  Observations :\ 
 
-  Linking this equation to FKDAC, we notice that they are in exact same form.
-  Except from Frank Wolfe interpretation, not only are we finding any
-  eigenvectors, we are specifically finding the eigenvectors that minimizes
-  quadratic term.
+  \;
 
-  <\equation*>
-    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>f<around|(|w|)>=<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|w<rsub|k+1>>>>>>w<rsub|k+1><rsup|T>*\<Phi\><rsub|k>*w<rsub|k+1>
-  </equation*>
+  1. We have performed Taylor expansion around <math|w<rsub|k>>
 
-  This observation tells us that the optimal vectors to solve the FKDAC
-  problem is the least dominant eigenvectors.
+  2. <math|w<rsub|k>> must have a norm of 1
 
-  <section|Frank Wolfe with multiple columns>
+  3. If we have chosen a proper <math|w<rsub|k+1>> that satisfies the
+  inequality, it forms a descent direction.
+
+  4. If we continue to follow the descent direction, we would hit
+  <math|w<rsup|\<ast\>>> at convergence
+
+  5. At the point of convergence <math|w<rsub|k+1>=w<rsub|k>>
+
+  6. At the point of convergence :
+
+  <\equation>
+    w<rsub|k+1><rsup|T>\<Phi\>*w<rsub|k+1>=w<rsub|k><rsup|T>\<Phi\> w<rsub|k>
+  </equation>
+
+  \ \ \ \ \ \ \ \ and no vector <math|v> exists such that :\ 
+
+  <\equation>
+    w<rsup|\<ast\>T>\<Phi\>*w<rsup|\<ast\>>\<less\>v<rsup|T>\<Phi\> v
+  </equation>
+
+  \;
+
+  Conclusion :\ 
+
+  \;
+
+  Given the point of expansion <math|w<rsub|k>>, there is no need to
+  iteratively approach convergence because we already know
+  <math|w<rsup|\<ast\>>>. \ The only vector <math|w<rsup|\<ast\>>> that
+  satisfies equation (10), is the least dominant eigenvector of
+  <math|\<Phi\>>.
+
+  \;
+
+  Linking this equation to FKDAC, we have previously shown that the
+  eigenvectors of <math|\<Phi\>> provide a stationary point such that
+  <math|\<nabla\>\<cal-L\>=0>. \ However, it was not certain which
+  eigenvectors are most appropriate. From the conclusion we have just drawn,
+  it shows that the least dominant eigenvectors are the most reasonable.\ 
+
+  \;
+
+  <section|Expand the same idea to multiple columns>
+
+  \;
 
   After understanding the basic concept through the usage of a single column
   example, we can now expand the same idea to a more general multiple column
@@ -643,8 +711,8 @@
 
   <section|Optimality condition>
 
-  The Frank Wolfe method corresponds directly with the optimality condition
-  with a convex constrained space. Given a problem of :
+  The Taylor expansion approach corresponds directly with the optimality
+  condition with a convex constrained space. Given a problem of :
 
   <\equation*>
     <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<table|<row|<cell|min>|<cell|f<around|(|x|)>>>|<row|<cell|x\<in\>X>|<cell|>>>>>
@@ -706,6 +774,39 @@
   this perspective, we conclude that picking the least dominant eigenvector
   is a reasonable approximation for the local minimum of the original cost
   function.
+
+  \;
+
+  <section|Implementation Details>
+
+  \;
+
+  The computation of cost function presented in this paper, is a complicated
+  equation that slows down both the implementation and speed of the results.\ 
+
+  <\equation>
+    <tabular|<tformat|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|min>|<cell|-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
+    e<rsup|-<frac|tr <around*|(|W<rsup|T>A<rsub|i,j>W|)>|2
+    \<sigma\><rsup|2>>>>>|<row|<cell|W>|<cell|>>|<row|<cell|s.t>|<cell|W<rsup|T>W=I>>|<row|<cell|>|<cell|W\<in\>\<bbb-R\><rsup|d
+    \<times\> q>>>|<row|<cell|>|<cell|A\<in\>\<bbb-R\><rsup|d\<times\>d>>>|<row|<cell|>|<cell|\<gamma\><rsub|i,j>\<in\>\<bbb-R\>>>>>>
+  </equation>
+
+  \;
+
+  Instead of solving the function itself, it could be mostly easily done with
+  the following equation.\ 
+
+  \;
+
+  <\equation*>
+    cost =HSIC<around*|(|X W,U|)>-\<lambda\> HSIC<around*|(|X W,Y|)>
+  </equation*>
+
+  \;
+
+  The simplest way is to write a HSIC function, and pass <math|X
+  W\<nocomma\>,U,> and <math|Y> to compute the final cost. Although easy,
+  this approach is not the fastest\ 
 </body>
 
 <initial|<\collection>
@@ -713,14 +814,15 @@
 
 <\references>
   <\collection>
-    <associate|auto-1|<tuple|1|?>>
-    <associate|auto-2|<tuple|2|?>>
-    <associate|auto-3|<tuple|3|?>>
-    <associate|auto-4|<tuple|1|?>>
-    <associate|auto-5|<tuple|2|?>>
-    <associate|auto-6|<tuple|3|?>>
-    <associate|auto-7|<tuple|4|?>>
-    <associate|auto-8|<tuple|5|?>>
+    <associate|auto-1|<tuple|1|3>>
+    <associate|auto-2|<tuple|2|3>>
+    <associate|auto-3|<tuple|3|4>>
+    <associate|auto-4|<tuple|1|5>>
+    <associate|auto-5|<tuple|2|7>>
+    <associate|auto-6|<tuple|3|8>>
+    <associate|auto-7|<tuple|4|9>>
+    <associate|auto-8|<tuple|5|10>>
+    <associate|auto-9|<tuple|6|?>>
   </collection>
 </references>
 
@@ -743,12 +845,13 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-5><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Single
-      Column Frank Wolfe Method> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Approximating
+      <with|mode|<quote|math>|w<rsub|k+1>>>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-6><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Frank
-      Wolfe with multiple columns> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Expand
+      the same idea to multiple columns> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-7><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Optimality
