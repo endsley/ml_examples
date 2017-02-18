@@ -55,6 +55,12 @@ class alt_spectral_clust:
 		self.db['debug_gradient'] = []
 		self.db['debug_debug_Wchange'] = []
 
+	def remove_previous_Y_columns(self):
+		db = self.db
+		Y = db['Y_matrix']
+		k = db['C_num']
+		db['Y_matrix'] = Y[:,0:Y.shape[1] - k]
+
 
 	def set_values(self, key, val):
 		self.db[key] = val

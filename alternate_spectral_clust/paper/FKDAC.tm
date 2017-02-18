@@ -259,99 +259,146 @@
 
   <section|Fast KDAC>
 
-  FKDAC is an alternative approach to KDAC that estimates the optimal result
-  without using gradient methods. Similar to DG, we start by looking at a
-  single column of <math|W> at a time.
+  \;
+
+  FKDAC is an alternative approach to Dimension Growth that estimates the
+  optimal result without using gradient methods. To simplify the explanation,
+  we introduce the algorithm by solving for a single column <math|w> matrix.
+  Once the derivation is understood, the key concepts can be easily
+  generalized to a multiple column scenerio.\ 
 
   <\equation>
     <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<table|<row|<cell|min>|<cell|-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>>>|<row|<cell|W>|<cell|>>|<row|<cell|s.*t>|<cell|w<rsup|T>*w=1>>|<row|<cell|>|<cell|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>1>>>|<row|<cell|>|<cell|A\<in\><with|math-font|Bbb*|R><rsup|d\<times\>d>>>|<row|<cell|>|<cell|\<gamma\><rsub|i,j>\<in\><with|math-font|Bbb*|R>>>>>>
   </equation>
 
-  A standard approach to find the optimal solution is to set the derivative
-  of the Lagrangian to zero and solve for <math|w>. According to Bertsekas,
-  the first order necessary condition of the Lagrange Multipliers states that
-  :
+  \;
+
+  \;
+
+  Due to the non-convex nature of the problem, FKDAC cannot guarentee to
+  discover the global minimum. However, a sufficient optimality condition
+  exists for a local minimum. According to Bertsekas in [1], Proposition
+  3.2.1 <math|x<rsup|\<ast\>>> is a optimal solution of it satisfies the
+  following proposition.\ 
+
+  \;
 
   <\proposition>
-    Let <math|x<rsup|\<ast\>>> be a local minimum of f s.t h(x)=0, and assume
-    that the constraint gradient <math|\<nabla\>*h<rsub|1><around|(|x<rsup|\<ast\>>|)>,\<nabla\>*h<rsub|2><around|(|x<rsup|\<ast\>>|)>,\<ldots\>>
-    are linearly independent. Then there exists a unique vector
-    <math|\<lambda\><rsup|\<ast\>>=<around|(|\<lambda\><rsub|1><rsup|\<ast\>>,\<lambda\><rsub|2><rsup|\<ast\>>,\<ldots\>,|)>>,
-    called the Lagrange multiplier such that :
+    (Second Order Sufficiency Conditions )\ 
+
+    Assume that f and h are twice continuously differentiable, and let
+    <math|x<rsup|\<ast\>>\<in\>\<bbb-R\><rsup|n>> and
+    <math|\<lambda\><rsup|\<ast\>>\<in\>\<bbb-R\><rsup|m>> satisfy the
+    following 3 conditions :\ 
 
     <\equation*>
-      \<nabla\>*f<around|(|x<rsup|\<ast\>>|)>+<big|sum><rsub|i=1><rsup|m>\<lambda\><rsup|\<ast\>><rsub|i>*\<nabla\>*h<rsub|i><around|(|x<rsup|\<ast\>>|)>=0
+      \<nabla\><rsub|x>\<cal-L\><around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>=0
     </equation*>
+
+    <\equation*>
+      \<nabla\><rsub|\<lambda\>>\<cal-L\><around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>=0
+    </equation*>
+
+    <\equation*>
+      y<rsup|T>\<nabla\><rsub|x x><rsup|2>L<around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>
+      y \<gtr\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|for>|<cell|all>|<cell|y\<neq\>0>|<cell|with>|<cell|\<nabla\>h<around*|(|x<rsup|\<ast\>>|)><rsup|T>y=0>>>>>
+    </equation*>
+
+    \;
+
+    Then <math|x<rsup|\<ast\>>> is a strict local minimum of <math|f>
+    subjected to h(x) = 0.
   </proposition>
 
-  \ Notice that the only assumption of the Lagrange multiplier theorem is the
-  linear independence of constraint functions. In our case, since the
-  constraint is :
+  \;
+
+  Notice that this is a very general sufficiency assumption that does not
+  assume the form of the functions <math|f> or <math|h>. Using this
+  requirement as a proof of optimality, we define how our cost function can
+  satisfy the definition. We start by finding the gradient of the Lagrangian
+  with respect to <math|w>.
 
   <\equation*>
-    h<around|(|w|)>=w<rsup|T>*w-1=0
+    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>+<frac|\<lambda\>|2>*<around|(|1-w<rsup|T>*w|)>
   </equation*>
 
   <\equation*>
-    \<nabla\>*h<around|(|w|)>=2*w
+    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*w>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*w|]>-\<lambda\>*w=0
   </equation*>
 
-  In the single vector case, the constraint gradient produces only a single
-  vector, and therefore the independence is automatically satisfied. Given
-  that we meet the assumption, we can apply the theorem on our problem and
-  yield :
+  \;
+
+  \;
 
   <\equation*>
-    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>+<frac|\<lambda\>|2>*<around|(|w<rsup|T>*w-1|)>
-  </equation*>
-
-  <\equation*>
-    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*w>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*w|]>+\<lambda\>*w=0
-  </equation*>
-
-  Let's for a moment assume that we magically know the optimal solution,
-  <math|w<rsup|\<ast\>>>, then the problem could be rewritten as :
-
-  <\equation*>
-    <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>*A<rsub|i,j>*w<rsup|\<ast\>>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>+\<lambda\>*I|]>*w<rsup|\<ast\>>=0
+    <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|<rsup|>T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>-\<lambda\>*I|]>*w=0
   </equation*>
 
   If we let :
 
   <\equation*>
-    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>*A<rsub|i,j>*w<rsup|\<ast\>>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
+    \<Phi\><around*|(|w|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
   </equation*>
 
   We can rewrite the equation :\ 
 
   <\equation*>
-    <around|[|\<Phi\>+\<lambda\>*I|]>*w<rsup|\<ast\>>=0
+    <around|[|\<Phi\><around*|(|w|)>-\<lambda\>*I|]>*w=0
   </equation*>
 
+  \;
+
   In other words, the optimal solution <math|w<rsup|\<ast\>>> is in the null
-  space of the matrix <math|\<Gamma\>=<around|[|\<Phi\>+\<lambda\>*I|]>>.
-  \ Or, from another perspective, we could rewrite the equation such that :
+  space of the matrix <math|\<Phi\>-\<lambda\>*I>. \ Or, from another
+  perspective, we could rewrite the equation.
 
   <\equation>
-    \<Phi\>*w<rsup|\<ast\>>=-\<lambda\>*w<rsup|\<ast\>>
+    \<Phi\>*<around*|(|w<rsup|\<ast\>>|)>w<rsup|\<ast\>>=\<lambda\>*w<rsup|\<ast\>>
   </equation>
 
-  From the equation above, <math|w<rsup|\<ast\>>> is an eigenvector of
-  <math|\<Phi\>>. \ From this perspective, it would be extremely easy to find
-  <math|w<rsup|\<ast\>>> if we know <math|\<Phi\>>. \ But, of course,
-  <math|\<Phi\>> includes the variable <math|w<rsup|\<ast\>>>. If we already
-  know <math|w<rsup|\<ast\>>>, there would be no point of finding it again.\ 
+  \;
+
+  The equation above implies that the gradient of the Lagrangian is equal to
+  0 when <math|w<rsup|\<ast\>>> is an eigenvector of
+  <math|\<Phi\><around*|(|w<rsup|\<ast\>>|)>>. \ Meeting this condition will
+  satisfy the 1st condition of Proposition 1.
+
+  \;
+
+  The 2nd condition of Proposition 1 requires that :
+  <math|\<nabla\><rsub|\<lambda\>>\<cal-L\>=0>. From the cost function, we
+  get :\ 
+
+  <\equation>
+    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*\<lambda\>>=1-w<rsup|T>*w=0
+  </equation>
+
+  \;
+
+  With the conclusions from equation (5), it is obvious that if the optimal
+  <math|w<rsup|\<ast\>>> is an eigenvector, this condition is simultaneously
+  satisfied.\ 
+
+  \;
+
+  \;
+
+  From this perspective, it would be extremely easy to find
+  <math|w<rsup|\<ast\>>> if <math|\<Phi\><around*|(|w<rsup|\<ast\>>|)>> was
+  known. \ But, of course, <math|\<Phi\><around*|(|w<rsup|\<ast\>>|)>>
+  includes the variable <math|w<rsup|\<ast\>>>
 
   \;
 
   \ To work around the requirement of <math|w<rsup|\<ast\>>> in
-  <math|\<Phi\>>, we can treat <math|w<rsup|\<ast\>>> inside <math|\<Phi\>>
-  and <math|w<rsup|\<ast\>>> outside of <math|\<Phi\>> as 2 separate
-  variables. By initializing <math|w<rsup|\<ast\>>> inside <math|\<Phi\>>
-  ``intelligently'', we could use this <math|\<Phi\><rsub|0>> to estimate
-  <math|w<rsub|1>>. The newly calculated <math|w<rsub|1>> can then feed into
-  <math|\<Phi\><rsub|1>> to again calculate <math|w<rsub|2>>. By iterating
-  this process, we hope to arrive to a convergence.\ 
+  <math|\<Phi\><around*|(|w|)>>, we can treat <math|w<rsup|\<ast\>>> inside
+  <math|\<Phi\><around*|(|w|)>> and <math|w<rsup|\<ast\>>> outside of
+  <math|\<Phi\><around*|(|w|)>> as 2 separate variables. By initializing
+  <math|w<rsup|\<ast\>>> inside <math|\<Phi\>> ``intelligently'', we could
+  use this <math|\<Phi\><rsub|0>> to estimate <math|w<rsub|1>>. The newly
+  calculated <math|w<rsub|1>> can then feed into <math|\<Phi\><rsub|1>> to
+  again calculate <math|w<rsub|2>>. By iterating this process, we hope to
+  arrive to a convergence.\ 
 
   \;
 
@@ -534,15 +581,15 @@
   the idea, we start by simplifying the problem into a single column <math|w>
   vector. This is without much loss of generality since the idea could be
   generalized into higher dimensions. Again, assuming that the Lipschitz
-  condition holds, we start by borrowing the idea of Frank Wolfe method by
-  taking the 1st order Taylor Expansion around some <math|w<rsub|k>>.
+  condition holds, we start by taking the 1st order Taylor Expansion around
+  some <math|w<rsub|k>>.
 
   <\equation>
     f<around|(|w|)>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>+2<around*|[|<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T><rsub|k>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*w<rsub|k>|]><rsup|T>*<around|(|w<rsub|k+1>-w<rsub|k>|)>
   </equation>
 
-  The Frank Wolfe method assume that the constraint space is convex. For our
-  case, since our constraint space is not convex, we must assume at least
+  The approximation generally assume that the constraint space is convex. For
+  our case, since our constraint space is not convex, we must assume at least
   that the constraint space is convex within a certain radius.
 
   <\equation*>
@@ -599,8 +646,9 @@
 
   \;
 
-  Another insight could be drawn by making some observations of the following
-  equation.\ 
+  Although finding a definite descent direction that stays on the Stiefel
+  manifold is difficult, another insight could be drawn by making some
+  obvious observations of the following equation.\ 
 
   <\equation>
     w<rsub|k><rsup|T>\<Phi\>*w<rsub|k+1>\<leq\>w<rsub|k><rsup|T>\<Phi\>
@@ -615,7 +663,7 @@
 
   1. We have performed Taylor expansion around <math|w<rsub|k>>
 
-  2. <math|w<rsub|k>> must have a norm of 1
+  2. Any <math|w<rsub|>> chosen must have a norm of 1
 
   3. If we have chosen a proper <math|w<rsub|k+1>> that satisfies the
   inequality, it forms a descent direction.
@@ -646,8 +694,10 @@
   Given the point of expansion <math|w<rsub|k>>, there is no need to
   iteratively approach convergence because we already know
   <math|w<rsup|\<ast\>>>. \ The only vector <math|w<rsup|\<ast\>>> that
-  satisfies equation (10), is the least dominant eigenvector of
-  <math|\<Phi\>>.
+  satisfies equation (10) and has a norm of 1, is the least dominant
+  eigenvector of <math|\<Phi\>>. Therefore, the least dominant eigenvector of
+  <math|\<Phi\>> is the best approximation of <math|w<rsup|\<ast\>>> at the
+  Taylor expansion of <math|w<rsub|k>>.
 
   \;
 
@@ -777,7 +827,7 @@
 
   \;
 
-  <section|Implementation Details>
+  <section|Implementation Details of Cost function>
 
   \;
 
@@ -806,7 +856,202 @@
 
   The simplest way is to write a HSIC function, and pass <math|X
   W\<nocomma\>,U,> and <math|Y> to compute the final cost. Although easy,
-  this approach is not the fastest\ 
+  this approach is not the fastest in terms of separating out the portion of
+  the code that requires constant update, and the portion that remains
+  constant. In this section, a faster approach to implement the cost function
+  is outlined.\ 
+
+  \;
+
+  Starting with the original cost function :\ 
+
+  <\equation*>
+    cost =HSIC<around*|(|X W,U|)>-\<lambda\> HSIC<around*|(|X W,Y|)>
+  </equation*>
+
+  \;
+
+  Convert it into trace format.\ 
+
+  <\equation*>
+    cost =Tr<around*|(|<wide|K|~>H U U<rsup|T>H|)>-\<lambda\>
+    Tr<around*|(|<wide|K|~>H Y Y<rsup|T>H|)>
+  </equation*>
+
+  \;
+
+  Where <math|<wide|K|~>> is the normalized kernel of <math|X W>, which could
+  also be written as <math|<wide|K|~>=D<rsup|-<frac|1|2>> K<rsub|X
+  W>D<rsup|-<frac|1|2>>>. Putting this into the cost function.\ 
+
+  <\equation*>
+    cost =Tr<around*|(|D<rsup|-<frac|1|2>> K<rsub|X W>D<rsup|-<frac|1|2>>H U
+    U<rsup|T>H|)>-\<lambda\> Tr<around*|(|D<rsup|-<frac|1|2>> K<rsub|X
+    W>D<rsup|-<frac|1|2>>H Y Y<rsup|T>H|)>
+  </equation*>
+
+  \;
+
+  When optimizing <math|U>, it is obvious that the 2nd portion does not
+  effect the optimization. Therefore, <math|U> can be solved using the
+  following form.\ 
+
+  <\equation*>
+    U=<tabular|<tformat|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|argmin>>|<row|<cell|U>>>>>Tr<around*|(|U<rsup|T>H
+    D<rsup|-1/2>K D<rsup|-1/2> H U|)>
+  </equation*>
+
+  \;
+
+  The situation get a bit more complicated if we are optimization for
+  <math|W>. Using the combination of the rotation property and the
+  combination of the 2 traces, the cost can be written as :\ 
+
+  <\equation*>
+    cost = Tr<around*|(|<around*|[|D<rsup|-1/2> H<around*|(|U
+    U<rsup|T>-\<lambda\> Y Y<rsup|T>|)>H D<rsup|-1/2>|]>K|)>
+  </equation*>
+
+  \;
+
+  In this form, it can be seen that the update of <math|W> matrix will only
+  affect the kernel <math|K> and the degree matrix <math|D>. Therefore, it
+  makes sens to treat the middle portion as a constant which we refer as
+  <math|\<Psi\>>.
+
+  <\equation*>
+    cost = Tr<around*|(|<around*|[|D<rsup|-1/2> \<Psi\>D<rsup|-1/2>|]>K|)>
+  </equation*>
+
+  \;
+
+  Given that <math|<around*|[|D<rsup|-1/2> \<Psi\>D<rsup|-1/2>|]>> is a
+  symmetric matrix, from this form, we can convert the trace into an element
+  wise product <math|\<odot\>>.
+
+  <\equation*>
+    cost = <around*|[|D<rsup|-1/2> \<Psi\>D<rsup|-1/2>|]>\<odot\>K
+  </equation*>
+
+  \;
+
+  To further reduction the amount of operation, we let <math|d> be a vector
+  of the diagonal elements of <math|D<rsup|-1/2>>, hence <math|d=
+  diag<around*|(|D<rsup|-1/2>|)>>, this equality hold.\ 
+
+  <\equation*>
+    D<rsup|-1/2> \<Psi\>D<rsup|-1/2> = <around*|[|d
+    d<rsup|T>|]>\<odot\>\<Psi\>
+  </equation*>
+
+  \;
+
+  Therefore, the final cost function can be written in its simplest form as :\ 
+
+  <\equation*>
+    cost=\<Gamma\>=\<Psi\>\<odot\><around*|[|d d<rsup|T>|]>\<odot\> K
+  </equation*>
+
+  \;
+
+  During update, as <math|W> update during each iteration, the matrix
+  <math|\<Psi\>> stays as a constant while <math|d d<rsup|T>> and <math|K >
+  update. The benefit of this form minimize the complexity of the equation,
+  while simplify cost into easily parallelizable matrix multiplications. The
+  equation also clearly separates the elements into portions that require an
+  update and portions that does not.\ 
+
+  \;
+
+  <section|Implementation Details of the Derivative>
+
+  \;
+
+  As it was shown from previous sections, the gradient of our cost function
+  using the Gaussian Kernel has the following form.
+
+  <\equation*>
+    \<nabla\>f <around*|(|W|)>=<around*|[|<frac|1|\<sigma\><rsup|2>><big|sum>
+    \<gamma\><rsub|i,j> K<rsub|i,j> A<rsub|i,j>|]> W
+  </equation*>
+
+  \;
+
+  It is often shown as :
+
+  <\equation*>
+    \<nabla\>f <around*|(|W|)>=\<Phi\> W
+  </equation*>
+
+  \;
+
+  The key is therefore to find <math|\<Phi\>>.
+
+  <\equation*>
+    \<Phi\>=<frac|1|\<sigma\><rsup|2>><big|sum> \<gamma\><rsub|i,j>
+    K<rsub|i,j> A<rsub|i,j>\ 
+  </equation*>
+
+  \;
+
+  If we note that <math|A<rsub|i,j>=<around*|(|x<rsub|i>-x<rsub|j>|)><around*|(|x<rsub|i>-x<rsub|j>|)><rsup|T>>
+  . \ It can be seen that the inner portion is identical to the cost
+  function. The difference is the addition of the <math|A<rsub|i,j>> matrix
+  and a constant of <math|<frac|1|\<sigma\><rsup|2>>>. These extra factors
+  can be incorporate in the following form.\ 
+
+  <\equation*>
+    \<Phi\>=<frac|1|\<sigma\><rsup|2>> Q<rsup|T>
+    diag<around*|(|Vec<around*|(|\<Gamma\>|)>|)> Q
+  </equation*>
+
+  \;
+
+  Where :\ 
+
+  <\equation*>
+    Q=<around*|(|X\<otimes\>\<b-1\><rsub|n>|)>-<around*|(|\<b-1\><rsub|n>\<otimes\>X|)>
+  </equation*>
+
+  \;
+
+  Note that <math|\<otimes\>> is a tensor product and <math|\<b-1\><rsub|n>>
+  is a 1 vector with a length of <math|n>.
+
+  \;
+
+  And :\ 
+
+  <\equation*>
+    cost = \<Gamma\>=\<Psi\>\<odot\><around*|[|d d<rsup|T>|]>\<odot\> K
+  </equation*>
+
+  \;
+
+  Since <math|Q> is a constant that never changes during the optimization, it
+  could be calculated at the beginning and cached. During each <math|W>
+  update using the gradient, <math|\<Psi\>> and <math|Q> are considered as
+  constants while <math|K> and <math|D> require a constant update. However,
+  each time the <math|U> matrix is updated, <math|\<Psi\>> must also be
+  updated.\ 
+
+  \;
+
+  Here we outline the Algorithm for the <math|W> optimization update scheme.\ 
+
+  \;
+
+  1. Initialize <math|W<rsub|0>=0> for the first time, and <math|W<rsub|k>>
+  if <math|U> has been updated.\ 
+
+  2. Calculate <math|Q\<nocomma\>,\<Psi\>> and store them as constants
+
+  3. Calculate <math|K,D,\<Phi\>>
+
+  4. <math|W<rsub|k+1>=<wide|eig|\<vect\>><rsub|min><around*|(|\<Phi\>|)>>,
+  pick <math|q> least dominant eigenvectors as <math|W<rsub|k+1>>.
+
+  5. Repeat 3,4 until <math|W> convergence
 </body>
 
 <initial|<\collection>
@@ -815,6 +1060,7 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|3>>
+    <associate|auto-10|<tuple|7|12>>
     <associate|auto-2|<tuple|2|3>>
     <associate|auto-3|<tuple|3|4>>
     <associate|auto-4|<tuple|1|5>>
@@ -822,7 +1068,7 @@
     <associate|auto-6|<tuple|3|8>>
     <associate|auto-7|<tuple|4|9>>
     <associate|auto-8|<tuple|5|10>>
-    <associate|auto-9|<tuple|6|?>>
+    <associate|auto-9|<tuple|6|11>>
   </collection>
 </references>
 
@@ -857,6 +1103,14 @@
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Optimality
       condition> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-8><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>Implementation
+      Details of Cost function> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-9><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|7<space|2spc>Implementation
+      Details of the Derivative> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-10><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>

@@ -71,8 +71,8 @@ else: 		# run preset original clustering
 
 if True:	# run alternative clustering
 	#rand_lambda = 3*np.random.random()
-	#rand_lambda = 0.1 # this one works with KDAC
-	rand_lambda = 1
+	rand_lambda = 0.1 # this one works with FKDAC
+	#rand_lambda = 1  # this work works with KDAC
 
 	ASC.set_values('q',4)
 	ASC.set_values('C_num',4)
