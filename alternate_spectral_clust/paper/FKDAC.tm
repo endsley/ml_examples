@@ -481,7 +481,7 @@
   Writing out the Larangian :
 
   <\equation*>
-    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>+<frac|1|2>*Tr<around|(|\<Lambda\>*<around|(|W<rsup|T>*W-I|)>|)>
+    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>+<frac|1|2>*Tr<around|(|\<Lambda\>*<around|(|I-W<rsup|T>*W|)>|)>
   </equation*>
 
   We simplify the Lagrangian by using the Taylor approximation on the
@@ -489,20 +489,20 @@
   the 1st order centering around 0.
 
   <\equation*>
-    <with|math-font|cal|L>\<approx\>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*<around*|(|1-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>|)>+<frac|1|2>*Tr<around|(|\<Lambda\>*<around|(|W<rsup|T>*W-I|)>|)>
+    <with|math-font|cal|L>\<approx\>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*<around*|(|1-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>|)>+<frac|1|2>*Tr<around|(|\<Lambda\>*<around|(|I-W<rsup|T>*W|)>|)>
   </equation*>
 
   Following the similar procedure by finding the derivative of
   <math|<with|math-font|cal|L>> and setting it to zero.
 
   <\equation*>
-    \<nabla\><with|math-font|cal|L>\<approx\><big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>*W+W*\<Lambda\>=0
+    \<nabla\><with|math-font|cal|L>\<approx\><big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>*W-W*\<Lambda\>=0
   </equation*>
 
   We arrange the problem into standard eigenvalue/eigenvector problem.
 
   <\equation*>
-    <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>*W=-W*\<Lambda\>
+    <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>*W=W*\<Lambda\>
   </equation*>
 
   From this, we see that <math|\<Phi\>> is no longer a function of <math|W>.
@@ -1035,17 +1035,17 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|3>>
-    <associate|auto-10|<tuple|5|12>>
-    <associate|auto-11|<tuple|6|?>>
+    <associate|auto-10|<tuple|5|10>>
+    <associate|auto-11|<tuple|6|12>>
     <associate|auto-12|<tuple|7|?>>
     <associate|auto-2|<tuple|2|3>>
     <associate|auto-3|<tuple|3|4>>
     <associate|auto-4|<tuple|1|5>>
-    <associate|auto-5|<tuple|1.1|7>>
-    <associate|auto-6|<tuple|1.2|8>>
-    <associate|auto-7|<tuple|2|9>>
-    <associate|auto-8|<tuple|3|10>>
-    <associate|auto-9|<tuple|4|11>>
+    <associate|auto-5|<tuple|1.1|5>>
+    <associate|auto-6|<tuple|1.2|6>>
+    <associate|auto-7|<tuple|2|8>>
+    <associate|auto-8|<tuple|3|9>>
+    <associate|auto-9|<tuple|4|10>>
   </collection>
 </references>
 
@@ -1063,31 +1063,34 @@
       KDAC> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-4><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Solving
-      problem with multiple <with|mode|<quote|math>|w> columns :>
+      <with|par-left|<quote|1.5fn>|1.1<space|2spc>Optimality Conditions
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-5><vspace|0.5fn>
+      <no-break><pageref|auto-5>>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Approximating
+      <with|par-left|<quote|1.5fn>|1.2<space|2spc>1st Order Relaxation
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-6>>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Approximating
       <with|mode|<quote|math>|w<rsub|k+1>>>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-6><vspace|0.5fn>
-
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Expand
-      the same idea to multiple columns> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-7><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Optimality
-      condition> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Expand
+      the same idea to multiple columns> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-8><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>Implementation
-      Details of Cost function> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Optimality
+      condition> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-9><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|7<space|2spc>Implementation
-      Details of the Derivative> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Implementation
+      Details of Cost function> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-10><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>Implementation
+      Details of the Derivative> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-11><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
