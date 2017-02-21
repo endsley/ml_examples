@@ -27,7 +27,7 @@ from file_writing import *
 #data = genfromtxt('data_sets/facial_98.csv', delimiter=',')		
 #data = genfromtxt('data_sets/facial_95.csv', delimiter=',')		
 
-data = genfromtxt('data_sets/facial_85.csv', delimiter=',')		
+data = genfromtxt('data_sets/facial_85.csv', delimiter=',')		# 27 samples
 label = genfromtxt('data_sets/facial_true_labels_624x960.csv', delimiter=',')		
 pose_label = genfromtxt('data_sets/facial_pose_labels_624x960.csv', delimiter=',')		
 original_Y = Allocation_2_Y(label)

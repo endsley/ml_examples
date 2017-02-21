@@ -262,16 +262,18 @@
   \;
 
   FKDAC is an alternative approach to Dimension Growth that estimates the
-  optimal result without using gradient methods. To simplify the explanation,
-  we introduce the algorithm by solving for a single column <math|w> matrix.
-  Once the derivation is understood, the key concepts can be easily
-  generalized to a multiple column scenerio.\ 
+  optimal result without using gradient methods. We restate the optimization
+  problem here :\ 
 
   <\equation>
-    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<table|<row|<cell|min>|<cell|-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>>>|<row|<cell|W>|<cell|>>|<row|<cell|s.*t>|<cell|w<rsup|T>*w=1>>|<row|<cell|>|<cell|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>1>>>|<row|<cell|>|<cell|A\<in\><with|math-font|Bbb*|R><rsup|d\<times\>d>>>|<row|<cell|>|<cell|\<gamma\><rsub|i,j>\<in\><with|math-font|Bbb*|R>>>>>>
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<table|<row|<cell|min>|<cell|-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>>>|<row|<cell|s.*t>|<cell|W<rsup|T>*W=I>>|<row|<cell|>|<cell|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>q>>>|<row|<cell|>|<cell|A\<in\><with|math-font|Bbb*|R><rsup|d\<times\>d>>>|<row|<cell|>|<cell|\<gamma\><rsub|i,j>\<in\><with|math-font|Bbb*|R>>>>>>
   </equation>
 
   \;
+
+  \;
+
+  <subsection|Optimality Conditions>
 
   \;
 
@@ -292,22 +294,25 @@
     following 3 conditions :\ 
 
     <\equation*>
-      \<nabla\><rsub|x>\<cal-L\><around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>=0
+      \<nabla\><rsub|x>\<cal-L\><around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>=0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>Condition
+      1
     </equation*>
 
     <\equation*>
-      \<nabla\><rsub|\<lambda\>>\<cal-L\><around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>=0
+      \<nabla\><rsub|\<lambda\>>\<cal-L\><around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>=0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>|<cell|>>>>>Condition
+      2
     </equation*>
 
     <\equation*>
-      y<rsup|T>\<nabla\><rsub|x x><rsup|2>L<around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>
-      y \<gtr\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|for>|<cell|all>|<cell|y\<neq\>0>|<cell|with>|<cell|\<nabla\>h<around*|(|x<rsup|\<ast\>>|)><rsup|T>y=0>>>>>
+      z<rsup|T>\<nabla\><rsub|x x><rsup|2>L<around*|(|x<rsup|\<ast\>>,\<lambda\><rsup|\<ast\>>|)>
+      z \<gtr\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|for>|<cell|all>|<cell|z\<neq\>0>|<cell|with>|<cell|\<nabla\>h<around*|(|x<rsup|\<ast\>>|)><rsup|T>z=0>>>>><tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>>>>>Condition
+      3
     </equation*>
 
     \;
 
-    Then <math|x<rsup|\<ast\>>> is a strict local minimum of <math|f>
-    subjected to h(x) = 0.
+    <with|font-series|bold|Then <math|x<rsup|\<ast\>>> is a strict local
+    minimum of <math|f> subjected to h(x) = 0.>
   </proposition>
 
   \;
@@ -319,11 +324,12 @@
   with respect to <math|w>.
 
   <\equation*>
-    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>+<frac|\<lambda\>|2>*<around|(|1-w<rsup|T>*w|)>
+    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>+<frac|\<Lambda\>|2>*<around|(|1-W<rsup|T>*W|)>
   </equation*>
 
   <\equation*>
-    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*w>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*w|]>-\<lambda\>*w=0
+    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*w>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*W|]>-W
+    \<Lambda\>=0
   </equation*>
 
   \;
@@ -331,179 +337,138 @@
   \;
 
   <\equation*>
-    <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|<rsup|>T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>-\<lambda\>*I|]>*w=0
+    <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>-\<lambda\>*I|]>*W=0
   </equation*>
 
   If we let :
 
   <\equation*>
-    \<Phi\><around*|(|w|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
+    \<Phi\><around*|(|W|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
   </equation*>
 
   We can rewrite the equation :\ 
 
   <\equation*>
-    <around|[|\<Phi\><around*|(|w|)>-\<lambda\>*I|]>*w=0
+    <around|[|\<Phi\><around*|(|W|)>-\<lambda\>*I|]>*W=0
   </equation*>
 
   \;
 
-  In other words, the optimal solution <math|w<rsup|\<ast\>>> is in the null
-  space of the matrix <math|\<Phi\>-\<lambda\>*I>. \ Or, from another
-  perspective, we could rewrite the equation.
+  The equation above states that the optimal solution <math|W<rsup|\<ast\>>>
+  is in the null space of the matrix <math|\<Phi\>-\<lambda\>*I>. \ Or, from
+  another perspective, we could rewrite the equation.
 
   <\equation>
-    \<Phi\>*<around*|(|w<rsup|\<ast\>>|)>w<rsup|\<ast\>>=\<lambda\>*w<rsup|\<ast\>>
+    \<Phi\>*<around*|(|W<rsup|\<ast\>>|)>W<rsup|\<ast\>>=W<rsup|\<ast\>>
+    \<Lambda\>
   </equation>
 
   \;
 
   The equation above implies that the gradient of the Lagrangian is equal to
-  0 when <math|w<rsup|\<ast\>>> is an eigenvector of
+  0 when <math|W<rsup|\<ast\>>> have columns of \ eigenvectors of
   <math|\<Phi\><around*|(|w<rsup|\<ast\>>|)>>. \ Meeting this condition will
   satisfy the 1st condition of Proposition 1.
 
   \;
 
   The 2nd condition of Proposition 1 requires that :
-  <math|\<nabla\><rsub|\<lambda\>>\<cal-L\>=0>. From the cost function, we
+  <math|\<nabla\><rsub|\<Lambda\>>\<cal-L\>=0>. From the cost function, we
   get :\ 
 
   <\equation>
-    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*\<lambda\>>=1-w<rsup|T>*w=0
+    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*\<Lambda\>>=1-W<rsup|T>*W=0
   </equation>
 
   \;
 
   With the conclusions from equation (5), it is obvious that if the optimal
-  <math|w<rsup|\<ast\>>> is an eigenvector, this condition is simultaneously
-  satisfied.\ 
+  <math|W<rsup|\<ast\>>> have columns as \ unit norm eigenvectors, this
+  condition is automatically satisfied.\ 
+
+  \;
+
+  To satisfy the final condtion, we first define :\ 
+
+  <\equation*>
+    \<cal-D\>f<around*|(|X|)><around*|[|Z|]>\<assign\><tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|f<around*|(|X+t
+    Z|)>-f<around*|(|X|)>|t>
+  </equation*>
+
+  \;
+
+  We want to define a set of <math|Z> such that :
+
+  <\equation*>
+    \<nabla\>h<around*|(|x<rsup|\<ast\>>|)><rsup|T>Z=0
+  </equation*>
+
+  \;
+
+  We know that <math|h<around*|(|W|)>=W<rsup|T>W-1>, therefore :\ 
+
+  <\equation*>
+    \<cal-D\>h<around*|(|W|)><around*|[|Z|]>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|<around*|(|W+t
+    Z|)><rsup|T><around*|(|W+ t Z|)>-W<rsup|T>W|t>=Z<rsup|T>W+W<rsup|T>Z
+  </equation*>
+
+  \;
+
+  From this, we define as set of <math|Z> such that :
+
+  <\equation*>
+    S<rsub|Z>=<around*|{|Z:Z<rsup|T>W+W<rsup|T>Z=0|}>
+  </equation*>
+
+  \;
+
+  The 3rd optimality condition is therefore met when :\ 
+
+  <\equation*>
+    Tr<around*|(|Z<rsup|T> \<cal-D\>f<around*|(|W|)><around*|[|Z|]>|)>-Tr<around*|(|\<Lambda\>
+    Z<rsup|T>Z|)>\<gtr\>0<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>>>>>\<forall\>
+    Z\<in\>S<rsub|Z>
+  </equation*>
+
+  \;
+
+  In Simpler terms, if the 2nd order gradient of the Lagrangian is Positive
+  Definite, then the condition is satisfied. Due to the complexity of
+  computing the Hessian in real time, a relaxation approach is discussed in a
+  later section.
 
   \;
 
   \;
 
-  From this perspective, it would be extremely easy to find
-  <math|w<rsup|\<ast\>>> if <math|\<Phi\><around*|(|w<rsup|\<ast\>>|)>> was
-  known. \ But, of course, <math|\<Phi\><around*|(|w<rsup|\<ast\>>|)>>
-  includes the variable <math|w<rsup|\<ast\>>>
+  <subsection|1st Order Relaxation>
 
   \;
 
-  \ To work around the requirement of <math|w<rsup|\<ast\>>> in
-  <math|\<Phi\><around*|(|w|)>>, we can treat <math|w<rsup|\<ast\>>> inside
-  <math|\<Phi\><around*|(|w|)>> and <math|w<rsup|\<ast\>>> outside of
-  <math|\<Phi\><around*|(|w|)>> as 2 separate variables. By initializing
-  <math|w<rsup|\<ast\>>> inside <math|\<Phi\>> ``intelligently'', we could
-  use this <math|\<Phi\><rsub|0>> to estimate <math|w<rsub|1>>. The newly
-  calculated <math|w<rsub|1>> can then feed into <math|\<Phi\><rsub|1>> to
-  again calculate <math|w<rsub|2>>. By iterating this process, we hope to
-  arrive to a convergence.\ 
-
-  \;
-
-  Given this scheme, how do we ``intelligently'' initialize <math|w<rsub|0>>
-  ? The trick is to approximate the cost function with another simpler cost
-  function.
-
-  <\proposition>
-    Assuming Lipschitz condition, the problem
-    <math|w<rsup|\<ast\>>=<tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|argmin>>|<row|<cell|w>>>>>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>>
-    can be approximated with the eigenvectors of the marix :
-    <math|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>>
-    .
-  </proposition>
-
-  <\proof>
-    \ 
-  </proof>
-
-  We start with the Lagrangian again :
+  Given that <math|\<Phi\><around*|(|W|)>> is a function of <math|W>, it is
+  difficult to take advantage of the eigenvalue/eigenvector relationship to
+  find the solution.
 
   <\equation*>
-    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>+<frac|\<lambda\>|2>*<around|(|w<rsup|T>*w-1|)>
-  </equation*>
-
-  Using the Taylor expansion around 0, we approximate
-  <math|e<rsup|-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>>> up to
-  the first order.
-
-  <\equation*>
-    f<around|(|w|)>\<approx\><wide|f|\<bar\>><around|(|w|)>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*<around*|(|1-<frac|w<rsup|T>*A<rsub|i,j>*w|2*\<sigma\><rsup|2>>|)>+<frac|\<lambda\>|2>*<around|(|w<rsup|T>*w-1|)>
-  </equation*>
-
-  Given the approximation function of <math|<wide|f|\<bar\>><around|(|w|)>>,
-  we again find the derivate and set it to zero.
-
-  <\equation*>
-    \<nabla\><wide|f|\<bar\>><around|(|w|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>*w+\<lambda\>*w=0
-  </equation*>
-
-  <\equation*>
-    \<nabla\><wide|f|\<bar\>><around|(|w|)>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>+\<lambda\>*I|]>*w=0
-  </equation*>
-
-  <\equation*>
-    <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>*w=-\<lambda\>*w
-  </equation*>
-
-  <\equation*>
-    \<Phi\><rsub|0>*w=-\<lambda\>*w
-  </equation*>
-
-  By using the Taylor expansion, we have discovered a first order
-  approximation of the original function where <math|\<Phi\><rsub|0>> does
-  not include <math|w>. Given Lipschits condition, this approximate form a
-  relatively tight bound of the original function. It is interesting to note
-  that this initialization condition is equivalent to setting <math|w=0>.\ 
-
-  <\equation*>
-    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsup|<rsup|\<ast\>>T>*A<rsub|i,j>*w<rsup|\<ast\>>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
-    \<nocomma\><tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>>>>>with
-    w=0
-  </equation*>
-
-  <\equation*>
-    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|0>*A<rsub|i,j>|]>
-    \<nocomma\>
-  </equation*>
-
-  <\equation*>
-    \<Phi\>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>**A<rsub|i,j>|]>
-    \<nocomma\>
+    \<Phi\>*<around*|(|W<rsup|\<ast\>>|)>W<rsup|\<ast\>>=W<rsup|\<ast\>>
+    \<Lambda\>
   </equation*>
 
   \;
 
-  This observation implies that during implementation, it is sufficient to
-  simply set <math|w<rsub|0>> as 0 to kick off the iterative process.
+  A standard approach to circumvent this restriction is to treat
+  <math|W<rsup|\<ast\>>> inside <math|\<Phi\>> as a separate variable and
+  solve the problem iteratively.\ 
+
+  <\equation*>
+    \<Phi\>*<around*|(|W<rsub|k-1>|)>W=W \<Lambda\>
+  </equation*>
 
   \;
 
-  Once we have found the initial <math|w<rsub|k>>, we could plug it back into
-  the original gradient equation to find a better approximation of
-  <math|\<Phi\><rsub|k+1>>. Using the new <math|\<Phi\><rsub|k+1>>, we can
-  once again approximate and find <math|w<rsub|k+1>>. This process could be
-  repeated until some satisfactory condition is met.
-
-  <\equation*>
-    eig<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|w<rsub|k><rsup|T>*A<rsub|i,j>*w<rsub|k>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>=w<rsub|k+1>
-  </equation*>
-
-  \ From this point, we could approximate the optimal <math|w<rsup|\<ast\>>>
-  by simply finding the eigenvector of <math|\<Phi\>>. \ To extrapolate this
-  idea to <math|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>q>> instead of
-  <math|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>1>>, we could simply
-  pick <math|q> eigenvectors. Since they are orthogonal with a magnitude of
-  1, these solutions are automatically within the constraint space.
-
-  \ 
-
-  <section|Solving problem with multiple <math|w> columns :>
-
-  We now expand our understanding to solve problems where <math|W> is a
-  <math|d> <math|\<times\>> <math|q> matrix instead of a single vector. We
-  now deal with the problem :
+  The key is, therefore, finding a reasonable initialization value for
+  <math|W<rsub|0>> . This section provide a theoretical suggestion for a
+  logical initialization point. \ Given the following problem :
 
   <\equation*>
     <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|1|1|cell-rborder|0ln>|<table|<row|<cell|min>>|<row|<cell|W>>>>>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>
@@ -519,8 +484,9 @@
     <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>+<frac|1|2>*Tr<around|(|\<Lambda\>*<around|(|W<rsup|T>*W-I|)>|)>
   </equation*>
 
-  We also similarly use the Taylor approximation on the exponential term up
-  to the first term and yield :
+  We simplify the Lagrangian by using the Taylor approximation on the
+  problematic exponential term. The Taylor approximation is expanded up to
+  the 1st order centering around 0.
 
   <\equation*>
     <with|math-font|cal|L>\<approx\>-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*<around*|(|1-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>|)>+<frac|1|2>*Tr<around|(|\<Lambda\>*<around|(|W<rsup|T>*W-I|)>|)>
@@ -539,8 +505,10 @@
     <around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>|]>*W=-W*\<Lambda\>
   </equation*>
 
-  From this, we see that if <math|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>q>>,
-  the <math|W> is <math|q> eigenvectors of the matrix :
+  From this, we see that <math|\<Phi\>> is no longer a function of <math|W>.
+  If <math|W\<in\><with|math-font|Bbb*|R><rsup|d\<times\>q>>, the
+  <math|W<rsub|0>> is therefore, <math|q> eigenvectors of the matrix
+  <math|\<Phi\><rsub|0> >:
 
   <\equation*>
     \<Phi\><rsub|0>=<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*A<rsub|i,j>
@@ -560,11 +528,18 @@
     \<Phi\><rsub|n+1>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around|(|W<rsub|n><rsup|T>*A<rsub|i,j>*W<rsub|n>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
   </equation*>
 
-  At this point, it is reasonable to wonder that given so many singular
-  values, which singular value would be the most reasonable to pick? \ One
-  reasonable approach is to use the greedy algorithm to find <math|q>
-  eigenvectors that produces the lowest cost. \ The following section
-  explores the theoretic motivation for choosing the optimal singular values.
+  Given that only <math|q> eigenvectors are chosen out of <math|d> total
+  eigenvectors, and <math|q\<ll\>d>. The total possible combinations could be
+  extremely large depending on the values of <math|d> and <math|q>, more
+  specifically it is equal to <math|<around*|(|<tabular|<tformat|<table|<row|<cell|d>>|<row|<cell|q>>>>>|)>>.
+  Solving this problem becomes a difficult and separate combinatorial
+  optimization. \ One reasonable approach is to use the greedy algorithm to
+  find <math|q> eigenvectors that produces the lowest cost. \ However, as we
+  explore the theoretic motivation for choosing the optimal eigenvectors, we
+  demonstrate in the next section the optimal eigenvectors without resorting
+  to greedy methods.
+
+  \;
 
   <section|Approximating <math|w<rsub|k+1>>>
 
@@ -1060,15 +1035,17 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|3>>
-    <associate|auto-10|<tuple|7|12>>
+    <associate|auto-10|<tuple|5|12>>
+    <associate|auto-11|<tuple|6|?>>
+    <associate|auto-12|<tuple|7|?>>
     <associate|auto-2|<tuple|2|3>>
     <associate|auto-3|<tuple|3|4>>
     <associate|auto-4|<tuple|1|5>>
-    <associate|auto-5|<tuple|2|7>>
-    <associate|auto-6|<tuple|3|8>>
-    <associate|auto-7|<tuple|4|9>>
-    <associate|auto-8|<tuple|5|10>>
-    <associate|auto-9|<tuple|6|11>>
+    <associate|auto-5|<tuple|1.1|7>>
+    <associate|auto-6|<tuple|1.2|8>>
+    <associate|auto-7|<tuple|2|9>>
+    <associate|auto-8|<tuple|3|10>>
+    <associate|auto-9|<tuple|4|11>>
   </collection>
 </references>
 
