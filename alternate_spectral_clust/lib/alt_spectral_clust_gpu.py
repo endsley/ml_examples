@@ -67,6 +67,11 @@ class alt_spectral_clust:
 
 		print '\n\nRan inside GPU\n\n'
 
+	def remove_previous_Y_columns(self):
+		self.kdac.DiscardLastRun()
+
+
+
 	def set_values(self, key, val):
 
 		if key in self.translation:
