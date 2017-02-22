@@ -103,8 +103,8 @@ class SDG:
 				[S2,U2] = np.linalg.eigh(matrix_sum)
 				eigsValues = S2[0:db['q']]
 				#print W
-				print S2
-				print eigsValues , '\n'
+				#print S2
+				#print eigsValues , '\n'
 				new_gradient = matrix_sum.dot(W)
 				Lagrange_gradient = new_gradient - W*eigsValues
 				new_gradient_mag = np.linalg.norm(Lagrange_gradient)
@@ -118,6 +118,7 @@ class SDG:
 				#print U2
 
 				W = U2[:,0:db['q']]
+
 			else:
 				# Use svd
 				[U,S,V] = np.linalg.svd(matrix_sum)
