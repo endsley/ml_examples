@@ -541,6 +541,180 @@
 
   \;
 
+  <subsection|Convergence>
+
+  \;
+
+  The convergence of the sequence generated from using the 1st order
+  relaxation may not be possible, however through the Bolzano-Weierstrass
+  Theorem, a convergent subsequence can be shown. According to [1], \ it
+  states that :\ 
+
+  <\theorem>
+    A bounded sequence of real numbers has convergent subsequence.
+  </theorem>
+
+  According to this theorem, if we can show that the sequences generated from
+  the 1st order relaxation is bounded, it has a convergent subsequence. If we
+  study the equation more closely :\ 
+
+  <\equation*>
+    \<Phi\><around*|(|W<rsub|k-1>|)>*W<rsub|k>=W<rsub|k>*\<Lambda\>
+  </equation*>
+
+  \;
+
+  The key driver of the sequence of <math|W<rsub|k>> is the matrix
+  <math|\<Phi\>>, therefore, if we can show that if this matrix is bounded,
+  the sequence itself is also bounded. We look inside the construction of the
+  matrix itself.\ 
+
+  <\equation*>
+    \<Phi\><rsub|n+1>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around|(|W<rsub|n><rsup|T>*A<rsub|i,j>*W<rsub|n>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>
+  </equation*>
+
+  \;
+
+  From this, equation, start with the matrix
+  <math|A<rsub|i,j>=<around*|(|x<rsub|i>-x<rsub|j>|)><around*|(|x<rsub|i>-x<rsub|j>|)><rsup|T>>.
+  Since <math|x<rsub|i>,x<rsub|j>> are data points that are always centered
+  and scaled to a variance of 1, the size of this matrix is always
+  constrained. It also implies that <math|A<rsub|i,j>> is a PSD matrix. From
+  this, the exponential term <math|e<rsup|-<frac|Tr<around|(|W<rsub|n><rsup|T>*A<rsub|i,j>*W<rsub|n>|)>|2*\<sigma\><rsup|2>>>*>is
+  always limited between the value of 0 and 1. The value of <math|\<sigma\>>
+  is a constant given from the initialization stage. Lastly, we have the
+  <math|\<gamma\><rsub|i,j>> term. Looking at it closely, it is equal to :\ 
+
+  <\equation*>
+    \<gamma\><rsub|i,j>=<frac|u<rsub|i><rsup|T>u<rsub|j>|d<rsub|i>d<rsub|j>>-\<lambda\>
+    <around*|(|H Y Y<rsup|T>H|)><rsub|i,j>
+  </equation*>
+
+  \;
+
+  The vectors <math|u<rsub|i>> will always be a vectors with a norm of 1,
+  <math|d<rsub|i>> is always less than <math|<sqrt|N>>, where <math|N> is the
+  number of samples. <math|\<lambda\>> is a constant given from the
+  initialization stage. <math|H> and <math|Y> can be considered as constants
+  as well. \ From this, it is clear that the size of the <math|\<Phi\>> is
+  always bounded. The eigenvalue matrix of <math|\<Lambda\>> is therefore
+  also bounded. Using the Bolzano-Weierstrass Theorem, the sequence contains
+  a convergent subsequence.
+
+  \;
+
+  <subsection|2nd Order Condition>
+
+  Given :\ 
+
+  <\equation*>
+    \<cal-L\>=-<big|sum>\<gamma\><rsub|i,j>
+    e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*-Tr<around*|(|\<Lambda\><around*|(|W<rsup|T>W-I|)>|)>
+  </equation*>
+
+  <\equation*>
+    \<nabla\>\<cal-L\>=<big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>
+    W-2 W\<Lambda\>
+  </equation*>
+
+  <\equation*>
+    \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
+    t><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W+t
+    Z|)><rsup|T>*A<rsub|i,j>*<around*|(|W+t
+    Z|)>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j> <around*|(|W+t Z|)>-2
+    <around*|(|W+t Z|)>\<Lambda\>
+  </equation*>
+
+  \;
+
+  Let's divide this problem into 3 terms.
+
+  <\equation*>
+    \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>=T<rsub|1>+T<rsub|2>-T<rsub|3>
+  </equation*>
+
+  \;
+
+  Let's now solve each term separately.\ 
+
+  <\equation*>
+    T<rsub|1>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
+    t><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W+t
+    Z|)><rsup|T>*A<rsub|i,j>*<around*|(|W+t
+    Z|)>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j> W
+  </equation*>
+
+  <\equation*>
+    T<rsub|1>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
+    t><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>W+t
+    Z<rsup|T>A<rsub|i,j>W+t W<rsup|T>A<rsub|i,j>
+    Z+t<rsup|2>Z<rsup|T>A<rsub|i,j>Z|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>
+    W
+  </equation*>
+
+  <\equation*>
+    T<rsub|1>=-<big|sum><frac|\<gamma\><rsub|i,j>|2\<sigma\><rsup|4>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
+    W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*Tr<around*|(|Z<rsup|T>A<rsub|i,j>W+W<rsup|T>A<rsub|i,j>Z|)>A<rsub|i,j>
+    W
+  </equation*>
+
+  \;
+
+  <\equation*>
+    T<rsub|2>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
+    t><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>> t
+    e<rsup|-<frac|Tr<around|(|<around*|(|W+t
+    Z|)><rsup|T>*A<rsub|i,j>*<around*|(|W+t
+    Z|)>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j> Z
+  </equation*>
+
+  <\equation*>
+    T<rsub|2>=<big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    \ e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>
+    Z
+  </equation*>
+
+  <\equation*>
+    T<rsub|3>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
+    t> 2<around*|(|W+t Z|)>\<Lambda\>
+  </equation*>
+
+  <\equation*>
+    T<rsub|3>=2 Z\<Lambda\>
+  </equation*>
+
+  \;
+
+  Putting together all 3 terms :\ 
+
+  <\equation*>
+    \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>=<around*|{|<big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
+    W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*<around*|[|A<rsub|i,j>Z-<frac|1|2\<sigma\><rsup|2>>Tr<around*|(|Z<rsup|T>A<rsub|i,j>W+W<rsup|T>A<rsub|i,j>Z|)>A<rsub|i,j>
+    W|]>|}>-2 Z\<Lambda\>
+  </equation*>
+
+  \;
+
+  For all <math|Z> satisfying the following condition.\ 
+
+  <\equation*>
+    Z<rsup|T>X+X<rsup|T>Z=0
+  </equation*>
+
+  \;
+
+  We know that the 2nd order condition is satisfied if :\ 
+
+  <\equation*>
+    Tr<around*|(|Z<rsup|T> \<cal-D\> \<nabla\>\<cal-L\><around*|[|Z|]>|)>\<gtr\>0
+  </equation*>
+
   <section|Approximating <math|w<rsub|k+1>>>
 
   Let <math|q> be the reduced the dimension and <math|d> as the original
@@ -1027,6 +1201,24 @@
   pick <math|q> least dominant eigenvectors as <math|W<rsub|k+1>>.
 
   5. Repeat 3,4 until <math|W> convergence
+
+  \;
+
+  \;
+
+  \;
+
+  \;
+
+  \;
+
+  <\itemize>
+    [1] <cite*|Bartle, Robert G.; Sherbert, Donald R.
+    (2000).<with|font-shape|italic|Introduction to Real Analysis>(3rd ed.).
+    New York: J. Wiley.>
+  </itemize>
+
+  \;
 </body>
 
 <initial|<\collection>
@@ -1035,17 +1227,18 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|3>>
-    <associate|auto-10|<tuple|5|10>>
-    <associate|auto-11|<tuple|6|12>>
-    <associate|auto-12|<tuple|7|?>>
+    <associate|auto-10|<tuple|3|10>>
+    <associate|auto-11|<tuple|4|12>>
+    <associate|auto-12|<tuple|5|?>>
+    <associate|auto-13|<tuple|6|?>>
     <associate|auto-2|<tuple|2|3>>
     <associate|auto-3|<tuple|3|4>>
     <associate|auto-4|<tuple|1|5>>
     <associate|auto-5|<tuple|1.1|5>>
     <associate|auto-6|<tuple|1.2|6>>
-    <associate|auto-7|<tuple|2|8>>
-    <associate|auto-8|<tuple|3|9>>
-    <associate|auto-9|<tuple|4|10>>
+    <associate|auto-7|<tuple|1.3|8>>
+    <associate|auto-8|<tuple|1.4|9>>
+    <associate|auto-9|<tuple|2|10>>
   </collection>
 </references>
 

@@ -165,7 +165,51 @@
     x<rsub|i,j><rsup|T> A \<Delta\> x<rsub|i,j>|2 \<sigma\><rsup|2>>|)>>>>>>>
   </equation*>
 
-  \;
+  Relaxation of rank.
+
+  <\equation*>
+    <tabular|<tformat|<table|<row|<cell|min>|<cell|Tr<around*|(|<around*|(|A<rsub|k>+\<delta\>
+    I|)><rsup|-1>A|)>-\<lambda\>Tr <around*|(|H U U<rsup|T> H
+    K|)>>>|<row|<cell|A,U>|<cell|>>>>>
+  </equation*>
+
+  <\equation*>
+    <tabular|<tformat|<table|<row|<cell|min>|<cell|Tr<around*|(|C
+    A|)>-\<lambda\>Tr <around*|(|H U U<rsup|T> H
+    K|)>>>|<row|<cell|A,U>|<cell|>>>>>
+  </equation*>
+
+  Let <math|Y<rsup|T>=H U U<rsup|T>H>, <math|A = W W<rsup|T>>, we transform
+  back into orthogonality constraint.\ 
+
+  <\equation*>
+    <tabular|<tformat|<table|<row|<cell|min>|<cell|Tr<around*|(|W<rsup|T>C W
+    |)>-<big|sum><rsub|i,j>\<lambda\>Y <rsub|i,j>
+    e<rsup|-<frac|Tr<around*|(|W<rsup|T>X<rsub|i,j>
+    W|)>|2\<sigma\><rsup|2>>>-<frac|1|2>Tr<around*|(|\<Lambda\><around*|(|W<rsup|T>W-I|)>|)>>>|<row|<cell|A,U>|<cell|>>>>>
+  </equation*>
+
+  <\equation*>
+    \<cal-L\>=Tr<around*|(|W<rsup|T>C W |)>-<big|sum><rsub|i,j>\<lambda\>Y
+    <rsub|i,j> e<rsup|-<frac|Tr<around*|(|W<rsup|T>X<rsub|i,j>
+    W|)>|2\<sigma\><rsup|2>>>-<frac|1|2>Tr<around*|(|\<Lambda\><around*|(|W<rsup|T>W-I|)>|)>
+  </equation*>
+
+  <\equation*>
+    \<nabla\>\<cal-L\>=2 C W +<big|sum><rsub|i,j><frac|\<lambda\>|\<sigma\><rsup|2>>Y
+    <rsub|i,j> e<rsup|-<frac|Tr<around*|(|W<rsup|T>X<rsub|i,j>
+    W|)>|2\<sigma\><rsup|2>>>X<rsub|i,j> W- W \<Lambda\>=0
+  </equation*>
+
+  <\equation*>
+    <around*|(|2 C \ +<big|sum><rsub|i,j><frac|\<lambda\>|\<sigma\><rsup|2>>Y
+    <rsub|i,j> e<rsup|-<frac|Tr<around*|(|W<rsup|T>X<rsub|i,j>
+    W|)>|2\<sigma\><rsup|2>>>X<rsub|i,j>|)> W= W \<Lambda\>
+  </equation*>
+
+  <\equation*>
+    \<Phi\><around*|(|W|)> W=W \<Lambda\>
+  </equation*>
 </body>
 
 <\initial>
@@ -180,3 +224,11 @@
     <associate|auto-1|<tuple|1|?>>
   </collection>
 </references>
+
+<\auxiliary>
+  <\collection>
+    <\associate|figure>
+      <tuple|normal||<pageref|auto-1>>
+    </associate>
+  </collection>
+</auxiliary>
