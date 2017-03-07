@@ -210,6 +210,50 @@
   <\equation*>
     \<Phi\><around*|(|W|)> W=W \<Lambda\>
   </equation*>
+
+  \;
+
+  Also finding out the number of clusters
+
+  <\equation*>
+    <tabular|<tformat|<table|<row|<cell|min>|<cell|rank<around*|(|A|)>+\<rho\>
+    rank<around*|(|K<rsub|U>|)>-\<lambda\>Tr <around*|(|K H
+    K<rsub|U>H|)>>>|<row|<cell|A,U>|<cell|>>|<row|<cell|s.t>|<cell|K=X A
+    X<rsup|T>>>|<row|<cell|>|<cell|A\<geq\>0>>|<row|<cell|>|<cell|A\<in\>\<bbb-R\><rsup|n\<times\>n>>>>>>
+  </equation*>
+
+  Optimizing A is identical, but optimizing for <math|U> is now changed to
+  optimize for the entire <math|K<rsub|U>> matrix.
+
+  <\equation*>
+    \<rho\> rank<around*|(|K<rsub|U>|)>-\<lambda\><around*|(|H X A X<rsup|T>H
+    K<rsub|U>|)>
+  </equation*>
+
+  <\equation*>
+    \<rho\> rank<around*|(|K<rsub|U>|)>-\<lambda\><around*|(|\<Phi\>
+    K<rsub|U>|)>
+  </equation*>
+
+  <\equation*>
+    \<rho\> Tr<around*|(|<around*|(|K<rsub|U<rsub|k-1>>-\<delta\>
+    I|)><rsup|-1>K<rsub|U>|)>-\<lambda\><around*|(|\<Phi\> K<rsub|U>|)>
+  </equation*>
+
+  <\equation*>
+    \ Tr<around*|(|<around*|[|\<rho\><around*|(|K<rsub|U<rsub|k-1>>-\<delta\>
+    I|)><rsup|-1>-\<lambda\> \<Phi\>|]>K<rsub|U>|)>
+  </equation*>
+
+  This problem is now converted into a SDP problem.
+
+  <\equation*>
+    <tabular|<tformat|<table|<row|<cell|min>|<cell|Tr<around*|(|W
+    K<rsub|U>|)>>>|<row|<cell|K<rsub|U>>|<cell|>>|<row|<cell|s.t>|<cell|K<rsub|U>\<succeq\>0>>>>>
+  </equation*>
+
+  By finding out the rank of <math|K<rsub|U>>, we also know the number of
+  clusters.
 </body>
 
 <\initial>

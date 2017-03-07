@@ -279,9 +279,15 @@
 
   Due to the non-convex nature of the problem, FKDAC cannot guarentee to
   discover the global minimum. However, a sufficient optimality condition
-  exists for a local minimum. According to Bertsekas in [1], Proposition
-  3.2.1 <math|x<rsup|\<ast\>>> is a optimal solution of it satisfies the
-  following proposition.\ 
+  exists for a local minimum. Given the problem :\ 
+
+  <\equation*>
+    <tabular|<tformat|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|min>|<cell|f<around*|(|x|)>>>|<row|<cell|x>|<cell|>>|<row|<cell|s.t>|<cell|h<around*|(|x|)>=0>>>>>
+  </equation*>
+
+  There exists a sufficiency condition according to Bertsekas in [1],
+  Proposition 3.2.1. It states that <math|x<rsup|\<ast\>>> is a optimal
+  solution of it satisfies the following proposition.\ 
 
   \;
 
@@ -328,7 +334,7 @@
   </equation*>
 
   <\equation*>
-    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*w>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*W|]>-W
+    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*W>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*W|]>-W
     \<Lambda\>=0
   </equation*>
 
@@ -536,8 +542,8 @@
   optimization. \ One reasonable approach is to use the greedy algorithm to
   find <math|q> eigenvectors that produces the lowest cost. \ However, as we
   explore the theoretic motivation for choosing the optimal eigenvectors, we
-  demonstrate in the next section the optimal eigenvectors without resorting
-  to greedy methods.
+  demonstrate the possibility of knowing the optimal eigenvectors without
+  resorting to greedy methods.
 
   \;
 
@@ -596,10 +602,10 @@
   <math|d<rsub|i>> is always less than <math|<sqrt|N>>, where <math|N> is the
   number of samples. <math|\<lambda\>> is a constant given from the
   initialization stage. <math|H> and <math|Y> can be considered as constants
-  as well. \ From this, it is clear that the size of the <math|\<Phi\>> is
-  always bounded. The eigenvalue matrix of <math|\<Lambda\>> is therefore
-  also bounded. Using the Bolzano-Weierstrass Theorem, the sequence contains
-  a convergent subsequence.
+  as well. \ From this, it is clear that the infinity norm of the
+  <math|\<Phi\>> is always bounded. The eigenvalue matrix of
+  <math|\<Lambda\>> is therefore also bounded. Using the Bolzano-Weierstrass
+  Theorem, the sequence contains a convergent subsequence.
 
   \;
 
@@ -608,19 +614,19 @@
   Given :\ 
 
   <\equation*>
-    \<cal-L\>=-<big|sum>\<gamma\><rsub|i,j>
+    \<cal-L\>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>
     e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*-Tr<around*|(|\<Lambda\><around*|(|W<rsup|T>W-I|)>|)>
   </equation*>
 
   <\equation*>
-    \<nabla\>\<cal-L\>=<big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    \<nabla\>\<cal-L\>=<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
     e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>
     W-2 W\<Lambda\>
   </equation*>
 
   <\equation*>
     \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
-    t><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    t><big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
     e<rsup|-<frac|Tr<around|(|<around*|(|W+t
     Z|)><rsup|T>*A<rsub|i,j>*<around*|(|W+t
     Z|)>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j> <around*|(|W+t Z|)>-2
@@ -641,7 +647,7 @@
 
   <\equation*>
     T<rsub|1>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
-    t><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    t><big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
     e<rsup|-<frac|Tr<around|(|<around*|(|W+t
     Z|)><rsup|T>*A<rsub|i,j>*<around*|(|W+t
     Z|)>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j> W
@@ -649,7 +655,7 @@
 
   <\equation*>
     T<rsub|1>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
-    t><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    t><big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
     e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>W+t
     Z<rsup|T>A<rsub|i,j>W+t W<rsup|T>A<rsub|i,j>
     Z+t<rsup|2>Z<rsup|T>A<rsub|i,j>Z|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>
@@ -657,7 +663,7 @@
   </equation*>
 
   <\equation*>
-    T<rsub|1>=-<big|sum><frac|\<gamma\><rsub|i,j>|2\<sigma\><rsup|4>>
+    T<rsub|1>=-<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|2\<sigma\><rsup|4>>
     e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
     W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*Tr<around*|(|Z<rsup|T>A<rsub|i,j>W+W<rsup|T>A<rsub|i,j>Z|)>A<rsub|i,j>
     W
@@ -667,14 +673,14 @@
 
   <\equation*>
     T<rsub|2>=<tabular|<tformat|<cwith|1|1|1|1|cell-halign|c>|<table|<row|<cell|lim>>|<row|<cell|t\<rightarrow\>0>>>>><frac|\<partial\>|\<partial\>
-    t><big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>> t
+    t><big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>> t
     e<rsup|-<frac|Tr<around|(|<around*|(|W+t
     Z|)><rsup|T>*A<rsub|i,j>*<around*|(|W+t
     Z|)>|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j> Z
   </equation*>
 
   <\equation*>
-    T<rsub|2>=<big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    T<rsub|2>=<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
     \ e<rsup|-<frac|Tr<around|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>
     Z
   </equation*>
@@ -693,7 +699,7 @@
   Putting together all 3 terms :\ 
 
   <\equation*>
-    \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>=<around*|{|<big|sum><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>=<around*|{|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
     e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
     W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*<around*|[|A<rsub|i,j>Z-<frac|1|2\<sigma\><rsup|2>>Tr<around*|(|Z<rsup|T>A<rsub|i,j>W+W<rsup|T>A<rsub|i,j>Z|)>A<rsub|i,j>
     W|]>|}>-2 Z\<Lambda\>
@@ -701,19 +707,122 @@
 
   \;
 
-  For all <math|Z> satisfying the following condition.\ 
+  Since <math|A<rsub|i,j>> is symmetric, we know that
+  <math|Tr<around*|(|Z<rsup|T>A<rsub|i,j>W|)>=Tr<around*|(|W<rsup|T>A<rsub|i,j>Z|)>>,
+  we can combine the two terms.\ 
 
   <\equation*>
-    Z<rsup|T>X+X<rsup|T>Z=0
+    \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>=<around*|{|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
+    W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*<around*|[|A<rsub|i,j>Z-<frac|1|\<sigma\><rsup|2>>Tr<around*|(|Z<rsup|T>A<rsub|i,j>W|)>A<rsub|i,j>
+    W|]>|}>-2 Z\<Lambda\>
   </equation*>
+
+  \;
 
   \;
 
   We know that the 2nd order condition is satisfied if :\ 
 
-  <\equation*>
+  <\equation>
     Tr<around*|(|Z<rsup|T> \<cal-D\> \<nabla\>\<cal-L\><around*|[|Z|]>|)>\<gtr\>0
+  </equation>
+
+  \;
+
+  Therefore :\ 
+
+  <\equation*>
+    Tr<around*|(|Z<rsup|T> \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>|)>=<around*|{|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
+    W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*<around*|[|Tr<around*|(|Z<rsup|T>A<rsub|i,j>Z|)>-<frac|1|\<sigma\><rsup|2>>Tr<around*|(|Z<rsup|T>A<rsub|i,j>W|)><rsup|2>|]>|}>-2
+    Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|W>|)>
   </equation*>
+
+  \;
+
+  For all <math|Z> satisfying the following condition.\ 
+
+  <\equation>
+    Z<rsup|T>W+W<rsup|T>Z=0
+  </equation>
+
+  \;
+
+  Using Condition (8), we note that <math|Z> must be orthogonal to <math|W>.
+  Given that <math|W> is the least dominant eigenvectors of
+  <math|\<Phi\><around*|(|W|)>>, <math|Z> must be the other eigenvectors of
+  <math|\<Phi\><around*|(|W|)> > not chosen to be in <math|W>. The trace
+  term, therefore, can be split into 3 parts.
+
+  <\equation*>
+    Tr<around*|(|Z<rsup|T> \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>|)>=Part
+    1+Part 2+Part 3
+  </equation*>
+
+  <\equation*>
+    Part 1=*Tr<around*|(|Z<rsup|T><big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
+    W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>A<rsub|i,j>Z|)>
+  </equation*>
+
+  <\equation*>
+    Part 1=*Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|Z>|)>
+  </equation*>
+
+  <\equation*>
+    Part 2=-<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|4>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
+    W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>*Tr<around*|(|Z<rsup|T>A<rsub|i,j>W|)><rsup|2>
+  </equation*>
+
+  <\equation*>
+    Part 3=-2 Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|W>|)>
+  </equation*>
+
+  \;
+
+  Together :
+
+  <\equation*>
+    Tr<around*|(|Z<rsup|T> \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>|)>=Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|Z>|)>-part
+    2 -2 Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|W>|)>
+  </equation*>
+
+  \;
+
+  From the formula above, to satisfy the 2nd order condition, our goal is to
+  make <math|Tr<around*|(|Z<rsup|T> \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>|)>>
+  as large as possible. It would make sense, therefore, to pick
+  <math|\<Lambda\><rsub|W>> to be as small as possible to allow
+  <math|\<Lambda\><rsub|Z>> to be as large as possible.\ 
+
+  \;
+
+  If we look at part 2, we note that <math|Z> and <math|W> are eigenvectors
+  orthogonal to each other. Therefore :
+
+  <\equation*>
+    Tr<around*|(|Z<rsup|T>A<rsub|i,j>W|)><rsup|2>=Tr<around*|(|W
+    Z<rsup|T>A<rsub|i,j>|)><rsup|2>=<around*|[|<big|sum><rsub|i,j><around*|[|W
+    Z<rsup|T>|]><rsub|i,j> A<rsub|i,j>|]><rsup|2>
+  </equation*>
+
+  \;
+
+  Since the norm of <math|<around*|[|W Z<rsup|T>|]><rsub|F>> \ is always a
+  constant regardless of which eigenvector of <math|W> is chosen, this term
+  does not contribute to maximizing the trace value. What is left is :
+
+  <\equation*>
+    -<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|4>>
+    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
+    W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>
+  </equation*>
+
+  \;
+
+  \;
 
   <section|Approximating <math|w<rsub|k+1>>>
 
@@ -1227,17 +1336,17 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|3>>
-    <associate|auto-10|<tuple|3|10>>
+    <associate|auto-10|<tuple|3|11>>
     <associate|auto-11|<tuple|4|12>>
-    <associate|auto-12|<tuple|5|?>>
-    <associate|auto-13|<tuple|6|?>>
+    <associate|auto-12|<tuple|5|12>>
+    <associate|auto-13|<tuple|6|14>>
     <associate|auto-2|<tuple|2|3>>
     <associate|auto-3|<tuple|3|4>>
     <associate|auto-4|<tuple|1|5>>
     <associate|auto-5|<tuple|1.1|5>>
     <associate|auto-6|<tuple|1.2|6>>
     <associate|auto-7|<tuple|1.3|8>>
-    <associate|auto-8|<tuple|1.4|9>>
+    <associate|auto-8|<tuple|1.4|8>>
     <associate|auto-9|<tuple|2|10>>
   </collection>
 </references>
@@ -1264,26 +1373,34 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-6>>
 
+      <with|par-left|<quote|1.5fn>|1.3<space|2spc>Convergence
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-7>>
+
+      <with|par-left|<quote|1.5fn>|1.4<space|2spc>2nd Order Condition
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-8>>
+
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Approximating
       <with|mode|<quote|math>|w<rsub|k+1>>>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-7><vspace|0.5fn>
+      <no-break><pageref|auto-9><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Expand
       the same idea to multiple columns> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-8><vspace|0.5fn>
+      <no-break><pageref|auto-10><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Optimality
       condition> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-9><vspace|0.5fn>
+      <no-break><pageref|auto-11><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Implementation
       Details of Cost function> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-10><vspace|0.5fn>
+      <no-break><pageref|auto-12><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>Implementation
       Details of the Derivative> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-11><vspace|0.5fn>
+      <no-break><pageref|auto-13><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
