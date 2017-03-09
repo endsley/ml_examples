@@ -6,6 +6,12 @@ from sklearn.cluster import SpectralClustering
 from sklearn.manifold import spectral_embedding
 import sklearn.metrics
 
+#	Initialization
+np.set_printoptions(precision=4)
+np.set_printoptions(threshold=np.nan)
+np.set_printoptions(linewidth=300)
+
+
 def eig_sorted(X):
 	D,V = np.linalg.eig(X)	
 	lastV = None
@@ -24,23 +30,9 @@ def eig_sorted(X):
 	return [V,D] 
 
 
+def dmc
 
-#	Initialization
-np.set_printoptions(precision=4)
-np.set_printoptions(threshold=np.nan)
-np.set_printoptions(linewidth=300)
 
-noise_level = 10
-n = 100
-dim_feature = 2
-dim_noise = 2
-d = dim_feature + dim_noise
-
-cluster_1 = 0.2*np.random.randn(n/2, dim_feature)
-cluster_2 = 0.2*np.random.randn(n/2, dim_feature) + 5
-noise = noise_level*np.random.rand(n, dim_noise)
-
-data = np.vstack((cluster_1, cluster_2))
 X = np.hstack((data, noise))
 
 A = np.eye(d)
