@@ -18,9 +18,10 @@ import matplotlib.pyplot as plt
  
 
 X = genfromtxt('dataset/breast-cancer.csv', delimiter=',')
-noise = 10*np.random.rand(X.shape[0],12)
-noise1 = 10*np.random.randn(X.shape[0],9)
-X = np.hstack((X + noise1,noise))
+noise = 10*np.random.rand(X.shape[0],4)
+#noise1 = 10*np.random.randn(X.shape[0],9)
+#X = np.hstack((X + noise1,noise))
+X = np.hstack((X,noise))
 #X = X + noise
 label = genfromtxt('dataset/breast-cancer-labels.csv', delimiter=',')
 
