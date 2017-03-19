@@ -29,7 +29,7 @@ import pickle
 #pickle.dump( X , open( "dat_2.p", "wb" ) )
 #plt.plot(X[:,2], X[:,3],'x')
 #plt.show()
-X = pickle.load( open( "dat_2.p", "rb" ) )
+X = pickle.load( open( "./dataset/small_moon.p", "rb" ) )
 
 #X = np.hstack((data, noise))
 #

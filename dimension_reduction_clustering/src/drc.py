@@ -33,6 +33,7 @@ def eig_sorted(X):
 def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma^2
 	n = X.shape[0]
 	d = X.shape[1]
+	Const = 2.0
 
 	A = np.eye(d)
 	H = np.eye(n) - (1.0/n)*np.ones((n,n))
@@ -57,12 +58,14 @@ def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma
 			#lmbda = 1;
 				
 			for count in range(10):
-				FI = part_1 - lmbda*np.power(1.1,count+1)*part_2
+				FI = part_1 = lmbda*Const*np.power(1.1,count+1)*part_2
+				#FI = lmbda*Const*np.power(1.1,count+1)*part_2 - part_1
 				#print '\t\tpart 1 size : ', str(np.linalg.norm(part_1))
 				#print '\t\tpart 2 size : ', str(np.linalg.norm(lmbda*np.power(1.1,count+1)*part_2))
 		
 				V,D = eig_sorted(FI)
 				reduced_dim = np.sum(D < 0)
+				import pdb; pdb.set_trace()
 			
 				if(reduced_dim < 1):
 					count += 1
