@@ -33,6 +33,7 @@ import pickle
 #plt.show()
 X = pickle.load( open( "./dataset/small_moon.p", "rb" ) )
 
+
 #X = np.hstack((data, noise))
 #
 ##	-----------------------------------------
