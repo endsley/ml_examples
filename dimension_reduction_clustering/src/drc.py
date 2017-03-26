@@ -47,10 +47,10 @@ def spectral_clustering(X,k, Gamma):
 	return [allocation, U]
 
 
-def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma^2
+def drc(X, k, Gamma=0.5, Const=1.0):	# X = data (n,d), k = num of clusters, gamma = 1/sigma^2
 	n = X.shape[0]
 	d = X.shape[1]
-	Const = 1.0
+
 
 	A = np.eye(d)
 	H = np.eye(n) - (1.0/n)*np.ones((n,n))
@@ -111,7 +111,7 @@ def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma
 	
 
 		U_diff = np.linalg.norm(U_new[:,0:k] - U)
-		print U_diff
+		#print U_diff
 		if(U_diff < 0.001*np.linalg.norm(U)): 
 			U_converged = True
 			output['allocation'] = allocation
