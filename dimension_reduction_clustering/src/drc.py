@@ -50,7 +50,7 @@ def spectral_clustering(X,k, Gamma):
 def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma^2
 	n = X.shape[0]
 	d = X.shape[1]
-	Const = 2.0
+	Const = 1.0
 
 	A = np.eye(d)
 	H = np.eye(n) - (1.0/n)*np.ones((n,n))
@@ -88,8 +88,8 @@ def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma
 		
 				V,D = eig_sorted(FI)
 				reduced_dim = np.sum(D < 0)
-				#import pdb; pdb.set_trace()
-			
+
+
 				if(reduced_dim < 1):
 					count += 1
 				else:

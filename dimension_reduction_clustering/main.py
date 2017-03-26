@@ -10,3 +10,4 @@ sys.path.append('./src')
 #import test_2		# moon dataset ( linear dimensionality reduction, gaussian spectral )
 #import test_3		# breast cancer
 import test_4		# facial test
+

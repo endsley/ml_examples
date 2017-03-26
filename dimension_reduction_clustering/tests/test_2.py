@@ -4,9 +4,11 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.manifold import spectral_embedding
+from sklearn.metrics.cluster import normalized_mutual_info_score
 import sklearn.metrics
 from drc import *
 import matplotlib.pyplot as plt
+from sklearn.mixture import GMM
 import pickle
 
 #	Data generation Moon
@@ -31,6 +33,7 @@ import pickle
 #plt.show()
 X = pickle.load( open( "./dataset/small_moon.p", "rb" ) )
 
+
 #X = np.hstack((data, noise))
 #
 ##	-----------------------------------------
@@ -42,38 +45,61 @@ X = pickle.load( open( "./dataset/small_moon.p", "rb" ) )
 #
 #
 
-clf = KMeans(n_clusters=2)
-allocation = clf.fit_predict(X)
-print 'Pure K means :\n\t' , allocation
+
+k = 2
+labels = np.hstack((np.zeros(200), np.ones(200)))
+
+gmm = GMM(n_components=k)
+gmm.fit(X)
+allocation = gmm.predict(X)
+gmm_nmi = normalized_mutual_info_score(allocation, labels)
+plt.suptitle('2 Moons with uniform noise, First 2 dimension=moon 3 dimensions after are noise')
 plt.subplot(221)
 subgroup = X[allocation == 0]
-plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='o', linestyle='None')
+plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='x', linestyle='None')
 subgroup2 = X[allocation == 1]
-plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='o', linestyle='None')
-plt.title('K means')
+plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='.', linestyle='None')
+plt.title('GMM \n nmi against label : ' + str(gmm_nmi))
 
-clf = SpectralClustering(n_clusters=2, gamma=0.08)
+
+
+
+clf = KMeans(n_clusters=k)
 allocation = clf.fit_predict(X)
-print 'Pure Spectral Clustering :\n\t' ,allocation
+kmeans_nmi = normalized_mutual_info_score(allocation, labels)
+#print 'Pure K means :\n\t' , allocation
 plt.subplot(222)
 subgroup = X[allocation == 0]
-plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='o', linestyle='None')
+plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='x', linestyle='None')
 subgroup2 = X[allocation == 1]
-plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='o', linestyle='None')
-plt.title('Spectral Clustering')
+plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='.', linestyle='None')
+plt.title('Kmeans \n nmi against label : ' + str(kmeans_nmi))
 
 
-result = drc(X, 2, 0.08)
-allocation = result['allocation']
-print 'DRC :\n\t' , result['allocation']
-print 'Dimension :\n' , result['L']
-
+clf = SpectralClustering(n_clusters=k, gamma=0.08)
+allocation = clf.fit_predict(X)
+spectral_nmi = normalized_mutual_info_score(allocation, labels)
 plt.subplot(223)
 subgroup = X[allocation == 0]
-plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='o', linestyle='None')
+plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='x', linestyle='None')
 subgroup2 = X[allocation == 1]
-plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='o', linestyle='None')
-plt.title('DRC')
+plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='.', linestyle='None')
+plt.title('Spectral Clustering \n nmi against label : ' + str(spectral_nmi))
+
+
+result = drc(X, 2, 0.06)
+allocation = result['allocation']
+drc_nmi = normalized_mutual_info_score(allocation, labels)
+#print 'DRC :\n\t' , result['allocation']
+#print 'Dimension :\n' , result['L']
+
+plt.subplot(224)
+subgroup = X[allocation == 0]
+plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='x', linestyle='None')
+subgroup2 = X[allocation == 1]
+plt.text(2, 0, str(np.round(result['L'],2)), style='italic', bbox={'facecolor':'red', 'alpha':0.5, 'pad':10})
+plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='.', linestyle='None')
+plt.title('DRC \n nmi against label : ' + str(drc_nmi))
 
 plt.show()
 
