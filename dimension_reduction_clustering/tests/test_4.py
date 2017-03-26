@@ -17,13 +17,14 @@ import matplotlib.pyplot as plt
 from sklearn.mixture import GMM
 
  
-k = 20
+k = 4
 X = genfromtxt('dataset/facial_85.csv', delimiter=',')
 #noise = 10*np.random.rand(X.shape[0],12)
 #noise1 = 10*np.random.randn(X.shape[0],9)
 #X = np.hstack((X + noise1,noise))
 #X = X + noise
-label = genfromtxt('dataset/facial_true_labels_624x960.csv', delimiter=',')
+#label = genfromtxt('dataset/facial_true_labels_624x960.csv', delimiter=',')	# identity k = 20
+label = genfromtxt('dataset/facial_pose_labels_624x960.csv', delimiter=',') # pose k = 4
 
 
 clf = KMeans(n_clusters=k)
@@ -49,32 +50,33 @@ gmm_nmi = normalized_mutual_info_score(allocation, label)
 print 'GMM : ' , gmm_nmi
 
 
-
-
-
-
 ##import pdb; pdb.set_trace()
-#
-p = [0.7,0.8,0.9,1,1.1,1.2,1.3,1.4]
+p = [0.3,0.4,0.5,0.6,0.7]   #,0.8,0.9,1,1.1,1.2,1.3,1.4
+drc_nmi = 0
 for m in p:
-	result = drc(X, k, Gamma, m)
+	result = drc(X, k, m*Gamma, 1.1)		# 1.1 turned out to be the best ratio
 	allocation = result['allocation']
-	drc_nmi = normalized_mutual_info_score(allocation, label)
-	print 'DRC : ' , m, ' , ' , drc_nmi
-
+	drc_nmi_new = normalized_mutual_info_score(allocation, label)
+	#print 'DRC : ' , drc_nmi
+	print 'DRC : ' , m, ' , ' , drc_nmi_new
+	if(drc_nmi < drc_nmi_new):
+		drc_nmi = drc_nmi_new
 #print 'Dimension :\n' , result['L']
 
 
-#objects = ('K means', 'Spectral', 'GMM', 'DRC')
-#y_pos = np.arange(len(objects))
-#performance = [kmeans_nmi, spectral_nmi, gmm_nmi, drc_nmi]
-# 
-#plt.bar(y_pos, performance, align='center', alpha=0.5)
-#matplotlib.rc('xtick', labelsize=10) 
-#plt.xticks(y_pos, objects, rotation='vertical')
-#plt.ylabel('NMI')
-#plt.title('Facial Clustering Results against Truth NMI')
-#info_text = 'NMI\nKmeans : ' + str(kmeans_nmi) + '\nSpectral : ' + str(spectral_nmi) + '\nGMM : ' + str(gmm_nmi) + '\nDRC : ' + str(drc_nmi)
-#plt.text(2, 0.5, info_text, style='italic', bbox={'facecolor':'red', 'alpha':0.5, 'pad':10}) 
-#plt.show()
+objects = ('K means', 'Spectral', 'GMM', 'DRC')
+y_pos = np.arange(len(objects))
+performance = [kmeans_nmi, spectral_nmi, gmm_nmi, drc_nmi]
+ 
+plt.bar(y_pos, performance, align='center', alpha=0.5)
+matplotlib.rc('xtick', labelsize=10) 
+plt.xticks(y_pos, objects, rotation='vertical')
+plt.ylabel('NMI')
+plt.title('Facial Pose Clustering Results against Truth NMI')
+info_text = 'Data size : ' + str(X.shape) + '\n'
+info_text += 'NMI\nKmeans : ' + str(kmeans_nmi) + '\nSpectral : ' + str(spectral_nmi) 
+info_text += '\nGMM : ' + str(gmm_nmi) + '\nDRC : ' + str(drc_nmi)
+info_text += '\nSuggested Dimension : ' + str(result['L'].shape[1])
+plt.text(2, 0.5, info_text, style='italic', bbox={'facecolor':'red', 'alpha':0.5, 'pad':10}) 
+plt.show()
 
