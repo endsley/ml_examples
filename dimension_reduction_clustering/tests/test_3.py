@@ -27,6 +27,7 @@ from sklearn.mixture import GMM
 
 X = pickle.load( open( "./dataset/dat_3.p", "rb" ) )
 k = 2 
+
 label = genfromtxt('dataset/breast-cancer-labels.csv', delimiter=',')
 
 
@@ -58,6 +59,26 @@ allocation = result['allocation']
 drc_nmi = normalized_mutual_info_score(allocation, label)
 print 'DRC : ' , drc_nmi
 
+
+#print 'Dimension :\n' , result['L']
+#
+#
+#objects = ('K means', 'Spectral', 'DRC')
+#y_pos = np.arange(len(objects))
+#performance = [kmeans_nmi, spectral_nmi, drc_nmi]
+# 
+#plt.bar(y_pos, performance, align='center', alpha=0.5)
+#matplotlib.rc('xtick', labelsize=10) 
+#plt.xticks(y_pos, objects, rotation='vertical')
+#plt.ylabel('NMI')
+#plt.title('Breast Cancer Clustering Results against Truth NMI')
+# 
+#plt.show()
+#
+#
+#
+#
+#
 print 'Dimension :\n' , result['L']
 
 

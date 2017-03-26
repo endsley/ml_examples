@@ -5,6 +5,8 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.manifold import spectral_embedding
 import sklearn.metrics
+from sklearn.preprocessing import normalize
+from sklearn.metrics.cluster import normalized_mutual_info_score
 
 #	Initialization
 np.set_printoptions(precision=4)
@@ -29,6 +31,21 @@ def eig_sorted(X):
 
 	return [V,D] 
 
+def spectral_clustering(X,k, Gamma):
+	C = sklearn.metrics.pairwise.rbf_kernel(X, gamma=Gamma)
+	D = np.linalg.inv(np.diag(np.sqrt(np.sum(C, axis=0))))
+	L = D.dot(C).dot(D)
+	[U,S,V] = np.linalg.svd(L)
+
+	U = U[:,0:k]
+	U = normalize(U, norm='l2', axis=1)
+
+	clf = KMeans(n_clusters=k)
+	allocation = clf.fit_predict(U)
+	#import pdb; pdb.set_trace()
+
+	return [allocation, U]
+
 
 def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma^2
 	n = X.shape[0]
@@ -43,7 +60,13 @@ def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma
 	
 	
 	##	Calculate initial U
+#	[output['init_allocation'], U] = spectral_clustering(X,k, 3)
+#	print output['init_allocation']
+#	output['allocation'] =  output['init_allocation']
+
 	C = sklearn.metrics.pairwise.rbf_kernel(X, gamma=Gamma)
+#	import pdb; pdb.set_trace()
+#
 	U = spectral_embedding(C, n_components=k)
 	clf = KMeans(n_clusters=k)
 	output['init_allocation'] = clf.fit_predict(U)
@@ -65,7 +88,8 @@ def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma
 		
 				V,D = eig_sorted(FI)
 				reduced_dim = np.sum(D < 0)
-			
+
+
 				if(reduced_dim < 1):
 					count += 1
 				else:
@@ -85,8 +109,10 @@ def drc(X, k, Gamma=0.5):	# X = data (n,d), k = num of clusters, gamma = 1/sigma
 		C = sklearn.metrics.pairwise.rbf_kernel(X.dot(L), gamma=Gamma)
 		U_new = spectral_embedding(C, n_components=embed_dim)
 	
-	
-		if(np.linalg.norm(U_new[:,0:k] - U) < 0.001*np.linalg.norm(U)): 
+
+		U_diff = np.linalg.norm(U_new[:,0:k] - U)
+		print U_diff
+		if(U_diff < 0.001*np.linalg.norm(U)): 
 			U_converged = True
 			output['allocation'] = allocation
 			output['L'] = L
