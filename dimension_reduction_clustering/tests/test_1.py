@@ -44,9 +44,9 @@ gmm_nmi = normalized_mutual_info_score(allocation, labels)
 plt.suptitle('2 Gaussians with uniform noise, First 2 dimension data 2nd 2 dimensions are noise')
 plt.subplot(221)
 subgroup = X[allocation == 0]
-plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='o', linestyle='None')
+plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='x', linestyle='None')
 subgroup2 = X[allocation == 1]
-plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='o', linestyle='None')
+plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='.', linestyle='None', fillstyle='none')
 plt.title('GMM / nmi against label : ' + str(gmm_nmi))
 
 
@@ -57,9 +57,9 @@ kmeans_nmi = normalized_mutual_info_score(allocation, labels)
 
 plt.subplot(222)
 subgroup = X[allocation == 0]
-plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='o', linestyle='None')
+plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='x', linestyle='None')
 subgroup2 = X[allocation == 1]
-plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='o', linestyle='None')
+plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='.', linestyle='None', fillstyle='none')
 plt.title('Kmeans / nmi against label : ' + str(kmeans_nmi))
 
 
@@ -70,9 +70,9 @@ spectral_nmi = normalized_mutual_info_score(allocation, labels)
 print 'Pure Spectral Clustering :\n\t' ,allocation
 plt.subplot(223)
 subgroup = X[allocation == 0]
-plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='o', linestyle='None')
+plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='x', linestyle='None')
 subgroup2 = X[allocation == 1]
-plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='o', linestyle='None')
+plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='.', linestyle='None', fillstyle='none')
 plt.title('Spectral Clustering \n nmi against label : ' + str(spectral_nmi))
 
 
@@ -84,10 +84,10 @@ print 'DRC :\n\t' , result['allocation']
 print 'Dimension :\n' , result['L']
 plt.subplot(224)
 subgroup = X[allocation == 0]
-plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='o', linestyle='None')
+plt.plot(subgroup[:,0], subgroup[:,1], color='r' , marker='x', linestyle='None')
 subgroup2 = X[allocation == 1]
 plt.text(3, 1, str(result['L']), style='italic', bbox={'facecolor':'red', 'alpha':0.5, 'pad':10})
-plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='o', linestyle='None')
+plt.plot(subgroup2[:,0], subgroup2[:,1], color='b' , marker='.', linestyle='None', fillstyle='none' )
 plt.title('DRC / nmi against label : ' + str(drc_nmi))
 
 plt.show()
