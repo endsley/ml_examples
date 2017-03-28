@@ -96,7 +96,7 @@ class SDG:
 		W_hold = W
 
 
-		for m in range(10): 
+		for m in range(3): 
 			[cost, matrix_sum] = db['cf'].calc_cost_function(W, also_calc_Phi=True)
 
 			if True:# Use eig

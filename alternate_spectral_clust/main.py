@@ -38,11 +38,11 @@ np.set_printoptions(linewidth=300)
 #import test_7_polynomial
 #import test_8				# Simple data
 #import gpu_test_8			# GPU Simple data test
-import test_9				# Four Gaussian
+#import test_9				# Four Gaussian
 #import gpu_test_9			# GPU Four Gaussian
 #import test_10				# moon with no noise
 #import gpu_test_10			# GPU moon with no noise
-#import test_11				# breast cancer
+import test_11				# breast cancer
 #import test_12				# facial data
 #import gpu_test_12			# GPU facial data
 #import test_13				# moon with noise

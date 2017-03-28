@@ -5,6 +5,7 @@ from U_optimize import *
 from objective_magnitude import *
 from cost_function import *
 import time 
+from orthogonal_optimization import *
 
 #	You must comment out one of the method and keep the other
 #from W_optimize_Gaussian import *
@@ -56,9 +57,40 @@ def properly_initialize_U(db):
 	U_optimize(db)
 
 
+def Orthogonal_implementation(db):
+	cf = cost_function(db)
+	db['cf'] = cf
+	OO = orthogonal_optimization(cf.calc_cost_function, cf.calc_gradient_function)
+
+	if db['prev_clust'] == 0: 
+		properly_initialize_U(db)
+	else:
+		if db['U_matrix'].size == 0: properly_initialize_U(db)
+
+		WU_converge = False
+		loop_count = 0
+		db['lowest_cost'] = float("inf")
+		db['lowest_gradient'] = float("inf")
+
+		db['W_matrix'] = np.eye(db['d'], db['q']) #This must be commented out if running together with FKDAC
+		db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
+	
+		while WU_converge == False: 	
+			cf.calc_psi()	# need a better way to initializating
+			Update_latest_UW(db)
+
+			db['W_matrix'] = OO.run(db['W_matrix'])
+			U_optimize(db)
+	
+			WU_converge = exit_condition(db, loop_count)
+			loop_count += 1
+
+		cf.calc_psi()	# this make sure that cost function are accurate
+
 def FKDAC_implementation(db):
 	cf = cost_function(db)
 	db['cf'] = cf
+	#OO = orthogonal_optimization(cf.calc_cost_function, cf.calc_gradient_function)
 
 	if db['prev_clust'] == 0: 
 		properly_initialize_U(db)
@@ -84,8 +116,8 @@ def FKDAC_implementation(db):
 		while WU_converge == False: 	
 			cf.calc_psi()	# need a better way to initializating
 			Update_latest_UW(db)
+			#db['W_matrix'] = OO.run(db['W_matrix'])
 			W_optimize_Gaussian_SDG(db)
-			#W_optimize_Gaussian(db)
 			U_optimize(db)
 	
 			WU_converge = exit_condition(db, loop_count)
@@ -128,6 +160,7 @@ def DongLing_implementation(db):
 
 
 def optimize_gaussian_kernel(db):
-	FKDAC_implementation(db)
+	#FKDAC_implementation(db)
 	#DongLing_implementation(db)
+	Orthogonal_implementation(db)
 

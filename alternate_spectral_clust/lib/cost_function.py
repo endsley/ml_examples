@@ -154,6 +154,11 @@ class cost_function:
 
 		return np.trace( H.dot(D).dot(K).dot(D).dot(H).dot(Y).dot(Y.T) ) 
 
+	def calc_gradient_function(self, W):
+		[cost, Phi] = self.calc_cost_function(W, also_calc_Phi=True)
+		gradient = Phi.dot(W)
+		return gradient
+
 	def calc_cost_function(self, W, also_calc_Phi=False, update_D_matrix=False, Y_columns=None): #Phi = the matrix we perform SVD on
 		db = self.db
 		if type(self.psi) == type(None): self.calc_psi(Y_columns)
