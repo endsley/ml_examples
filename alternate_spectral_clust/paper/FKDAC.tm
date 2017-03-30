@@ -749,11 +749,60 @@
 
   \;
 
-  Using Condition (8), we note that <math|Z> must be orthogonal to <math|W>.
-  Given that <math|W> is the least dominant eigenvectors of
-  <math|\<Phi\><around*|(|W|)>>, <math|Z> must be the other eigenvectors of
-  <math|\<Phi\><around*|(|W|)> > not chosen to be in <math|W>. The trace
-  term, therefore, can be split into 3 parts.
+  Taking a closer look at this condition, it defines the poential space
+  of<math|Z>. Within this space <math|Z> could either be orthogonal to
+  <math|W> or not orthogonal to <math|W>. However, if we look closely at the
+  possibilities of <math|Z> not being orthogonal to <math|W>, given
+  <math|Z\<in\>\<bbb-R\><rsup|d\<times\>q>>,
+  \ <math|<frac|q<around*|(|q-1|)>|2>> constraints must be satisfied.\ 
+
+  <\equation*>
+    <around*|[|<tabular|<tformat|<table|<row|<cell|z<rsub|1><rsup|T>>>|<row|<cell|z<rsub|2><rsup|T>>>|<row|<cell|\<ldots\>>>|<row|<cell|z<rsub|q><rsup|T>>>>>>|]><around*|[|<tabular|<tformat|<table|<row|<cell|w<rsub|1>>|<cell|w<rsub|2>>|<cell|\<ldots\>>|<cell|w<rsub|q>>>>>>|]>+<around*|[|<tabular|<tformat|<table|<row|<cell|w<rsub|1><rsup|T>>>|<row|<cell|w<rsub|2><rsup|T>>>|<row|<cell|\<ldots\>>>|<row|<cell|w<rsub|q><rsup|T>>>>>>|]><around*|[|<tabular|<tformat|<table|<row|<cell|z<rsub|1>>|<cell|z<rsub|2>>|<cell|\<ldots\>>|<cell|z<rsub|q>>>>>>|]>=0
+  </equation*>
+
+  <\equation*>
+    <around*|[|<tabular|<tformat|<table|<row|<cell|z<rsub|1><rsup|T>
+    w<rsub|1>+w<rsub|1><rsup|T>z<rsub|1>>|<cell|z<rsub|1><rsup|T>w<rsub|2>+w<rsub|1><rsup|T>z<rsub|1>>|<cell|\<ldots\>>|<cell|z<rsub|1><rsup|T>w<rsub|q>+w<rsub|1><rsup|T>z<rsub|q>>>|<row|<cell|z<rsub|2><rsup|T>
+    w<rsub|1>+w<rsub|2><rsup|T>z<rsub|1>>|<cell|\<ldots\>>|<cell|\<ldots\>>|<cell|\<ldots\>>>|<row|<cell|\<ldots\>>|<cell|\<ldots\>>|<cell|\<ldots\>>|<cell|\<ldots\>>>|<row|<cell|z<rsub|q><rsup|T>
+    w<rsub|1>+w<rsub|q><rsup|T>z<rsub|1>>|<cell|\<ldots\>>|<cell|\<ldots\>>|<cell|z<rsub|q><rsup|T>w<rsub|q>+w<rsub|q><rsup|T>z<rsub|q>>>>>>|]>=0
+  </equation*>
+
+  \;
+
+  On the other hand, if we assume that <math|Z> and <math|W> are orthogonal,
+  the previous conditions that restricted the space no longer applies since
+  they are automatically satisfied. As a matter of fact, the space of
+  possibility is spanned by the space of <math|d-q> dimensions. Since in most
+  dimensionality reduction problems, it is reasonable to assumem that
+  <math|d\<gg\>q>, the space of <math|d-q> dimensions can be assumed to be
+  very large. It is from this reasoning we justify relaxing the theoretical
+  requirement of <math|Z> to a subset where <math|Z> is orthogonal to
+  <math|W>.
+
+  \;
+
+  This relaxation greatly highlights a previously hidden relationship. Given
+  that <math|W> is the least dominant eigenvectors of
+  <math|\<Phi\><around*|(|W|)>>, <math|Z> must be the <math|q> vectors formed
+  by the linear combination of other eigenvectors of
+  <math|\<Phi\><around*|(|W|)> > not chosen to be in <math|W>. We will denote
+  these vectors as <math|<wide|W|\<bar\>>> and
+  <math|<wide|\<Lambda\>|\<bar\>>> as the corresponding eigenvalues not
+  chosen in <math|W>. The columns of <math|Z> are formed in the following
+  manner.
+
+  \;
+
+  <\equation*>
+    Z=<around*|[|<tabular|<tformat|<table|<row|<cell|z<rsub|1>>|<cell|z<rsub|2>>|<cell|\<ldots\>>|<cell|z<rsub|q>>>>>>|]>=<around*|[|<tabular|<tformat|<table|<row|<cell|>|<cell|>|<cell|>|<cell|>>|<row|<cell|<around*|(|<big|sum>\<rho\><rsup|<around*|(|1|)>><rsub|\<alpha\>>
+    <wide|W|\<bar\>><rsub|\<alpha\>>|)>>|<cell|<around*|(|<big|sum>\<rho\><rsup|<around*|(|2|)>><rsub|\<alpha\>>
+    <wide|W|\<bar\>><rsub|\<alpha\>>|)>>|<cell|\<ldots\>>|<cell|<around*|(|<big|sum>\<rho\><rsup|<around*|(|q|)>><rsub|\<alpha\>>
+    <wide|W|\<bar\>><rsub|\<alpha\>>|)>>>|<row|<cell|>|<cell|>|<cell|>|<cell|>>>>>|]>
+  </equation*>
+
+  \;
+
+  The trace term, therefore, can be split into 3 parts.
 
   <\equation*>
     Tr<around*|(|Z<rsup|T> \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>|)>=Part
@@ -767,7 +816,17 @@
   </equation*>
 
   <\equation*>
-    Part 1=*Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|Z>|)>
+    Part 1=Tr<around*|(|<around*|[|<tabular|<tformat|<table|<row|<cell|p<rsup|<around*|(|1|)>><rsub|\<alpha\>>>|<cell|p<rsup|<around*|(|2|)>><rsub|\<alpha\>>>|<cell|\<ldots\>>|<cell|p<rsup|<around*|(|q|)>><rsub|\<alpha\>>>>>>>|]><rsup|T><wide|\<Lambda\>|\<bar\>>
+    <around*|[|<tabular|<tformat|<table|<row|<cell|p<rsup|<around*|(|1|)>><rsub|\<alpha\>>>|<cell|p<rsup|<around*|(|2|)>><rsub|\<alpha\>>>|<cell|\<ldots\>>|<cell|p<rsup|<around*|(|q|)>><rsub|\<alpha\>>>>>>>|]>|)>
+  </equation*>
+
+  \;
+
+  Let <math|P=><math|<around*|[|<tabular|<tformat|<table|<row|<cell|p<rsup|<around*|(|1|)>><rsub|\<alpha\>>>|<cell|p<rsup|<around*|(|2|)>><rsub|\<alpha\>>>|<cell|\<ldots\>>|<cell|p<rsup|<around*|(|q|)>><rsub|\<alpha\>>>>>>>|]>>,
+  we get a compressed version of Part 1.
+
+  <\equation*>
+    Part 1=Tr<around*|(|P<rsup| T><wide|\<Lambda\>|\<bar\>> P|)>
   </equation*>
 
   <\equation*>
@@ -780,13 +839,17 @@
     Part 3=-2 Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|W>|)>
   </equation*>
 
+  <\equation*>
+    Part 3=-2 Tr<around*|(|Z\<Lambda\><rsub|W>Z<rsup|T>|)>
+  </equation*>
+
   \;
 
   Together :
 
   <\equation*>
-    Tr<around*|(|Z<rsup|T> \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>|)>=Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|Z>|)>-part
-    2 -2 Tr<around*|(|Z<rsup|T>Z\<Lambda\><rsub|W>|)>
+    Tr<around*|(|Z<rsup|T> \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>|)>=Tr<around*|(|P<rsup|T><wide|\<Lambda\>|\<bar\>>
+    P|)>-part 2 -2 Tr<around*|(|Z\<Lambda\><rsub|W>Z<rsup|T>|)>
   </equation*>
 
   \;
@@ -795,32 +858,36 @@
   make <math|Tr<around*|(|Z<rsup|T> \<cal-D\>\<nabla\>\<cal-L\><around*|[|Z|]>|)>>
   as large as possible. It would make sense, therefore, to pick
   <math|\<Lambda\><rsub|W>> to be as small as possible to allow
-  <math|\<Lambda\><rsub|Z>> to be as large as possible.\ 
+  <math|\<Lambda\><rsub|Z>> to be as large as possible. \ From this
+  relationship, we conclude that if the ratio of the largest eigenvalue is
+  sufficiently greater than the smallest eigenvalues, the 2nd order condition
+  is satisfied.
 
   \;
 
-  If we look at part 2, we note that <math|Z> and <math|W> are eigenvectors
-  orthogonal to each other. Therefore :
+  To further confirm this result, experiments were conducted to study this
+  ratio between the largest and smallest eigenvalues. The following table
+  provides the ratio values at the point of convergence.\ 
+
+  \;
 
   <\equation*>
-    Tr<around*|(|Z<rsup|T>A<rsub|i,j>W|)><rsup|2>=Tr<around*|(|W
-    Z<rsup|T>A<rsub|i,j>|)><rsup|2>=<around*|[|<big|sum><rsub|i,j><around*|[|W
-    Z<rsup|T>|]><rsub|i,j> A<rsub|i,j>|]><rsup|2>
+    <block|<tformat|<table|<row|<cell|Experiment>|<cell|Ratio <around*|(|min
+    eig/max eig|)>>>|<row|<cell|Small 4 Gaussians>|<cell|1.7 \<times\>
+    10<rsup|-4>>>|<row|<cell|Large 4 Gaussians>|<cell|7.8 \<times\>
+    10<rsup|-6>>>|<row|<cell|Moon no noise>|<cell|3.9 \<times\>
+    10<rsup|-5>>>|<row|<cell|Moon with noise>|<cell|6.9
+    \<times\>10<rsup|-4>>>|<row|<cell|Breast Cancer
+    Data>|<cell|1.7\<times\>10<rsup|-4>>>|<row|<cell|Facial image
+    Data>|<cell|0.27>>>>>
   </equation*>
 
   \;
 
-  Since the norm of <math|<around*|[|W Z<rsup|T>|]><rsub|F>> \ is always a
-  constant regardless of which eigenvector of <math|W> is chosen, this term
-  does not contribute to maximizing the trace value. What is left is :
-
-  <\equation*>
-    -<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|4>>
-    e<rsup|-<frac|Tr<around|(|<around*|(|W<rsup|T>A<rsub|i,j>
-    W|\<nobracket\>>|)>|2*\<sigma\><rsup|2>>>
-  </equation*>
-
   \;
+
+  \ It is from this derivation, that each iterative process, the smallest
+  eigenvectors are chosen as the new <math|W> matrix.
 
   \;
 
