@@ -50,7 +50,7 @@ db = ASC.db
 if False:	# run original spectral clustering
 	ASC.set_values('q',30)
 	ASC.set_values('C_num',20)
-	ASC.set_values('sigma',sigma)
+	ASC.set_values('sigma',np.float64(sigma))
 	ASC.set_values('kernel_type','Gaussian Kernel')
 	ASC.run()
 	original = db['allocation']
@@ -70,14 +70,15 @@ else: 		# run preset original clustering
 
 
 if True:	# run alternative clustering
+	print ':::::   ENTERING ALTERNATIVE :::::::::\n\n'
 	#rand_lambda = 3*np.random.random()
 	rand_lambda = 0.1 # this one works with KDAC
 	#rand_lambda = 1
 
 	ASC.set_values('q',4)
 	ASC.set_values('C_num',4)
-	ASC.set_values('sigma',sigma)
-	ASC.set_values('lambda',rand_lambda)
+	ASC.set_values('sigma',np.float64(sigma))
+	ASC.set_values('lambda', np.float64(rand_lambda))
 	#ASC.set_values('kernel_type','Linear Kernel')
 	ASC.set_values('kernel_type','Gaussian Kernel')
 	start_time = time.time() 
