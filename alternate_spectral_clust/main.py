@@ -42,8 +42,8 @@ np.set_printoptions(linewidth=300)
 #import gpu_test_9			# GPU Four Gaussian
 #import test_10				# moon with no noise
 #import gpu_test_10			# GPU moon with no noise
-import test_11				# breast cancer
-#import test_12				# facial data
+#import test_11				# breast cancer
+import test_12				# facial data
 #import gpu_test_12			# GPU facial data
 #import test_13				# moon with noise
 #import gene_data_test

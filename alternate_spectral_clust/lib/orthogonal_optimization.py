@@ -33,7 +33,7 @@ class orthogonal_optimization:
 				cost_2 = self.cost_function(next_x)
 	
 				print alpha, cost_1, cost_2
-				if(cost_2 < cost_1):
+				if((cost_2 < cost_1) or (abs(cost_1 - cost_2)/abs(cost_1) < 0.0001)):
 					x_change = linalg.norm(next_x - self.x_opt)
 					[self.x_opt,R] = linalg.qr(next_x)		# QR ensures orthogonality
 					self.cost_opt = cost_2

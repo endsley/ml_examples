@@ -113,11 +113,18 @@ def FKDAC_implementation(db):
 			db['Kernel_matrix'] = db['data']
 			db['D_matrix'] = np.diag(1/np.sqrt(np.sum(db['Kernel_matrix'],axis=1))) # 1/sqrt(D)
 	
+		Toggle = True
 		while WU_converge == False: 	
 			cf.calc_psi()	# need a better way to initializating
 			Update_latest_UW(db)
-			#db['W_matrix'] = OO.run(db['W_matrix'])
+
+			#if Toggle:
+			#	db['W_matrix'] = OO.run(db['W_matrix'])
+			#else:
 			W_optimize_Gaussian_SDG(db)
+
+			#Toggle = not Toggle
+
 			U_optimize(db)
 	
 			WU_converge = exit_condition(db, loop_count)
@@ -160,7 +167,7 @@ def DongLing_implementation(db):
 
 
 def optimize_gaussian_kernel(db):
-	#FKDAC_implementation(db)
+	FKDAC_implementation(db)
 	#DongLing_implementation(db)
-	Orthogonal_implementation(db)
+	#Orthogonal_implementation(db)
 

@@ -25,6 +25,7 @@ ASC.set_values('sigma',6)
 ASC.set_values('kernel_type','Gaussian Kernel')
 ASC.run()
 a = db['allocation']
+#print "NMI : " , normalized_mutual_info_score(a,true_labels)
 
 #orig_W = db['W_matrix']
 #print 'Original allocation :' , a
@@ -45,8 +46,11 @@ a = db['allocation']
 start_time = time.time() 
 ASC.run()
 b = db['allocation']
-#print "NMI : " , normalized_mutual_info_score(b,true_labels)
+cf = db['cf']
 print("--- %s seconds ---" % (time.time() - start_time))
+print "alt vs truth NMI : " , normalized_mutual_info_score(b,true_labels)
+print "original vs alt : " , normalized_mutual_info_score(a,b)
+print 'My cost : ' , cf.calc_cost_function(db['W_matrix'], Y_columns=db['C_num'])
 
 
 #Y = db['data'].dot(db['W_matrix'])

@@ -16,8 +16,8 @@ import matplotlib.pyplot as plt
 from Y_2_allocation import *
 
 
-#data = genfromtxt('data_sets/moon.csv', delimiter=',')		
-data = genfromtxt('data_sets/moon_164x7.csv', delimiter=',')		
+data = genfromtxt('data_sets/moon.csv', delimiter=',')		
+#data = genfromtxt('data_sets/moon_164x7.csv', delimiter=',')		
 label_1 = genfromtxt('data_sets/Moon_label_1.csv', delimiter=',')		
 label_2 = genfromtxt('data_sets/Moon_label_2.csv', delimiter=',')		
 

@@ -25,7 +25,7 @@ class SDG:
 		self.Wchange_list = []
 
 		self.y_tilde = None
-		self.debug_mode = True
+		self.debug_mode = False
 
 	def run_debug_1(self, new_gradient_mag, new_cost, lowest_cost, exit_condition):
 		if self.debug_mode:
@@ -96,14 +96,17 @@ class SDG:
 		W_hold = W
 
 
-		for m in range(3): 
+		for m in range(10): 
 			[cost, matrix_sum] = db['cf'].calc_cost_function(W, also_calc_Phi=True)
+
+			#print 'Rank : ' , np.linalg.matrix_rank(matrix_sum)
+			#print 'Shape : ' , matrix_sum.shape
 
 			if True:# Use eig
 				[S2,U2] = np.linalg.eigh(matrix_sum)
 				eigsValues = S2[0:db['q']]
 				#print W
-				#print S2
+				print np.max(S2), S2[S2 < 0]
 				#print eigsValues , '\n'
 				new_gradient = matrix_sum.dot(W)
 				Lagrange_gradient = new_gradient - W*eigsValues
