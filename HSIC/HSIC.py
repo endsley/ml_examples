@@ -36,10 +36,6 @@ if __name__ == "__main__":
 		hsic = HSIC_rbf(X, X, 1)
 		hsic_list = np.hstack((hsic_list, hsic))
 	 
-	#objects = ('Python', 'C++', 'Java', 'Perl', 'Scala', 'Lisp')
-	#y_pos = np.arange(len(objects))
-	#performance = [10,8,6,4,2,1]
-	 
 	y_pos = np.arange(len(hsic_list))
 	plt.bar(y_pos, hsic_list, align='center', alpha=0.5)
 	#plt.xticks(y_pos, objects)
