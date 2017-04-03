@@ -168,6 +168,6 @@ def DongLing_implementation(db):
 
 def optimize_gaussian_kernel(db):
 	#FKDAC_implementation(db)
-	DongLing_implementation(db)
-	#Orthogonal_implementation(db)
+	#DongLing_implementation(db)
+	Orthogonal_implementation(db)
 

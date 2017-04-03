@@ -52,15 +52,15 @@ import matplotlib.pyplot as plt
 
 x = [1, 2, 3, 4, 5]
 KDAC = np.log(30*np.array([0.71, 516, 909.6, 894, 29088]))
-FKDAC = np.log(np.array([0.01, 3.6, 0.35, 0.78, 390]))
+FKDAC = np.log(np.array([0.01, 3.6, 0.35, 0.78, 18.56]))
 GPU = np.log(30*np.array([0.023, 6.49, 3.8, 134, 600]))
-Orthogonal = np.log(30*np.array([0.07, 3.4, 0.3, 0.68, 17.3]))
+Orthogonal = np.log(30*np.array([0.07, 3.4, 0.3, 0.68, 16.73]))
 labels = ['4 Small\nGaussians', '4 Large\nGaussians', 'Moon no\nnoise', 'Moon with\nnoise', 'Face image\ndata']
 
-plt.plot(x, KDAC, 'r-')
-plt.plot(x, FKDAC, 'b-.')
-plt.plot(x, GPU, 'y--')
-plt.plot(x, Orthogonal, 'g:')
+plt.plot(x, KDAC, 'r-'); plt.plot(x, KDAC, 'ro');
+plt.plot(x, FKDAC, 'b-.'); plt.plot(x, FKDAC, 'bo');
+plt.plot(x, GPU, 'y--'); plt.plot(x, GPU, 'yo');
+plt.plot(x, Orthogonal, 'g:'); plt.plot(x, Orthogonal, 'go');
 
 plt.text(5, KDAC[4], 'KDAC')
 plt.text(5, GPU[4], 'KDAC GPU')
