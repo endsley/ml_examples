@@ -110,8 +110,9 @@ def drc(X, k, Gamma=0.5, Const=1.0):	# X = data (n,d), k = num of clusters, gamm
 		U_new = spectral_embedding(C, n_components=embed_dim)
 	
 
-		U_diff = np.linalg.norm(U_new[:,0:k] - U)
-		#print U_diff
+		U_diff = np.linalg.norm(U_new[:,0:embed_dim] - U[:,0:embed_dim])
+
+		print U_diff
 		if(U_diff < 0.001*np.linalg.norm(U)): 
 			U_converged = True
 			output['allocation'] = allocation
