@@ -1,0 +1,5 @@
+
+Dataset 	: 	webkbRaw_word.csv	
+					This data is not centered and scaled, it is the raw word count
+					You can get the listing of words at webkbRaw_wordnames.csv
+Size		: 	1041 x 500
