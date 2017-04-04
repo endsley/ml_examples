@@ -330,7 +330,7 @@
   with respect to <math|w>.
 
   <\equation*>
-    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>+<frac|\<Lambda\>|2>*<around|(|1-W<rsup|T>*W|)>
+    <with|math-font|cal|L>=-<big|sum><rsub|i,j>\<gamma\><rsub|i,j>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>-<frac|1|2>Tr<around*|[|\<Lambda\>*<around|(|W<rsup|T>*W-I|)>|]>
   </equation*>
 
   <\equation*>
@@ -338,13 +338,14 @@
     \<Lambda\>=0
   </equation*>
 
-  \;
-
-  \;
-
   <\equation*>
-    <around*|[|<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>|]>-\<lambda\>*I|]>*W=0
+    <frac|\<partial\><with|math-font|cal|L>|\<partial\>*W>=<around*|[|<big|sum><rsub|i,j><frac|\<gamma\><rsub|i,j>|\<sigma\><rsup|2>>*e<rsup|-<frac|Tr<around*|(|W<rsup|T>*A<rsub|i,j>*W|)>|2*\<sigma\><rsup|2>>>*A<rsub|i,j>*|]>W=W
+    \<Lambda\>
   </equation*>
+
+  \;
+
+  \;
 
   If we let :
 
@@ -354,15 +355,7 @@
 
   We can rewrite the equation :\ 
 
-  <\equation*>
-    <around|[|\<Phi\><around*|(|W|)>-\<lambda\>*I|]>*W=0
-  </equation*>
-
   \;
-
-  The equation above states that the optimal solution <math|W<rsup|\<ast\>>>
-  is in the null space of the matrix <math|\<Phi\>-\<lambda\>*I>. \ Or, from
-  another perspective, we could rewrite the equation.
 
   <\equation>
     \<Phi\>*<around*|(|W<rsup|\<ast\>>|)>W<rsup|\<ast\>>=W<rsup|\<ast\>>
@@ -1622,6 +1615,9 @@
 
   \;
 </body>
+
+<initial|<\collection>
+</collection>>
 
 <\references>
   <\collection>

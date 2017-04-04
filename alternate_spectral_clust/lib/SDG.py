@@ -25,7 +25,7 @@ class SDG:
 		self.Wchange_list = []
 
 		self.y_tilde = None
-		self.debug_mode = False
+		self.debug_mode = True
 
 	def run_debug_1(self, new_gradient_mag, new_cost, lowest_cost, exit_condition):
 		if self.debug_mode:
@@ -106,7 +106,7 @@ class SDG:
 				[S2,U2] = np.linalg.eigh(matrix_sum)
 				eigsValues = S2[0:db['q']]
 				#print W
-				print 100*np.abs((S2[db['q'] - 1] - S2[db['q']])/S2[db['q'] - 1])
+				#print 100*np.abs((S2[db['q'] - 1] - S2[db['q']])/S2[db['q'] - 1])
 				#print np.min(S2)/np.max(S2)
 				#print np.max(S2), S2[S2 < 0]
 				#print eigsValues , '\n'
