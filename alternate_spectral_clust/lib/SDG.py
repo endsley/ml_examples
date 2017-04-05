@@ -139,9 +139,7 @@ class SDG:
 	
 			new_cost = db['cf'].calc_cost_function(W)
 
-			##	Frank Wolfe
-			#	W = -new_gradient/np.linalg.norm(new_gradient)
-
+			if db['auto_adjust_lambda']: db['cf'].balance_lambda(db)	# this will cause the code to run slower, but find out lambda for you
 
 			exit_condition = np.linalg.norm(W - W_hold)/np.linalg.norm(W)
 			self.update_best_W(new_cost, new_gradient_mag, W)

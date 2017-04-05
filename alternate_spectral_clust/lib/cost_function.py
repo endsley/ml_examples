@@ -136,6 +136,12 @@ class cost_function:
 		new_gradient_mag = np.linalg.norm(Lagrange_gradient)
 		return new_gradient_mag
 
+	def balance_lambda(self, db):
+		cq = self.cluster_quality(db)
+		aq = self.alternative_quality(db)
+		db['lambda'] = np.abs(cq/aq)
+		print 'Lambda : ' , db['lambda']
+
 	def cluster_quality(self, db):
 		W = db['W_matrix']
 		K = self.create_Kernel(W)

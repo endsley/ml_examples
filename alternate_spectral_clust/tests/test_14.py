@@ -48,11 +48,12 @@ else:
 
 if True:	# run alternative clustering
 	#rand_lambda = 3*np.random.random()
-	rand_lambda = 0.1 # this one works with FKDAC
+	rand_lambda = 0.057 # this one works with FKDAC
 	#rand_lambda = 1  # this work works with KDAC
 
 	ASC.set_values('q',4)
 	ASC.set_values('C_num',4)
+	ASC.set_values('auto_adjust_lambda', True)
 	ASC.set_values('sigma',sigma_value)
 	ASC.set_values('lambda',rand_lambda)
 	#ASC.set_values('kernel_type','Linear Kernel')
