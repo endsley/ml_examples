@@ -6,7 +6,14 @@ import matplotlib.pyplot as plt; plt.rcdefaults()
 import matplotlib.pyplot as plt
 
 def HSIC_rbf(X, Y, sigma):
+	if (X.shape[0] != Y.shape[0]): 
+		print 'Error : size of X and Y must be equal'
+		return
+
 	n = X.shape[0]
+	if len(X.shape) == 1: X = X.reshape((n,1))
+	if len(Y.shape) == 1: Y = Y.reshape((n,1))
+
 
 	gamma = 1.0/(2*sigma*sigma)
 	xK = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma)
@@ -15,6 +22,7 @@ def HSIC_rbf(X, Y, sigma):
 	C = 1.0/((n-1)*(n-1))
 
 	HSIC = C*np.sum((xK.dot(H)).T*yK.dot(H))
+	#HSIC = np.sum((xK.dot(H)).T*yK.dot(H))
 
 	#print HSIC
 	#HSIC = C*np.trace(xK.dot(H).dot(yK).dot(H))

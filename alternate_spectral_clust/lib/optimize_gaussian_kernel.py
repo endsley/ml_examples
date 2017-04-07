@@ -46,6 +46,11 @@ def exit_condition(db, loop_count):
 
 	return False
 
+def report_current_status(db):
+	minutes = (time.time() - db['start_time'])/60.0
+	print '\n\nAt minute : ', minutes , '\n\n'
+
+
 def properly_initialize_U(db):
 	db['W_matrix'] = np.identity(db['d'])
 	if db['data_type'] == 'Feature Matrix': 
@@ -72,7 +77,13 @@ def Orthogonal_implementation(db):
 		db['lowest_cost'] = float("inf")
 		db['lowest_gradient'] = float("inf")
 
-		db['W_matrix'] = np.eye(db['d'], db['q']) #This must be commented out if running together with FKDAC
+		#	Generate W
+		#db['W_matrix'] = np.eye(db['d'], db['q']) 			# default initialization value
+		W_temp = np.random.randn(db['d'], db['q']) 			# randomize initialization
+		[Q,R] = np.linalg.qr(W_temp)
+		db['W_matrix'] = Q
+		print Q[0:2,:]
+
 		db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
 	
 		while WU_converge == False: 	
@@ -85,9 +96,10 @@ def Orthogonal_implementation(db):
 			WU_converge = exit_condition(db, loop_count)
 			loop_count += 1
 
+			report_current_status(db)
 		cf.calc_psi()	# this make sure that cost function are accurate
 
-def FKDAC_implementation(db):
+def ISM_implementation(db):
 	cf = cost_function(db)
 	db['cf'] = cf
 	#OO = orthogonal_optimization(cf.calc_cost_function, cf.calc_gradient_function)
@@ -129,6 +141,7 @@ def FKDAC_implementation(db):
 	
 			WU_converge = exit_condition(db, loop_count)
 			loop_count += 1
+			report_current_status(db)
 
 		cf.calc_psi()	# this make sure that cost function are accurate
 
@@ -164,10 +177,13 @@ def DongLing_implementation(db):
 	
 			WU_converge = exit_condition(db, loop_count)
 			loop_count += 1
+			report_current_status(db)
 
 
 def optimize_gaussian_kernel(db):
-	FKDAC_implementation(db)
-	#DongLing_implementation(db)
+	db['start_time'] = time.time() 
+
+	#ISM_implementation(db)
+	DongLing_implementation(db)
 	#Orthogonal_implementation(db)
 
