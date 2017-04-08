@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from Y_2_allocation import *
 
 
+print 'Test 14 Web KB data \n\n'
 
 university_labels  = genfromtxt('data_sets/webkb_processed/webkbRaw_label_univ.csv', delimiter=',')
 topic_labels  = genfromtxt('data_sets/webkb_processed/webkbRaw_label_topic.csv', delimiter=',')
