@@ -108,23 +108,23 @@ if True:	# plot the clustering results
 	X = db['data']
 	plt.figure(1)
 	
-	plt.subplot(221)
-	plt.plot(X[:,0], X[:,1], 'bo')
-	#plt.plot(X[:,2], X[:,3], 'bo')
-	plt.xlabel('Feature 1')
-	plt.ylabel('Feature 2')
-	plt.title('Moon dataset')
-	
-	plt.subplot(222)
-	plt.plot(X[:,2], X[:,3], 'bo')
-	#plt.plot(X[:,0], X[:,1], 'bo')
-	plt.xlabel('Feature 3')
-	plt.ylabel('Feature 4')
-	plt.title('Moon dataset')
+#	plt.subplot(221)
+#	plt.plot(X[:,0], X[:,1], 'bo')
+#	#plt.plot(X[:,2], X[:,3], 'bo')
+#	plt.xlabel('Feature 1')
+#	plt.ylabel('Feature 2')
+#	plt.title('Moon dataset')
+#	
+#	plt.subplot(222)
+#	plt.plot(X[:,2], X[:,3], 'bo')
+#	#plt.plot(X[:,0], X[:,1], 'bo')
+#	plt.xlabel('Feature 3')
+#	plt.ylabel('Feature 4')
+#	plt.title('Moon dataset')
 	
 	
 	#plt.figure(2)
-	plt.subplot(224)
+	plt.subplot(211)
 	Uq_a = np.unique(a)
 	group1 = X[a == Uq_a[0]]
 	group2 = X[a == Uq_a[1]]
@@ -134,12 +134,12 @@ if True:	# plot the clustering results
 	plt.plot(group1[:,2], group1[:,3], 'bo')
 	plt.plot(group2[:,2], group2[:,3], 'ro')
 
-	plt.xlabel('Feature 3')
-	plt.ylabel('Feature 4')
-	plt.title('Original Clustering by FKDAC')
+	#plt.xlabel('Feature 3')
+	#plt.ylabel('Feature 4')
+	plt.title('Original Clustering')
 	
 	
-	plt.subplot(223)
+	plt.subplot(212)
 	Uq_b = np.unique(b)
 	group1 = X[b == Uq_b[0]]
 	group2 = X[b == Uq_b[1]]
@@ -149,7 +149,7 @@ if True:	# plot the clustering results
 	plt.plot(group2[:,0], group2[:,1], 'ro')
 	plt.xlabel('Feature 1')
 	plt.ylabel('Feature 2')
-	plt.title('Alternative Clustering by FKDAC')
+	plt.title('Alternative Clustering')
 	
 	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
 	plt.show()

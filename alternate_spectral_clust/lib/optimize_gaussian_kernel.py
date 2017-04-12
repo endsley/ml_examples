@@ -174,7 +174,7 @@ def DongLing_implementation(db):
 def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
-	#ISM_implementation(db)
+	ISM_implementation(db)
 	#DongLing_implementation(db)
-	Orthogonal_implementation(db)
+	#Orthogonal_implementation(db)
 

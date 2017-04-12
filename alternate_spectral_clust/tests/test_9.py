@@ -84,7 +84,7 @@ if True:	#	Plot clustering results
 	ax.set_xlabel('Feature 1')
 	ax.set_ylabel('Feature 2')
 	ax.set_zlabel('Feature 3')
-	ax.set_title('FKDAC Original Clustering Four_gaussian_3D.csv')
+	ax.set_title('Original Clustering')
 	
 	ax = fig.add_subplot(212, projection='3d')
 	Uq_b = np.unique(b)
@@ -96,7 +96,7 @@ if True:	#	Plot clustering results
 	ax.set_xlabel('Feature 1')
 	ax.set_ylabel('Feature 2')
 	ax.set_zlabel('Feature 3')
-	ax.set_title('FKDAC Alternative Clustering Four_gaussian_3D.csv')
+	ax.set_title('Alternative Clustering')
 	
 	plt.show()
 
@@ -113,7 +113,7 @@ if False:	# save or load db to and from a pickle file
 
 
 
-if True:	# plot the W convergence results
+if False:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	

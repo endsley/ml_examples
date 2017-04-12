@@ -91,7 +91,7 @@ if True:	#	plot the clustering result
 		plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
 	plt.xlabel('Feature 1')
 	plt.ylabel('Feature 2')
-	plt.title('Original Clustering by FKDAC')
+	plt.title('Original Clustering')
 	
 	
 	plt.subplot(313)
@@ -101,7 +101,7 @@ if True:	#	plot the clustering result
 		plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
 	plt.xlabel('Feature 1')
 	plt.ylabel('Feature 2')
-	plt.title('Alternative Clustering by FKDAC')
+	plt.title('Alternative Clustering')
 	
 	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
 	plt.show()
