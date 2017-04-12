@@ -27,7 +27,12 @@ def Allocation_2_Y(allocation):
 
 	return Y
 
-def calc_gamma(X):
+def calc_gamma(X, gamma):
+	print 'gamma = ', gamma
+	if gamma != None: return gamma
+	print '----------'
+
+	#X = preprocessing.scale(X)
 	d_matrix = sklearn.metrics.pairwise.pairwise_distances(X, metric='euclidean')
 	sigma = np.median(d_matrix)
 	if(sigma == 0): sigma = np.mean(d_matrix)
@@ -36,7 +41,7 @@ def calc_gamma(X):
 
 
 
-def HSIC(X, Y, X_kernel='Gaussian', Y_kernel='Delta'): # X is n by d, n=# of sample, d=# of features
+def HSIC(X, Y, X_kernel='Gaussian', Y_kernel='Delta', gamma=None): # X is n by d, n=# of sample, d=# of features
 	if (X.shape[0] != Y.shape[0]): 
 		print 'Error : size of X and Y must be equal'
 		exit()
@@ -48,8 +53,7 @@ def HSIC(X, Y, X_kernel='Gaussian', Y_kernel='Delta'): # X is n by d, n=# of sam
 
 	#import pdb; pdb.set_trace()	
 	if X_kernel == 'Gaussian':
-		#X = preprocessing.scale(X)
-		xK = sklearn.metrics.pairwise.rbf_kernel(X, gamma=calc_gamma(X))
+		xK = sklearn.metrics.pairwise.rbf_kernel(X, gamma=calc_gamma(X, gamma))
 
 	elif X_kernel == 'Linear':
 		xK = X.dot(X.T)
@@ -71,7 +75,7 @@ def HSIC(X, Y, X_kernel='Gaussian', Y_kernel='Delta'): # X is n by d, n=# of sam
 		gamma = 1.0/(2*sigma*sigma)
 		gamma = 1
 
-		yK = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=calc_gamma(Y))
+		yK = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=calc_gamma(Y, gamma))
 	elif Y_kernel == 'Linear':
 		yK = Y.dot(Y.T)
 	elif Y_kernel == 'Delta':
