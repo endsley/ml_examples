@@ -28,9 +28,7 @@ def Allocation_2_Y(allocation):
 	return Y
 
 def calc_gamma(X, gamma):
-	print 'gamma = ', gamma
 	if gamma != None: return gamma
-	print '----------'
 
 	#X = preprocessing.scale(X)
 	d_matrix = sklearn.metrics.pairwise.pairwise_distances(X, metric='euclidean')
@@ -51,7 +49,6 @@ def HSIC(X, Y, X_kernel='Gaussian', Y_kernel='Delta', gamma=None): # X is n by d
 	if len(Y.shape) == 1: Y = Y.reshape((n,1))
 
 
-	#import pdb; pdb.set_trace()	
 	if X_kernel == 'Gaussian':
 		xK = sklearn.metrics.pairwise.rbf_kernel(X, gamma=calc_gamma(X, gamma))
 
@@ -67,14 +64,6 @@ def HSIC(X, Y, X_kernel='Gaussian', Y_kernel='Delta', gamma=None): # X is n by d
 		
 
 	if Y_kernel == 'Gaussian':
-		#Y = preprocessing.scale(Y)
-
-		d_matrix = sklearn.metrics.pairwise.pairwise_distances(Y, metric='euclidean')
-		sigma = np.median(d_matrix)
-		if(sigma == 0): sigma = np.mean(d_matrix)
-		gamma = 1.0/(2*sigma*sigma)
-		gamma = 1
-
 		yK = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=calc_gamma(Y, gamma))
 	elif Y_kernel == 'Linear':
 		yK = Y.dot(Y.T)
@@ -86,15 +75,9 @@ def HSIC(X, Y, X_kernel='Gaussian', Y_kernel='Delta', gamma=None): # X is n by d
 		Y = Allocation_2_Y(Y)
 		yK = Y.dot(Y.T)
 
-	gamma = 1.0/2
-	n = X.shape[0]
-	xK = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma)
-	yK = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=gamma)
-
 	H = np.eye(n) - (1.0/n)*np.ones((n,n))
 	C = 1.0/((n-1)*(n-1))
 
-	#HSIC_value = C*np.trace(H.dot(xK).dot(H).dot(Y).dot(Y.T))
 	HSIC_value = C*np.sum((xK.dot(H)).T*yK.dot(H))
 	return HSIC_value
 
