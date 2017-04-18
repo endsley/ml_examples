@@ -26,6 +26,7 @@ from sklearn.mixture import GMM
 #pickle.dump( X , open( "./dataset/dat_3.p", "wb" ) )
 
 X = pickle.load( open( "./dataset/dat_3.p", "rb" ) )
+
 k = 2 
 
 label = genfromtxt('dataset/breast-cancer-labels.csv', delimiter=',')

@@ -19,6 +19,7 @@ from sklearn.mixture import GMM
  
 k = 4
 X = genfromtxt('dataset/min_words.csv', delimiter=',')
+
 univ_label = genfromtxt('dataset/webkbRaw_label_univ.csv', delimiter=',') 
 topic_label = genfromtxt('dataset/webkbRaw_label_topic.csv', delimiter=',') 
 
