@@ -1442,7 +1442,7 @@
 
   <\equation*>
     U=<tabular|<tformat|<cwith|2|2|1|1|cell-halign|c>|<table|<row|<cell|argmin>>|<row|<cell|U>>>>>Tr<around*|(|U<rsup|T>H
-    D<rsup|-1/2>K D<rsup|-1/2> H U|)>
+    D<rsup|-1/2>K <rsub|X W>D<rsup|-1/2> H U|)>
   </equation*>
 
   \;
@@ -1615,9 +1615,6 @@
 
   \;
 </body>
-
-<initial|<\collection>
-</collection>>
 
 <\references>
   <\collection>
