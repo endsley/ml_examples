@@ -561,6 +561,12 @@
     \<Phi\><around*|(|W<rsub|k-1>|)>*W<rsub|k>=W<rsub|k>*\<Lambda\>
   </equation*>
 
+  S. D. Bay, \PThe UCI KDD archive,\Q 1999. [Online]. Available:
+
+  \;
+
+  http://kdd.ics.uci.edu
+
   \;
 
   The key driver of the sequence of <math|W<rsub|k>> is the matrix
@@ -1614,6 +1620,82 @@
   </itemize>
 
   \;
+
+  \;
+
+  \;
+
+  \;
+
+  <subsection|1.1 Motivation and Previous Work>
+
+  Our work is initially motivated by the desire to create an interactive
+  graphical engine to enchance pattern discovery. To discover multiple hidden
+  patterns simultaneously, KDAC [8] demonstrated the best performance.
+  Unfortunately, the optimization approach proposed by the paper proved to be
+  prohibitively expensive beyond toy examples. This is especially problematic
+  when the Gaussian Kernel is used since the cost function becomes highly
+  non-convex. Given the original problem contained a orthogonality
+  constraint, the Gaussian Kernel further complicates the solution. Since the
+  Gaussian Kernel has historically superior performance, it is also the most
+  important. In light of these impediments, the idea of implementing a real
+  time engine with various kernels was simply not possible with the current
+  method. The proposed technique was originally introduced in a separate
+  paper [10], and the technique itself is called Dimensional Growth (DG).
+  Although DG achieved its objective of solving a complex non-convex problem,
+  the original priority was never on the actual implementation. As a result,
+  DG lack the scalability necessary as we enter into the era of big data.
+
+  \;
+
+  One obvious solution is to separate out the components of the algorithm to
+  perform parallel processing. Parallel processing on the CPU was the initial
+  choice, but the speed improvement was still many magnitudes off. Moving the
+  algorithm onto the GPU was the next logical step. Techniques such as Frank
+  Wolfe [11], and ADMM [12] were researched and implemented. The constraint
+  of the cost function included a non-convex Stiefel Manifold. Due to the
+  non-convex cost function and constraint, Frank Wolfe is not a suitable
+  solution. The implementation of ADMM was successful even on a Stiefel
+  Manifold. Unfortunately, the power of ADMM requires the formulation to be
+  separable through dual decomposition. Yet, since the ADMM formulation was
+  not separable, ADMM without parallelization defeats its own purpose. As a
+  matter of fact, our implementation showed that ADMM converged significantly
+  slower than the original algorithm.
+
+  After much trial, it became clear that simply moving the algorithm onto the
+  GPU was not enough, the real change must be algorithmic. This is when we
+  researched into solutions that solves orthogonality constraints
+  [13][16][17] or reformulates the problem as a semi-definite programming
+  (SDP) [14][15][18]. The reformulation of the problem into a SDP is not
+  difficult even with a orthogonality constraint. However, as the size of the
+  solution space increase, SDP algorithms are notoriously inflexible in terms
+  of scalability.\ 
+
+  More success came from the reimplementation of KDAC using orthogonality
+  constraint techniques. As we demonstrate in the experimental results, the
+  technique from [13] improved the convergence rate by many orders of
+  magnitude. The result was encouraging, but even with the success of this
+  implementation, the objective of approaching real time was still elusive.
+  To further exacerbate the problem, since KDAC is a non-convex problem, the
+  algorithm must be repeated up to 50 times to avoid being trapped in a local
+  minimum. Depending on the complexity of the data, it is difficult to
+  determine the number of random initializations.
+
+  Given a lack of other options, we set out to invent a new optimization
+  technique. From the list of requirements, the algorithm must be extremely
+  fast while scalable against the growth of data size. It must be able to
+  handle non-convex function constrained on a stiefel manifold. We wish to
+  avoid running many random initializations by discovering a theoretically
+  reasonable starting point. The algorithm itself should be easily
+  understandable and easily implementable through off the shelf tools. Since
+  we wish to take adventage of the GPU technology, the algorithm must be able
+  to take adventage of parallel processing. Lastly, we wish to provide a
+  solid theoretical foundation that motivates the procedures of the
+  algorithm. To this end, we have successfully designed an algorithm that met
+  all these requirements. We call this optimization technique the Iterative
+  Spectral Method (ISM).
+
+  \;
 </body>
 
 <\references>
@@ -1626,6 +1708,7 @@
     <associate|auto-14|<tuple|5|16>>
     <associate|auto-15|<tuple|6|16>>
     <associate|auto-16|<tuple|7|18>>
+    <associate|auto-17|<tuple|7.1|?>>
     <associate|auto-2|<tuple|2|3>>
     <associate|auto-3|<tuple|3|4>>
     <associate|auto-4|<tuple|1|5>>

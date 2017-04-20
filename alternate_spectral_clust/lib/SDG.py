@@ -106,10 +106,7 @@ class SDG:
 				[S2,U2] = np.linalg.eigh(matrix_sum)
 				eigsValues = S2[0:db['q']]
 				#print W
-				#print 100*np.abs((S2[db['q'] - 1] - S2[db['q']])/S2[db['q'] - 1])
-				#print np.min(S2)/np.max(S2)
-				#print np.max(S2), S2[S2 < 0]
-				#print eigsValues , '\n'
+				print 'Ratio : ' , np.abs((S2[db['q'] - 1] - S2[db['q']])/S2[db['q'] - 1])
 				new_gradient = matrix_sum.dot(W)
 				Lagrange_gradient = new_gradient - W*eigsValues
 				new_gradient_mag = np.linalg.norm(Lagrange_gradient)

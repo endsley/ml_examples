@@ -1,5 +1,6 @@
 
 import numpy as np
+import sklearn.metrics
 
 def Y_2_allocation(Y):
 	i = 0

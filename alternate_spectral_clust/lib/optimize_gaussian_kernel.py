@@ -115,9 +115,6 @@ def ISM_implementation(db):
 		db['lowest_gradient'] = float("inf")
 
 		db['W_matrix'] = np.zeros((db['d'], db['q']) )
-		#db['W_matrix'] = np.eye(db['d'], db['q']) #This must be commented out if running together with FKDAC
-		#db['W_matrix'], R = np.linalg.qr(np.random.normal(0,1, (db['d'], db['q']) ))
-		#print db['W_matrix']
 
 		if db['data_type'] == 'Feature Matrix': 
 			db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
@@ -130,13 +127,7 @@ def ISM_implementation(db):
 			cf.calc_psi()	# need a better way to initializating
 			Update_latest_UW(db)
 
-			#if Toggle:
-			#	db['W_matrix'] = OO.run(db['W_matrix'])
-			#else:
 			W_optimize_Gaussian_SDG(db)
-
-			#Toggle = not Toggle
-
 			U_optimize(db)
 	
 			WU_converge = exit_condition(db, loop_count)
@@ -183,7 +174,7 @@ def DongLing_implementation(db):
 def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
-	#ISM_implementation(db)
-	DongLing_implementation(db)
+	ISM_implementation(db)
+	#DongLing_implementation(db)
 	#Orthogonal_implementation(db)
 
