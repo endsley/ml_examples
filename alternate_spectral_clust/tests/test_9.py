@@ -113,7 +113,7 @@ if False:	# save or load db to and from a pickle file
 
 
 
-if False:	# plot the W convergence results
+if True:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	
