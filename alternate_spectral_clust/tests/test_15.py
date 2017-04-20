@@ -18,6 +18,8 @@ import matplotlib
 import calc_cost
 from PIL import Image
 colors = matplotlib.colors.cnames
+from mpl_toolkits.mplot3d import Axes3D
+
 
 np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
@@ -25,35 +27,68 @@ np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 
 
-im = Image.open("data_sets/Flower.jpg")
+im = Image.open("data_sets/Flower_174x175.png")
+#im = Image.open("data_sets/Flower_70x70.png")
 
 rgb_im = im.convert('RGB')
 Img_3d_array = np.asarray(rgb_im)
-data = np.empty((0, 3))
+X = np.empty((0, 3))
 
 for i in range(Img_3d_array.shape[0]):
 	for j in range(Img_3d_array.shape[0]):
-		data = np.vstack((data, Img_3d_array[i,j]))
-
-#Y_original = genfromtxt('data_sets/data_4_Y_original.csv', delimiter=',')
-#U_original = genfromtxt('data_sets/data_4_U_original.csv', delimiter=',')
+		X = np.vstack((X, Img_3d_array[i,j]))
 
 
-
-ASC = alt_spectral_clust(data)
-db = ASC.db
-
-if True: #	Calculating the original clustering
-	ASC.set_values('q',2)
-	ASC.set_values('C_num',2)
-	ASC.set_values('sigma',0.5)
-	ASC.set_values('kernel_type','Gaussian Kernel')
-	ASC.run()
-	a = db['allocation']
+if True:	#	Plot data results
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	ax.scatter(X[:,0], X[:,1], X[:,2], c='b', marker='o')
+	ax.set_xlabel('Feature 1')
+	ax.set_ylabel('Feature 2')
+	ax.set_zlabel('Feature 3')
+	ax.set_title('Original Clustering')
 	
-	#np.savetxt('data_4_U_original.csv', db['U_matrix'], delimiter=',', fmt='%d')
+	#ax = fig.add_subplot(212, projection='3d')
 
+	#ax.set_xlabel('Feature 1')
+	#ax.set_ylabel('Feature 2')
+	#ax.set_zlabel('Feature 3')
+	#ax.set_title('Alternative Clustering')
+	
+	plt.show()
 import pdb; pdb.set_trace()
+
+
+
+
+
+
+
+##Y_original = genfromtxt('data_sets/data_4_Y_original.csv', delimiter=',')
+##U_original = genfromtxt('data_sets/data_4_U_original.csv', delimiter=',')
+#
+#
+#d_matrix = sklearn.metrics.pairwise.pairwise_distances(data, Y=None, metric='euclidean')
+#sigma = np.median(d_matrix)
+#
+#ASC = alt_spectral_clust(data)
+#db = ASC.db
+#
+#if True: #	Calculating the original clustering
+#	ASC.set_values('q',2)
+#	ASC.set_values('C_num',2)
+#	ASC.set_values('sigma',sigma)
+#	ASC.set_values('kernel_type','Gaussian Kernel')
+#	ASC.run()
+#	a = db['allocation']
+#	
+#	#np.savetxt('data_4_U_original.csv', db['U_matrix'], delimiter=',', fmt='%d')
+#
+##bw = a.reshape((100,100))
+##img = Image.fromarray(bw, 'L') 
+##img.show()
+#
+#import pdb; pdb.set_trace()
 
 
 

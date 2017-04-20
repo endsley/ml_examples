@@ -8,7 +8,7 @@ def U_optimize(db) :
 	L = db['H_matrix'].dot(L).dot(db['H_matrix'])
 
 	if L.shape[0]*L.shape[1] > 3000*3000:
-		eigenVectors, eigenValues = large_eig.nystrom(L, db['C_num'], 0.6)
+		eigenVectors, eigenValues = large_eig.nystrom(L, db['C_num'], 0.2)
 	else :
 		eigenValues,eigenVectors = np.linalg.eigh(L)
 
