@@ -56,6 +56,7 @@ def drc(X, k, Gamma=0.5, Const=1.0):	# X = data (n,d), k = num of clusters, gamm
 	H = np.eye(n) - (1.0/n)*np.ones((n,n))
 	U_converged = False
 	delta = 0.001
+	escape_count = 20
 	output = {}
 	
 	
@@ -72,7 +73,7 @@ def drc(X, k, Gamma=0.5, Const=1.0):	# X = data (n,d), k = num of clusters, gamm
 	output['init_allocation'] = clf.fit_predict(U)
 		
 	while U_converged == False:
-		for rep in range(20):
+		for rep in range(12):
 			part_1 = np.linalg.inv(A + delta*np.eye(d))
 			part_2 = X.T.dot(H).dot(U).dot(U.T).dot(H).dot(X)
 			n_1 = np.linalg.norm(part_1,'fro');
@@ -80,7 +81,7 @@ def drc(X, k, Gamma=0.5, Const=1.0):	# X = data (n,d), k = num of clusters, gamm
 			lmbda = n_1/n_2;
 			#lmbda = 1;
 				
-			for count in range(10):
+			for count in range(escape_count):
 				FI = part_1 - lmbda*Const*np.power(1.1,count+1)*part_2
 				#FI = lmbda*Const*np.power(1.1,count+1)*part_2 - part_1
 				#print '\t\tpart 1 size : ', str(np.linalg.norm(part_1))
@@ -93,12 +94,17 @@ def drc(X, k, Gamma=0.5, Const=1.0):	# X = data (n,d), k = num of clusters, gamm
 				if(reduced_dim < 1):
 					count += 1
 				else:
-					#print 'broke : ' + str(count)
 					break;
-			
+
+			if count == escape_count:
+				print 'Error : Your Const is too small, try a larger value.'
+				exit()
+
+
 			L = V[:,-reduced_dim:]
 			new_A = L.dot(L.T)	
-		
+
+
 			if(np.linalg.norm(new_A - A) < 0.001*np.linalg.norm(A)): break;
 			else: A = new_A
 		
@@ -117,7 +123,9 @@ def drc(X, k, Gamma=0.5, Const=1.0):	# X = data (n,d), k = num of clusters, gamm
 			U_converged = True
 			output['allocation'] = allocation
 			output['L'] = L
-	
+
+		print L.shape
+
 		U = U_new[:,0:k]
 		clf = KMeans(n_clusters=k)
 		allocation = clf.fit_predict(U)

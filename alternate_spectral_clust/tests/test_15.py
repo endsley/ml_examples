@@ -28,22 +28,26 @@ np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 
 
-im = Image.open("data_sets/Flower2.png")
+im = Image.open("data_sets/Flower3.png")
 #im = Image.open("data_sets/Flower_174x175.png")
 #im = Image.open("data_sets/Flower_70x70.png")
 
 rgb_im = im.convert('RGB')
 Img_3d_array = np.asarray(rgb_im)
+before_preprocess_data = np.empty((0, 3), dtype=np.uint8)
 data = np.empty((0, 3))
 data_dic = {}
+data_alloc = {}
 
 for i in range(Img_3d_array.shape[0]):
-	for j in range(Img_3d_array.shape[0]):
+	for j in range(Img_3d_array.shape[1]):
 		data_dic[ str(Img_3d_array[i,j]) ] = Img_3d_array[i,j]
 
 
 for i,j in data_dic.items():
+	before_preprocess_data = np.vstack((before_preprocess_data, j))
 	data = np.vstack((data, j))
+
 
 data = preprocessing.scale(data)
 
@@ -85,22 +89,37 @@ if True: #	Calculating the original clustering
 	ASC.run()
 	a = db['allocation']
 
-if True:	#	Plot clustering results
-	X = db['data']
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
-	Uq_a = np.unique(a)
+	for m in range(len(a)):
+		data_alloc[str(before_preprocess_data[m,:])] = a[m]
 	
-	group1 = X[a == Uq_a[0]]
-	group2 = X[a == Uq_a[1]]
-	
-	ax.scatter(group1[:,0], group1[:,1], group1[:,2], c='b', marker='o')
-	ax.scatter(group2[:,0], group2[:,1], group2[:,2], c='r', marker='x')
-	ax.set_xlabel('Feature 1')
-	ax.set_ylabel('Feature 2')
-	ax.set_zlabel('Feature 3')
-	ax.set_title('Original Clustering')
-	
-	plt.show()
+	import pdb; pdb.set_trace()
+	out_img = np.zeros(Img_3d_array.shape[0:2])
+	for i in range(Img_3d_array.shape[0]):
+		for j in range(Img_3d_array.shape[1]):
+			out_img[i,j] = 255*(data_alloc[str(Img_3d_array[i,j])] - 1)
+
+
+img = Image.fromarray(out_img, 'L') 
+img.save('my.png') 
+img.show()
+import pdb; pdb.set_trace()
+
+#if True:	#	Plot clustering results
+#	X = db['data']
+#	fig = plt.figure()
+#	ax = fig.add_subplot(111, projection='3d')
+#	Uq_a = np.unique(a)
+#	
+#	group1 = X[a == Uq_a[0]]
+#	group2 = X[a == Uq_a[1]]
+#	
+#	ax.scatter(group1[:,0], group1[:,1], group1[:,2], c='b', marker='o')
+#	ax.scatter(group2[:,0], group2[:,1], group2[:,2], c='r', marker='x')
+#	ax.set_xlabel('Feature 1')
+#	ax.set_ylabel('Feature 2')
+#	ax.set_zlabel('Feature 3')
+#	ax.set_title('Original Clustering')
+#	
+#	plt.show()
 
 
