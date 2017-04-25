@@ -22,6 +22,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from sklearn import preprocessing
 
 
+
 np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
@@ -92,13 +93,21 @@ if True: #	Calculating the original clustering
 	for m in range(len(a)):
 		data_alloc[str(before_preprocess_data[m,:])] = a[m]
 	
-	import pdb; pdb.set_trace()
 	out_img = np.zeros(Img_3d_array.shape[0:2])
 	for i in range(Img_3d_array.shape[0]):
 		for j in range(Img_3d_array.shape[1]):
+			#if str(Img_3d_array[i,j]) == '[255 255 255]':
+			#	out_img[i,j] = 255
+			#else:
+			#	out_img[i,j] = 0
+
+			#import pdb; pdb.set_trace()
 			out_img[i,j] = 255*(data_alloc[str(Img_3d_array[i,j])] - 1)
 
+			#print out_img[i,j]
+			#print Img_3d_array[i,j]
 
+out_img = out_img.astype('uint8')
 img = Image.fromarray(out_img, 'L') 
 img.save('my.png') 
 img.show()
@@ -121,5 +130,5 @@ import pdb; pdb.set_trace()
 #	ax.set_title('Original Clustering')
 #	
 #	plt.show()
-
-
+#
+#
