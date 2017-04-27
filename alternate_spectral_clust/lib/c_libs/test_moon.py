@@ -32,7 +32,9 @@ output = np.empty((num_samples, 1), dtype=data_type)
 kernel_matrix = np.empty((num_samples, num_samples), dtype=data_type)
 
 
-kdac = Nice4Py.KDAC(sys.argv[1])
+#kdac = Nice4Py.KDAC(sys.argv[1])
+kdac = Nice4Py.KDAC('gpu')
+
 params = {'c':num_clusters, 'q':num_clusters, 'kernel':'Gaussian', 'lambda':1.0, 'sigma':0.3, 'verbose':1.0}
 kdac.SetupParams(params)
 print 'First Fit to Generate Y Matrix'
