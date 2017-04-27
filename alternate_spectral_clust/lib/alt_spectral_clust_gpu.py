@@ -26,6 +26,7 @@ class alt_spectral_clust:
 		self.kdac = Nice4Py.KDAC('gpu')
 
 		self.params = {}
+		self.params['verbose'] = 1.0
 		self.db['sigma'] = 1
 		self.db['poly_order'] = 2
 		self.db['q'] = 1
@@ -36,6 +37,7 @@ class alt_spectral_clust:
 
 		self.db['Kernel_matrix'] = np.zeros((self.db['N'],self.db['N']))
 		self.db['prev_clust'] = 0
+		self.db['with_predefined_clustering'] = False
 		self.db['Y_matrix'] = np.array([])
 		self.db['kernel_type'] = 'Gaussian Kernel'
 		#self.db['kernel_type'] = 'Linear Kernel'
@@ -104,11 +106,17 @@ class alt_spectral_clust:
 			if self.db['prev_clust'] == 0 : 
 				self.kdac.SetupParams(self.params)
 				self.kdac.Fit(db['data'], N, db['d'])
+			elif (self.db['with_predefined_clustering'] == True):
+				self.kdac.SetupParams(self.params)
+				self.kdac.Fit(db['data'], N, db['d'], db['Y_matrix'], N, db['C_num'])
 			else : 
 				#import pdb; pdb.set_trace()
 				self.kdac.SetupParams(self.params)
+				print 'FFF'
 				self.kdac.Fit()
+				print 'DDD'
 
+			print 'got to here'
 			self.kdac.Predict(output, N, 1)
 
 			db['allocation'] = output.T[0]
