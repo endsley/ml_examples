@@ -152,7 +152,7 @@ if True:	# run alternative clustering
 	alternative = ASC_2.db['allocation']	
 
 
-if True:	# Plot the clustered image
+if False:	# Plot the clustered image
 	data_alloc2 = {}
 	for m in range(len(alternative)):
 		data_alloc2[str(before_preprocess_data[m,:])] = alternative[m]
@@ -168,3 +168,50 @@ if True:	# Plot the clustered image
 	img.save('alternative_img.png') 
 	img.show()
 
+
+db = ASC_2.db
+if True:	# plot the W convergence results
+	X = db['data']
+	plt.figure(2)
+	
+	plt.suptitle('Escher Flower',fontsize=24)
+	plt.subplot(311)
+	inc = 0
+	for costs in db['debug_costVal']: 
+		xAxis = np.array(range(len(costs))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, costs, 'b')
+		plt.plot(inc, costs[-1], 'bo', markersize=10)
+		plt.title('Cost vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('cost')
+		
+	plt.subplot(312)
+	inc = 0
+	for gradient in db['debug_gradient']: 
+		xAxis = np.array(range(len(gradient))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, gradient, 'b')
+		plt.plot(inc, gradient[-1], 'bo', markersize=10)
+		plt.title('Gradient vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('gradient')
+
+
+	plt.subplot(313)
+	inc = 0
+	for wchange in db['debug_debug_Wchange']: 
+		xAxis = np.array(range(len(wchange))) + inc; 
+		inc = np.amax(xAxis)
+		plt.plot(xAxis, wchange, 'b')
+		plt.plot(inc, wchange[-1], 'bo', markersize=10)
+		plt.title('|w_old - w_new|/|w| vs w iteration, each dot is U update')
+		plt.xlabel('w iteration')
+		plt.ylabel('|w_old - w_new|/|w| ')
+
+	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+	plt.subplots_adjust(top=0.85)
+	plt.show()
+
+
+import pdb; pdb.set_trace()
