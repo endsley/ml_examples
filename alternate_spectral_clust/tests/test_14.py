@@ -112,6 +112,8 @@ if True:	# run alternative clustering
 #	#print "Alternative aginst truth : " , normalized_mutual_info_score(label, alternative)
 	
 
+import pdb; pdb.set_trace()
+
 if True:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
