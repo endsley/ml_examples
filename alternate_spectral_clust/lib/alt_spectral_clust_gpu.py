@@ -112,9 +112,7 @@ class alt_spectral_clust:
 			else : 
 				#import pdb; pdb.set_trace()
 				self.kdac.SetupParams(self.params)
-				print 'FFF'
 				self.kdac.Fit()
-				print 'DDD'
 
 			print 'got to here'
 			self.kdac.Predict(output, N, 1)
