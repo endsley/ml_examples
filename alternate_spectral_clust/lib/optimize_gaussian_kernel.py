@@ -6,6 +6,8 @@ from objective_magnitude import *
 from cost_function import *
 import time 
 from orthogonal_optimization import *
+import pickle
+import os
 
 #	You must comment out one of the method and keep the other
 #from W_optimize_Gaussian import *
@@ -61,6 +63,16 @@ def properly_initialize_U(db):
 
 	U_optimize(db)
 
+def save_initial_W(W_matrix):
+	if os.path.exists("./init_W.pk"):
+		init_W = pickle.load( open( "init_W.pk", "rb" ) )
+	else:
+		init_W = []
+
+	init_W.append(W_matrix)
+	pickle.dump( init_W, open( "init_W.pk", "wb" ) )
+
+
 
 def Orthogonal_implementation(db):
 	cf = cost_function(db)
@@ -80,6 +92,8 @@ def Orthogonal_implementation(db):
 		#	Generate W
 		#db['W_matrix'] = np.eye(db['d'], db['q']) 			# default initialization value
 		W_temp = np.random.randn(db['d'], db['q']) 			# randomize initialization
+		#save_initial_W(W_temp)								# each random initialization, it is stored here
+
 		[Q,R] = np.linalg.qr(W_temp)
 		db['W_matrix'] = Q
 		print Q[0:2,:]
@@ -153,6 +167,12 @@ def DongLing_implementation(db):
 		if False: # running both
 			if db['Y_matrix'].size > 0:
 				db['Y_matrix'] = db['Y_matrix'][:,0:db['C_num']]
+		elif True:	# If we initialize W from some pickle file
+			if os.path.exists("./init_W.pk"):
+				init_W = pickle.load( open( "init_W.pk", "rb" ) )
+				db['W_matrix'] = init_W[1]
+			else:
+				db['W_matrix'] = np.eye(db['d'], db['q']) 
 		else:
 			db['W_matrix'] = np.eye(db['d'], db['q']) #This must be commented out if running together with FKDAC
 
@@ -174,7 +194,7 @@ def DongLing_implementation(db):
 def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
-	ISM_implementation(db)
-	#DongLing_implementation(db)
+	#ISM_implementation(db)
+	DongLing_implementation(db)
 	#Orthogonal_implementation(db)
 
