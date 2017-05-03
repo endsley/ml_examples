@@ -165,7 +165,7 @@ def DongLing_implementation(db):
 		db['lowest_cost'] = float("inf")
 		db['lowest_gradient'] = float("inf")
 
-		if False: # running both
+		if True: # running both
 			if db['Y_matrix'].size > 0:
 				db['Y_matrix'] = db['Y_matrix'][:,0:db['C_num']]
 		elif False:	# If we initialize W from some pickle file
