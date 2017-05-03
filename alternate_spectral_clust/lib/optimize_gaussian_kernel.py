@@ -170,7 +170,8 @@ def DongLing_implementation(db):
 		elif True:	# If we initialize W from some pickle file
 			if os.path.exists("./init_W.pk"):
 				init_W = pickle.load( open( "init_W.pk", "rb" ) )
-				db['W_matrix'] = init_W[1]
+				db['W_matrix'] = init_W[2]
+				print init_W[2]
 			else:
 				db['W_matrix'] = np.eye(db['d'], db['q']) 
 		else:
