@@ -94,9 +94,9 @@ def Orthogonal_implementation(db):
 			db['W_matrix'] = np.eye(db['d'], db['q']) 		
 		else:
 			W_temp = np.random.randn(db['d'], db['q']) 			# randomize initialization
-			save_initial_W(W_temp)								# each random initialization, it is stored here
 			[Q,R] = np.linalg.qr(W_temp)
 			db['W_matrix'] = Q
+			save_initial_W(db['W_matrix'])						# each random initialization, it is stored here
 			print Q[0:2,:]
 
 		db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
@@ -197,11 +197,6 @@ def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
 	#ISM_implementation(db)
-<<<<<<< HEAD
-	#DongLing_implementation(db)
-	Orthogonal_implementation(db)
-=======
 	DongLing_implementation(db)
 	#Orthogonal_implementation(db)
->>>>>>> 1f12b6816c2b183d845f308ce8596788c1aa75fc
 
