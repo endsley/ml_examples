@@ -90,13 +90,14 @@ def Orthogonal_implementation(db):
 		db['lowest_gradient'] = float("inf")
 
 		#	Generate W
-		#db['W_matrix'] = np.eye(db['d'], db['q']) 			# default initialization value
-		W_temp = np.random.randn(db['d'], db['q']) 			# randomize initialization
-		#save_initial_W(W_temp)								# each random initialization, it is stored here
-
-		[Q,R] = np.linalg.qr(W_temp)
-		db['W_matrix'] = Q
-		print Q[0:2,:]
+		if True:												#Use identity
+			db['W_matrix'] = np.eye(db['d'], db['q']) 		
+		else:
+			W_temp = np.random.randn(db['d'], db['q']) 			# randomize initialization
+			save_initial_W(W_temp)								# each random initialization, it is stored here
+			[Q,R] = np.linalg.qr(W_temp)
+			db['W_matrix'] = Q
+			print Q[0:2,:]
 
 		db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
 	
@@ -167,7 +168,7 @@ def DongLing_implementation(db):
 		if False: # running both
 			if db['Y_matrix'].size > 0:
 				db['Y_matrix'] = db['Y_matrix'][:,0:db['C_num']]
-		elif True:	# If we initialize W from some pickle file
+		elif False:	# If we initialize W from some pickle file
 			if os.path.exists("./init_W.pk"):
 				init_W = pickle.load( open( "init_W.pk", "rb" ) )
 				db['W_matrix'] = init_W[2]
@@ -195,7 +196,7 @@ def DongLing_implementation(db):
 def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
-	#ISM_implementation(db)
-	DongLing_implementation(db)
+	ISM_implementation(db)
+	#DongLing_implementation(db)
 	#Orthogonal_implementation(db)
 
