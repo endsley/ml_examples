@@ -90,7 +90,7 @@ def Orthogonal_implementation(db):
 		db['lowest_gradient'] = float("inf")
 
 		#	Generate W
-		if True:												#Use identity
+		if False:												#Use identity
 			db['W_matrix'] = np.eye(db['d'], db['q']) 		
 		else:
 			W_temp = np.random.randn(db['d'], db['q']) 			# randomize initialization
@@ -195,7 +195,7 @@ def DongLing_implementation(db):
 def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
-	ISM_implementation(db)
+	#ISM_implementation(db)
 	#DongLing_implementation(db)
-	#Orthogonal_implementation(db)
+	Orthogonal_implementation(db)
 

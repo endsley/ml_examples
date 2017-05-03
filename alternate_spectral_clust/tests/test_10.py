@@ -67,8 +67,27 @@ b = db['allocation']
 
 #np.savetxt('Moon_label_2.csv', db['Y_matrix'][:,2:4], delimiter=',', fmt='%d')
 
+#	Output the result to a file
+if True:
+	label_1 = Y_2_allocation(label_1)
+	label_2 = Y_2_allocation(label_2)
 
-if True:	# plot the clustering results
+	cf = db['cf']
+	final_cost = cf.calc_cost_function(db['W_matrix'])
+	against_truth = np.round(normalized_mutual_info_score(label_2, b),3)
+	against_alternative = np.round(normalized_mutual_info_score(label_1, b),3)
+
+	outLine = str(against_truth) + '\t' + str(against_alternative) + '\t' 
+	outLine += str(np.round(cf.cluster_quality(db), 4)) + '\t' + str(np.round(final_cost ,3))
+	outLine += '\t' + str(np.round(db['run_alternative_time'],3)) + '\n'
+
+	fin = open('moon_result.txt','a')
+	fin.write(outLine)
+	fin.close()
+
+
+
+if False:	# plot the clustering results
 	X = db['data']
 	plt.figure(1)
 	
@@ -120,7 +139,7 @@ if True:	# plot the clustering results
 
 
 
-if True:	# plot the W convergence results
+if False:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	
