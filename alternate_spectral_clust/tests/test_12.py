@@ -82,14 +82,16 @@ if True:	# run alternative clustering
 	ASC.set_values('kernel_type','Gaussian Kernel')
 	start_time = time.time() 
 	ASC.run()
-	print("--- Time took : %s seconds ---" % (time.time() - start_time))
+
+	time_it_took = time.time() - start_time
+	print("--- Time took : %s seconds ---" % time_it_took)
 	alternative = db['allocation']	
 	alternative_Y = Allocation_2_Y(alternative)
 	pose_Y = Allocation_2_Y(pose_label)
 
 
-	against_truth = normalized_mutual_info_score(pose_label, alternative)
-	against_alternative = normalized_mutual_info_score(label, alternative)
+	against_truth = np.round(normalized_mutual_info_score(pose_label, alternative),3)
+	against_alternative = np.round(normalized_mutual_info_score(label, alternative),3)
 
 	alternative_HSIC = HSIC_rbf(data, alternative_Y, sigma)
 	pose_HSIC = HSIC_rbf(data, pose_Y, sigma)
@@ -110,6 +112,7 @@ if True:	# run alternative clustering
 
 
 
+	cf = db['cf']
 
 
 	txt = '\tLabel against alternative : ' + str(against_alternative) + '\n'
@@ -118,8 +121,16 @@ if True:	# run alternative clustering
 	txt += '\tPose HSIC % diff from random : ' + str(pose_percent_diff) + '\n'
 	txt += '\tLambda used : ' + str(rand_lambda) + '\n'
 	txt += '\tLowest Cost : ' + str(db['lowest_cost']) + '\n'
-
 	print txt
+
+
+	outLine = str(against_truth) + '\t' + str(against_alternative) + '\t' 
+	outLine += str(np.round(cf.cluster_quality(db), 4)) + '\t' + str(np.round(db['lowest_cost'],3))
+	outLine += '\t' + str(time_it_took) + '\n'
+
+	fin = open('face_result.txt','a')
+	fin.write(outLine)
+	fin.close()
 
 	#append_txt('./output.txt', txt)
 
