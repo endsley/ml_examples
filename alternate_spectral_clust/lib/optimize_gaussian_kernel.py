@@ -171,7 +171,8 @@ def DongLing_implementation(db):
 		elif False:	# If we initialize W from some pickle file
 			if os.path.exists("./init_W.pk"):
 				init_W = pickle.load( open( "init_W.pk", "rb" ) )
-				db['W_matrix'] = init_W[1]
+				db['W_matrix'] = init_W[9]
+				print init_W[9]
 			else:
 				db['W_matrix'] = np.eye(db['d'], db['q']) 
 		else:
@@ -196,6 +197,11 @@ def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
 	#ISM_implementation(db)
+<<<<<<< HEAD
 	#DongLing_implementation(db)
 	Orthogonal_implementation(db)
+=======
+	DongLing_implementation(db)
+	#Orthogonal_implementation(db)
+>>>>>>> 1f12b6816c2b183d845f308ce8596788c1aa75fc
 
