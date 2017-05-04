@@ -60,20 +60,39 @@ ASC.run()
 b = db['allocation']
 
 #print 'Alternate allocation :', b
-print("--- %s seconds ---" % (time.time() - start_time))
+db['run_alternative_time'] = time.time() - start_time
+print("--- %s seconds ---" % db['run_alternative_time'])
 
-#print "NMI : " , normalized_mutual_info_score(a,b)
-#g_truth = np.concatenate((np.ones(100), np.zeros(100),np.ones(100), np.zeros(100)))
-#a_truth = np.concatenate((np.ones(200), np.zeros(200)))
-#print "NMI Against Ground Truth : " , normalized_mutual_info_score(b,a_truth)
-#print db['Y_matrix']
 
-if True:	# some HSIC debug stuff
+against_alternative = np.around(normalized_mutual_info_score(a,b), 3)
+#a_truth = np.concatenate((np.ones(20), np.zeros(20)))
+a_truth = np.concatenate((np.ones(10), np.zeros(10),np.ones(10), np.zeros(10)))
+against_truth = np.round(normalized_mutual_info_score(b,a_truth),3)
+
+
+
+
+if True:		#	Output the result to a text file
+	cf = db['cf']
+	outLine = str(against_truth) + '\t' + str(against_alternative) + '\t' 
+	outLine += str(np.round(cf.cluster_quality(db), 4)) + '\t' + str(np.round(cf.calc_cost_function(db['W_matrix']),3))
+	outLine += '\t' + str(np.round(db['run_alternative_time'],3)) + '\n'
+
+	fin = open('Small_Gaussian_result_OM.txt','a')
+	fin.write(outLine)
+	fin.close()
+
+
+
+
+
+
+if False:	# some HSIC debug stuff
 	cf = db['cf']
 	print 'My cost : ' , cf.calc_cost_function(db['W_matrix'], Y_columns=db['C_num'])
 	print 'test cost : ' , calc_cost.calc_cost_function(db)
 
-if True:	#	plot the clustering result
+if False:	#	plot the clustering result
 	X = db['data']
 	plt.figure(1)
 	

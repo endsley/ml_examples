@@ -44,7 +44,7 @@ def exit_condition(db, loop_count):
 	db['previous_U_matrix'] = db['U_matrix']
 	db['previous_W_matrix'] = db['W_matrix']
 	
-	if loop_count > 10: return True
+	if loop_count > db['maximum_U_update_count']: return True
 
 	return False
 
@@ -105,7 +105,7 @@ def Orthogonal_implementation(db):
 			cf.calc_psi()	# need a better way to initializating
 			Update_latest_UW(db)
 
-			db['W_matrix'] = OO.run(db['W_matrix'])
+			db['W_matrix'] = OO.run(db['W_matrix'], db['maximum_W_update_count'])		# Use a lower max_rep if it doesn't finish running	
 			U_optimize(db)
 	
 			WU_converge = exit_condition(db, loop_count)
@@ -197,6 +197,6 @@ def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
 	#ISM_implementation(db)
-	DongLing_implementation(db)
-	#Orthogonal_implementation(db)
+	#DongLing_implementation(db)
+	Orthogonal_implementation(db)
 

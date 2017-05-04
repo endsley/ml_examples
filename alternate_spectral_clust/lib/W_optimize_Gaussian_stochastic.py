@@ -3,6 +3,7 @@ import numpy as np
 from create_gamma_ij import *
 from create_y_tilde import *
 from objective_magnitude import *
+import time 
 
 
 
@@ -101,7 +102,7 @@ def W_optimize_Gaussian(db):
 					new_alpha = 0
 					break
 
-			print 'magnitude : ' , new_mag
+			print 'magnitude , counter , time since start: ' , new_mag, counter, time.time() - db['start_time']
 
 			if type(last_W) != type(None):
 				relative_magnitude = np.linalg.norm(new_W)
