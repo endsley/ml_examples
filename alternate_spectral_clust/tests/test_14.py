@@ -60,8 +60,8 @@ if True:	# run alternative clustering
 	ASC.set_values('C_num',4)
 	ASC.set_values('sigma',sigma_value)
 	ASC.set_values('lambda',rand_lambda)
-	ASC.set_values('maximum_W_update_count',1)			# Sets the counter to loop only 3 times
-	ASC.set_values('maximum_U_update_count',1)			# Sets the counter to loop only 3 times
+	ASC.set_values('maximum_W_update_count',20)			# Sets the counter to loop only 3 times
+	ASC.set_values('maximum_U_update_count',20)			# Sets the counter to loop only 3 times
 
 	#ASC.set_values('kernel_type','Linear Kernel')
 	ASC.set_values('kernel_type','Gaussian Kernel')

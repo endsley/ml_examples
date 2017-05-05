@@ -168,7 +168,7 @@ def DongLing_implementation(db):
 		if False: # running both
 			if db['Y_matrix'].size > 0:
 				db['Y_matrix'] = db['Y_matrix'][:,0:db['C_num']]
-		elif False:	# If we initialize W from some pickle file
+		elif True:	# If we initialize W from some pickle file
 			if os.path.exists("./init_W.pk"):
 				init_W = pickle.load( open( "init_W.pk", "rb" ) )
 				db['W_matrix'] = init_W[9]
