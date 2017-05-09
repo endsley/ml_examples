@@ -60,17 +60,34 @@ if True:	# run alternative clustering
 	ASC.set_values('C_num',4)
 	ASC.set_values('sigma',sigma_value)
 	ASC.set_values('lambda',rand_lambda)
+	ASC.set_values('maximum_W_update_count',20)			# Sets the counter to loop only 3 times
+	ASC.set_values('maximum_U_update_count',20)			# Sets the counter to loop only 3 times
+
 	#ASC.set_values('kernel_type','Linear Kernel')
 	ASC.set_values('kernel_type','Gaussian Kernel')
 	start_time = time.time() 
+
 	ASC.run()
-	print("--- Time took : %s seconds ---" % (time.time() - start_time))
+	db['run_alternative_time'] = time.time() - start_time
+	print("--- Time took : %s seconds ---" % db['run_alternative_time'])
 	alternative = db['allocation']	
 	against_alternative = normalized_mutual_info_score(university_labels, alternative)
 	against_truth = normalized_mutual_info_score(topic_labels, alternative)
 
 	print against_alternative
 	print against_truth
+
+
+if True:		#	Output the result to a text file
+	cf = db['cf']
+	outLine = str(against_truth) + '\t' + str(against_alternative) + '\t' 
+	outLine += str(np.round(cf.cluster_quality(db), 4)) + '\t' + str(np.round(cf.calc_cost_function(db['W_matrix']),3))
+	outLine += '\t' + str(np.round(db['run_alternative_time'],3)) + '\n'
+
+	fin = open('webKB_result_DG.txt','a')
+	fin.write(outLine)
+	fin.close()
+
 
 
 #	alternative_Y = Allocation_2_Y(alternative)

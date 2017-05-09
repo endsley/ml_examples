@@ -14,11 +14,10 @@ class orthogonal_optimization:
 		A = G.dot(x.T) - x.dot(G.T)
 		return A
 
-	def run(self, x_init):
+	def run(self, x_init, max_rep=200):
 		d = x_init.shape[0]
 		self.x_opt = x_init
 		I = eye(d)
-		max_rep = 200
 		converged = False
 		x_change = linalg.norm(x_init)
 		m = 0
@@ -40,6 +39,8 @@ class orthogonal_optimization:
 					break
 				else:
 					alpha = alpha*0.2
+
+			m += 1
 
 			if(x_change < 0.01*linalg.norm(self.x_opt)): converged = True
 		if m > 190: print m	

@@ -8,6 +8,7 @@ from optimize_polynomial_kernel import *
 from K_means import *
 from numpy import genfromtxt
 from cost_function import *
+import time 
 
 
 class alt_spectral_clust:
@@ -42,13 +43,15 @@ class alt_spectral_clust:
 		self.db['D_matrix'] = np.array([])
 		self.db['U_matrix'] = np.array([])	
 		self.db['W_matrix'] = np.array([])
+		self.db['start_time'] = time.time() 
 
 		# output from spectral clustering
 		self.db['allocation'] = np.array([])
 		self.db['binary_allocation'] = np.array([[0,2,0],[8,2,0]])
 
 		self.db['H_matrix'] = None
-		self.db['maximum_W_update_count'] = 400
+		self.db['maximum_W_update_count'] = 200
+		self.db['maximum_U_update_count'] = 20
 		self.db['data'] = data_set
 
 		# debug db

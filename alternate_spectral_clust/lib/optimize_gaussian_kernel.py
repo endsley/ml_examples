@@ -44,7 +44,7 @@ def exit_condition(db, loop_count):
 	db['previous_U_matrix'] = db['U_matrix']
 	db['previous_W_matrix'] = db['W_matrix']
 	
-	if loop_count > 10: return True
+	if loop_count > db['maximum_U_update_count']: return True
 
 	return False
 
@@ -105,7 +105,7 @@ def Orthogonal_implementation(db):
 			cf.calc_psi()	# need a better way to initializating
 			Update_latest_UW(db)
 
-			db['W_matrix'] = OO.run(db['W_matrix'])
+			db['W_matrix'] = OO.run(db['W_matrix'], db['maximum_W_update_count'])		# Use a lower max_rep if it doesn't finish running	
 			U_optimize(db)
 	
 			WU_converge = exit_condition(db, loop_count)
@@ -168,7 +168,7 @@ def DongLing_implementation(db):
 		if False: # running both
 			if db['Y_matrix'].size > 0:
 				db['Y_matrix'] = db['Y_matrix'][:,0:db['C_num']]
-		elif False:	# If we initialize W from some pickle file
+		elif True:	# If we initialize W from some pickle file
 			if os.path.exists("./init_W.pk"):
 				init_W = pickle.load( open( "init_W.pk", "rb" ) )
 				db['W_matrix'] = init_W[9]
