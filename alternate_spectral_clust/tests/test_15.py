@@ -148,7 +148,8 @@ if True:	# run alternative clustering
 	ASC_2.set_values('kernel_type','Gaussian Kernel')
 	start_time = time.time() 
 	ASC_2.run()
-	print("--- Time took : %s seconds ---" % (time.time() - start_time))
+	db['run_alternative_time'] = time.time() - start_time
+	print("--- Time took : %s seconds ---" % db['run_alternative_time'])
 	alternative = ASC_2.db['allocation']	
 
 
@@ -167,6 +168,20 @@ if False:	# Plot the clustered image
 	img = Image.fromarray(alt_img, 'L') 
 	img.save('alternative_img.png') 
 	img.show()
+
+
+#	Output the result to a file
+if True:
+
+	cf = db['cf']
+	final_cost = cf.calc_cost_function(db['W_matrix'])
+	outLine = str(np.round(cf.cluster_quality(db), 4)) + '\t' + str(np.round(final_cost ,3))
+	outLine += '\t' + str(np.round(db['run_alternative_time'],3)) + '\n'
+
+	fin = open('flower_result.txt','a')
+	fin.write(outLine)
+	fin.close()
+
 
 
 db = ASC_2.db
