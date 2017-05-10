@@ -148,8 +148,8 @@ if True:	# run alternative clustering
 	ASC_2.set_values('kernel_type','Gaussian Kernel')
 	start_time = time.time() 
 	ASC_2.run()
-	db['run_alternative_time'] = time.time() - start_time
-	print("--- Time took : %s seconds ---" % db['run_alternative_time'])
+	ASC_2.db['run_alternative_time'] = time.time() - start_time
+	print("--- Time took : %s seconds ---" % ASC_2.db['run_alternative_time'])
 	alternative = ASC_2.db['allocation']	
 
 
@@ -170,6 +170,7 @@ if False:	# Plot the clustered image
 	img.show()
 
 
+db = ASC_2.db
 #	Output the result to a file
 if True:
 
@@ -184,8 +185,7 @@ if True:
 
 
 
-db = ASC_2.db
-if True:	# plot the W convergence results
+if False:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	
