@@ -31,6 +31,9 @@ class alt_spectral_clust:
 		self.db['alpha'] = 0.01
 		self.db['SGD_size'] = 10
 		self.db['polynomial_constant'] = 1
+		self.db['W_opt_technique'] = 'ISM'
+		self.db['DG_init_W_from_pickle'] = False
+		self.db['pickle_count'] = 0
 
 		self.db['Kernel_matrix'] = np.zeros((self.db['N'],self.db['N']))
 		self.db['prev_clust'] = 0

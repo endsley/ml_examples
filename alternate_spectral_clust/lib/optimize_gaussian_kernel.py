@@ -63,14 +63,17 @@ def properly_initialize_U(db):
 
 	U_optimize(db)
 
-def save_initial_W(W_matrix):
-	if os.path.exists("./init_W.pk"):
-		init_W = pickle.load( open( "init_W.pk", "rb" ) )
+def save_initial_W(db):
+	W_matrix = db['W_matrix']
+	fname = "init_W_" + db['Experiment_name'] + ".pk"
+
+	if os.path.exists(fname):
+		init_W = pickle.load( open( fname, "rb" ) )
 	else:
 		init_W = []
 
 	init_W.append(W_matrix)
-	pickle.dump( init_W, open( "init_W.pk", "wb" ) )
+	pickle.dump( init_W, open( fname, "wb" ) )
 
 
 
@@ -96,7 +99,7 @@ def Orthogonal_implementation(db):
 			W_temp = np.random.randn(db['d'], db['q']) 			# randomize initialization
 			[Q,R] = np.linalg.qr(W_temp)
 			db['W_matrix'] = Q
-			save_initial_W(db['W_matrix'])						# each random initialization, it is stored here
+			save_initial_W(db)						# each random initialization, it is stored here
 			print Q[0:2,:]
 
 		db['Kernel_matrix'] = cf.create_Kernel(db['W_matrix'])
@@ -168,11 +171,13 @@ def DongLing_implementation(db):
 		if False: # running both
 			if db['Y_matrix'].size > 0:
 				db['Y_matrix'] = db['Y_matrix'][:,0:db['C_num']]
-		elif True:	# If we initialize W from some pickle file
-			if os.path.exists("./init_W.pk"):
-				init_W = pickle.load( open( "init_W.pk", "rb" ) )
-				db['W_matrix'] = init_W[5]
-				print init_W[5]
+
+
+		if db['DG_init_W_from_pickle']:	# If we initialize W from some pickle file
+			fname = "init_W_" + db['Experiment_name'] + ".pk"
+			if os.path.exists(fname):
+				init_W = pickle.load( open( fname, "rb" ) )
+				db['W_matrix'] = init_W[db['pickle_count']]
 			else:
 				db['W_matrix'] = np.eye(db['d'], db['q']) 
 		else:
@@ -196,7 +201,7 @@ def DongLing_implementation(db):
 def optimize_gaussian_kernel(db):
 	db['start_time'] = time.time() 
 
-	ISM_implementation(db)
-	#DongLing_implementation(db)
-	#Orthogonal_implementation(db)
+	if db['W_opt_technique'] == 'ISM': ISM_implementation(db)
+	if db['W_opt_technique'] == 'DG': DongLing_implementation(db)
+	if db['W_opt_technique'] == 'SM': Orthogonal_implementation(db)
 

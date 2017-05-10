@@ -95,9 +95,11 @@ class SDG:
 		#W = np.zeros((db['d'], db['q']) )
 		new_cost = float("inf")
 		W_hold = W
+		exit_count = 10
+		if db['auto_adjust_lambda']:
+			exit_count = 30
 
-
-		for m in range(10): 
+		for m in range(exit_count):
 			[cost, matrix_sum] = db['cf'].calc_cost_function(W, also_calc_Phi=True)
 
 			#print 'Rank : ' , np.linalg.matrix_rank(matrix_sum)
@@ -108,7 +110,8 @@ class SDG:
 				[S2,U2] = np.linalg.eigh(matrix_sum)
 				eigsValues = S2[0:db['q']]
 				#print W
-				print 'Ratio : ' , np.abs((S2[db['q'] - 1] - S2[db['q']])/S2[db['q'] - 1])
+				#print 'Ratio : ' , np.abs((S2[db['q'] - 1] - S2[db['q']])/S2[db['q'] - 1])
+
 				new_gradient = matrix_sum.dot(W)
 				Lagrange_gradient = new_gradient - W*eigsValues
 				new_gradient_mag = np.linalg.norm(Lagrange_gradient)
