@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
 
 	print 'Time difference '
-	A = np.random.randn(400,400)
+	A = np.random.randn(70,70)
 	A = A.dot(A.T)
 
 	start_time = time.time() 

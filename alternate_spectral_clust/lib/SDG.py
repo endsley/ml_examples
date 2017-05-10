@@ -8,6 +8,7 @@ from create_y_tilde import *
 from create_gamma_ij import *
 from StringIO import StringIO
 from scipy.optimize import minimize
+import power_eig
 
 
 class SDG:
@@ -103,6 +104,8 @@ class SDG:
 			#print 'Shape : ' , matrix_sum.shape
 
 			if True:# Use eig
+
+				start_time = time.time() 
 				[S2,U2] = np.linalg.eigh(matrix_sum)
 				eigsValues = S2[0:db['q']]
 				#print W
@@ -120,7 +123,13 @@ class SDG:
 				#print U2
 
 				W = U2[:,0:db['q']]
+				print("First --- %s seconds ---" % (time.time() - start_time))
 
+
+				start_time = time.time() 
+				[eigVects, eigValues] = power_eig.power_eig(matrix_sum,db['q'], direction='smallest first', accuracy=0.0001)
+				print("2nd --- %s seconds ---" % (time.time() - start_time))
+				import pdb; pdb.set_trace()
 			else:
 				# Use svd
 				[U,S,V] = np.linalg.svd(matrix_sum)
