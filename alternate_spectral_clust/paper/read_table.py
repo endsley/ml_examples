@@ -35,6 +35,8 @@ time_mean = means[4]
 time_std = SD[4]
 total_time = sumes[4]
 
+print 'NMI : ', nmi_quality_mean , '+' , nmi_quality_var
+print 'NMI max : ', nmi_quality_best
 print 'Alternative NMI : ', nmi_alternative_mean , '+' , nmi_alternative_var
 print 'Cluster Q : ', cluster_quality_mean , '+' , cluster_quality_SD
 print 'Cost : ', cost_mean , '+' , cost_SD

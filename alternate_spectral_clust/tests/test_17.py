@@ -19,7 +19,7 @@ from HSIC import *
 from sklearn import preprocessing
 
 
-fsize = '300x4'
+fsize = '900x4'
 file_name = 'moon_' + fsize
 data = genfromtxt('data_sets/' + file_name + '.csv', delimiter=',')		
 data = preprocessing.scale(data)
@@ -75,7 +75,7 @@ if True: #	Run the alternative clustering
 	db['Experiment_name'] = file_name  
 
 	db['DG_init_W_from_pickle'] = True
-	db['pickle_count'] = 8
+	db['pickle_count'] = 9
 	
 	
 	start_time = time.time() 
