@@ -19,7 +19,7 @@ from HSIC import *
 from sklearn import preprocessing
 
 
-fsize = '400x4'
+fsize = '200x4'
 file_name = 'moon_' + fsize
 data = genfromtxt('data_sets/' + file_name + '.csv', delimiter=',')		
 data = preprocessing.scale(data)
