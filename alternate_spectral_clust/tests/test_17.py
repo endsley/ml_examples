@@ -71,11 +71,11 @@ if True: #	Run the alternative clustering
 	ASC.set_values('q',2)
 	ASC.set_values('lambda', l)
 	ASC.set_values('sigma',0.1)
-	db['W_opt_technique'] = 'ISM'  # DG, SM, or ISM
+	db['W_opt_technique'] = 'DG'  # DG, SM, or ISM
 	db['Experiment_name'] = file_name  
 
 	db['DG_init_W_from_pickle'] = True
-	db['pickle_count'] = 10
+	db['pickle_count'] = 9
 	
 	
 	start_time = time.time() 
