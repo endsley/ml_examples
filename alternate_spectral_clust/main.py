@@ -48,8 +48,8 @@ np.set_printoptions(linewidth=300)
 #import test_13				# moon with noise
 #import gpu_test_13			# moon with noise
 #import gene_data_test
-import test_14			# webkb data
+#import test_14			# webkb data
 #import test_15			# Echer flower image
 #import gpu_test_15		# Echer flower image
 #import test_16			# Echer mariposa image
-#import test_17				# moon 800 with noise
+import test_17				# moon 800 with noise
