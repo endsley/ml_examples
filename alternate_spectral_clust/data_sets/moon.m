@@ -1,7 +1,7 @@
 #!/usr/bin/octave
 
-N = 200;		% half of samples
-noise_N = 0;
+N = 500;		% half of samples
+noise_N = 3;
 total_d = 4 + noise_N;
 
 a = randn(N,2) + 5;

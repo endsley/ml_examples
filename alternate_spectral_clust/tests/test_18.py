@@ -20,14 +20,19 @@ from sklearn import preprocessing
 
 
 
-data = genfromtxt('data_sets/moon_164x7.csv', delimiter=',')		
+fsize = '1000x7'
+file_name = 'moon_' + fsize
+
+
+data = genfromtxt('data_sets/' + file_name + '.csv', delimiter=',')		
 data = preprocessing.scale(data)
 data[:,6] = data[:,6]/3.0
 data[:,5] = data[:,5]/3.0
 data[:,4] = data[:,4]/3.0
 
-label_1 = genfromtxt('data_sets/Moon_label_1.csv', delimiter=',')		
-label_2 = genfromtxt('data_sets/Moon_label_2.csv', delimiter=',')		
+label_1 = genfromtxt('data_sets/moon_' + fsize + '_original_label.csv', delimiter=',')		
+label_2 = genfromtxt('data_sets/moon_' + fsize + '_alt_label.csv', delimiter=',')		
+
 
 d_matrix = sklearn.metrics.pairwise.pairwise_distances(data, Y=None, metric='euclidean')
 sigma = np.median(d_matrix)
@@ -87,10 +92,10 @@ b = db['allocation']
 
 #np.savetxt('Moon_label_2.csv', db['Y_matrix'][:,2:4], delimiter=',', fmt='%d')
 
-if True:	# some HSIC debug stuff
-	original_allocation = Y_2_allocation(label_1)
-	alternate_allocation = Y_2_allocation(label_2)
-
+if False:	# some HSIC debug stuff
+	original_allocation = label_1
+	alternate_allocation = label_2
+	
 	cf = db['cf']
 	print "Original NMI : " , normalized_mutual_info_score(a,original_allocation)
 	print "Alternate NMI : " , normalized_mutual_info_score(b,alternate_allocation)
@@ -112,7 +117,25 @@ if True:	# some HSIC debug stuff
 
 	print db['W_matrix']
 
-if True:	# plot the clustering results
+#	Output the result to a file
+if True:
+	cf = db['cf']
+	final_cost = cf.calc_cost_function(db['W_matrix'])
+	against_truth = np.round(normalized_mutual_info_score(label_2, b),3)
+	against_alternative = np.round(normalized_mutual_info_score(label_1, b),3)
+
+	outLine = str(db['N']) + '\t' + db['W_opt_technique'] + '\t' + str(np.round(db['run_alternative_time'],3)) + '\t'
+	outLine += str(np.round(final_cost ,3)) + '\t' + str(np.round(cf.cluster_quality(db), 3)) + '\t'
+	outLine += str(against_truth) + '\t' + str(against_alternative) + '\n' 
+
+	fin = open('moon_' + str(db['N']) + 'x' + str(db['d']) + '_result.txt','a')
+	fin.write(outLine)
+	fin.close()
+
+
+
+
+if False:	# plot the clustering results
 	X = db['data']
 	plt.figure(1)
 	
