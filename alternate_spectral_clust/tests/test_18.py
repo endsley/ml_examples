@@ -75,12 +75,12 @@ else: #	Predefining the original clustering, the following are the required sett
 ASC.set_values('q',2)
 ASC.set_values('lambda', l)
 ASC.set_values('sigma',0.1)
-ASC.set_values('W_opt_technique','SM')		# DG, SM, or ISM
+ASC.set_values('W_opt_technique','DG')		# DG, SM, or ISM
 ASC.set_values('Experiment_name','Basic_moon_noise')
 
 #	only matters if picking DG
-#db['DG_init_W_from_pickle'] = True
-#db['pickle_count'] = 9
+db['DG_init_W_from_pickle'] = True
+db['pickle_count'] = 9
 
 
 start_time = time.time() 
