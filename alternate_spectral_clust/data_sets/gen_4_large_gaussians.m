@@ -10,9 +10,7 @@ c  =  randn(n,d)  +  repmat([0,-p],n,1);
 d  =  randn(n,d)  +  repmat([-p,0],n,1);
 
 dat  =  [a;b;c;d];
-
-
-noise = randn(400,4);
+noise = rand(400,4);
 
 X = [dat, noise];
 X = X - repmat(mean(X),  n*4,  1);

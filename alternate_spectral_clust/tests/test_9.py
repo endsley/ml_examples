@@ -58,6 +58,11 @@ else: #	Predefining the original clustering, the following are the required sett
 
 if True:	#	Alterntive clustering
 	ASC.set_values('sigma',1)
+	ASC.set_values('W_opt_technique','SM')		# DG, SM, or ISM
+	ASC.set_values('Experiment_name','Four_Gauss')
+	#	only matters if picking DG
+	db['DG_init_W_from_pickle'] = True
+	db['pickle_count'] = 9
 
 	start_time = time.time() 
 	ASC.run()
@@ -70,7 +75,7 @@ if True:	#	Alterntive clustering
 
 	#np.savetxt('Four_gaussian_label_2.csv', db['Y_matrix'][:,2:4], delimiter=',', fmt='%d')
 
-if True:	#	Plot clustering results
+if False:	#	Plot clustering results
 	X = db['data']
 	fig = plt.figure()
 	ax = fig.add_subplot(211, projection='3d')
@@ -113,7 +118,7 @@ if False:	# save or load db to and from a pickle file
 
 
 
-if True:	# plot the W convergence results
+if False:	# plot the W convergence results
 	X = db['data']
 	plt.figure(2)
 	
