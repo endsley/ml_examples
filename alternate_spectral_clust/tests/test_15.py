@@ -51,7 +51,6 @@ for i,j in data_dic.items():
 
 data = preprocessing.scale(data)
 
-
 d_matrix = sklearn.metrics.pairwise.pairwise_distances(data, Y=None, metric='euclidean')
 sigma = 0.1*np.median(d_matrix)
 
@@ -126,7 +125,6 @@ for i,j in data_dic.items():
 
 
 data = preprocessing.scale(data)
-
 
 d_matrix = sklearn.metrics.pairwise.pairwise_distances(data, Y=None, metric='euclidean')
 sigma = 0.1*np.median(d_matrix)

@@ -1,0 +1,13 @@
+
+file : face_fft.mat
+	0.732629 , 0.139720
+file : face_gabor.mat
+	0.647849 , 0.023043
+file : face_hog.mat
+	0.759067 , 0.155291
+file : face_lbp.mat
+	0.631190 , 0.016277
+file : face_pca.mat
+	0.751872 , 0.157081
+file : full_data.mat
+	0.754485 , 0.168363
