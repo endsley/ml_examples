@@ -16,7 +16,7 @@ class DCN:
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
 		self.hidden_d = self.d + 6					# hidden layer has 1 extra dimension
-		self.output_d = k							# output layer has k dimensions
+		self.output_d = 1							# output layer has k dimensions
 		self.lambdaV = -100
 		self.alpha = 0.001
 		self.I = np.eye(self.N)
@@ -42,6 +42,10 @@ class DCN:
 		self.NN = torch.nn.Sequential(
 			torch.nn.Linear(self.d, self.hidden_d, bias=True),
 			torch.nn.ReLU(),
+			torch.nn.Linear(self.hidden_d, self.hidden_d, bias=True),
+			torch.nn.ReLU(),
+			torch.nn.Linear(self.hidden_d, self.hidden_d, bias=True),
+			torch.nn.ReLU(),
 			torch.nn.Linear(self.hidden_d, self.output_d, bias=True),
 			torch.nn.Sigmoid(),
 		)
@@ -49,10 +53,10 @@ class DCN:
 		self.xTor = Variable(self.xTor.type(self.dtype), requires_grad=False)
 
 
-		#np.set_printoptions(precision=3)
-		#np.set_printoptions(threshold=np.nan)
+		np.set_printoptions(precision=3)
+		np.set_printoptions(threshold=np.nan)
 		np.set_printoptions(linewidth=300)
-		#np.set_printoptions(suppress=True)
+		np.set_printoptions(suppress=True)
 
 	#	Auxiliary Functions
 	def create_miniBatch(self, X, bsize):		# x_i, x_j is sub batch of data	
@@ -86,7 +90,8 @@ class DCN:
 		l = self.lambdaV
 
 		Ku = self.U_matrix.dot(self.U_matrix.T)			# kernel U
-		Phi_large = l*self.I + H.dot(Ku).dot(H)			
+		#Phi_large = l*self.I + H.dot(Ku).dot(H)			
+		Phi_large = H.dot(Ku).dot(H)			
 
 		if(len(x_i_list) == self.N): 
 			Phi_large = torch.from_numpy(Phi_large)
@@ -162,46 +167,46 @@ class DCN:
 	def update_W(self):
 		learning_rate = 0.2
 
-		for mn in range(10):
-			while True:
-				[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.mini_batch_size)	# x is sub batch of data, u is the corresponding clustering
-				phi = self.create_Phi(xi_idx, xj_idx)	
-				
-				[y_i, y_j, cost] = self.forward_pass(x_i, x_j, phi)
-				
-				self.NN.zero_grad()
-				cost.backward()
-	
-				while True:		#	Adaptive Learning Rate
-					for param in self.NN.parameters():
-						param.data += learning_rate * param.grad.data
-	
-					[new_y_i, new_y_j, new_cost] = self.forward_pass(x_i, x_j, phi)
-					if(new_cost.data[0] < cost.data[0]): # if got worse, undo and lower the learning rate. 
-						for param in self.NN.parameters():
-							param.data -= learning_rate * param.grad.data
-	
-						learning_rate = learning_rate*0.6
-					else: 
-						break
-					if learning_rate < 0.00000001: break
-	
-				grad_norm = 0	
+		while True:
+			[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.mini_batch_size)	# x is sub batch of data, u is the corresponding clustering
+			phi = self.create_Phi(xi_idx, xj_idx)	
+			
+			[y_i, y_j, cost] = self.forward_pass(x_i, x_j, phi)
+			
+			self.NN.zero_grad()
+			cost.backward()
+
+			while True:		#	Adaptive Learning Rate
 				for param in self.NN.parameters():
-					grad_norm += param.grad.data.norm()
-	
-				#print(L_grad, ' , ' , learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
-				print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
-				#if grad_norm < 0.001 and np.absolute(L_grad) < 0.001:
-				if grad_norm < 0.1:
+					param.data += learning_rate * param.grad.data
+
+				[new_y_i, new_y_j, new_cost] = self.forward_pass(x_i, x_j, phi)
+				if(new_cost.data[0] < cost.data[0]): # if got worse, undo and lower the learning rate. 
+					for param in self.NN.parameters():
+						param.data -= learning_rate * param.grad.data
+
+					learning_rate = learning_rate*0.6
+				else: 
 					break
+				if learning_rate < 0.00000001: break
+
+			grad_norm = 0	
+			for param in self.NN.parameters():
+				grad_norm += param.grad.data.norm()
+
+			#print(L_grad, ' , ' , learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
+			print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
+			#if grad_norm < 0.001 and np.absolute(L_grad) < 0.001:
+			if grad_norm < 0.1:
+				break
 	
-			print '\n\n------------------------\n\n'
-			Y = self.NN(self.xTor).data.numpy()
-			K = Y.dot(Y.T)
-			L_grad = np.trace(K) - 10
-			self.lambdaV = self.lambdaV - self.alpha*L_grad
-			#import pdb; pdb.set_trace()
+
+		print '\n\n------------------------\n\n'
+		Y = self.NN(self.xTor).data.numpy()
+		K = Y.dot(Y.T)
+		L_grad = np.trace(K) - 10
+		#self.lambdaV = self.lambdaV - self.alpha*L_grad
+		#import pdb; pdb.set_trace()
 
 
 		import pdb; pdb.set_trace()
@@ -266,6 +271,7 @@ class DCN:
 					new_loss = error.norm()
 	
 					if(new_loss.data[0] >= loss.data[0]): # if got worse, undo and lower the learning rate. 
+						print 'loss'
 						for param in self.NN.parameters():
 							param.data += learning_rate * param.grad.data
 	
@@ -273,7 +279,10 @@ class DCN:
 					else: 
 						#learning_rate = learning_rate*1.1
 						break
-					if learning_rate < 0.000001: break
+					if learning_rate < 0.000001: 
+						print 'kk'
+						import pdb; pdb.set_trace()
+						break
 			else:
 				optimizer.zero_grad()
 				loss.backward()
@@ -304,15 +313,10 @@ class DCN:
 
 
 	def run(self):
-
-
 		self.initialize_W()
+		self.calc_U()
+		print self.get_clustering_results()
 
-#		self.calc_U()
-#		print self.get_clustering_results()
-#
-#		#import pdb; pdb.set_trace()
-#
 #		while(self.loop):
 #			self.update_W()
 #			self.update_K()
