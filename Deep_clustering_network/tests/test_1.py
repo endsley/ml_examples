@@ -10,4 +10,4 @@ from numpy import genfromtxt
 data = genfromtxt('datasets/data_4.csv', delimiter=',')
 
 dcn = DCN(data,4)
-print dcn.run()
+dcn.run()
