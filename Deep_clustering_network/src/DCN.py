@@ -2,7 +2,8 @@
 import sklearn.metrics
 import torch
 from torch.autograd import Variable
-import numpy as np
+import autograd.numpy as np
+#import numpy as np
 from sklearn.preprocessing import normalize
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
@@ -15,8 +16,8 @@ class DCN:
 		self.k = k
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
-		self.hidden_d = self.d + 6					# hidden layer has 1 extra dimension
-		self.output_d = 1							# output layer has k dimensions
+		self.hidden_d = self.d + 50					# hidden layer has 1 extra dimension
+		self.output_d = k							# output layer has k dimensions
 		self.lambdaV = -100
 		self.alpha = 0.001
 		self.I = np.eye(self.N)
@@ -41,6 +42,8 @@ class DCN:
 		#self.dtype = torch.cuda.FloatTensor # Uncomment this to run on GPU	
 		self.NN = torch.nn.Sequential(
 			torch.nn.Linear(self.d, self.hidden_d, bias=True),
+			torch.nn.ReLU(),
+			torch.nn.Linear(self.hidden_d, self.hidden_d, bias=True),
 			torch.nn.ReLU(),
 			torch.nn.Linear(self.hidden_d, self.hidden_d, bias=True),
 			torch.nn.ReLU(),
@@ -133,17 +136,15 @@ class DCN:
 		return cost
 
 	def calc_U(self):
-		eigenValues,eigenVectors = np.linalg.eigh(self.L_centered)
+		eigenValues,eigenVectors = np.linalg.eigh(self.kernel)
 	
 		idx = eigenValues.argsort()
 		idx = idx[::-1]
 		eigenValues = eigenValues[idx]
 		eigenVectors = eigenVectors[:,idx]
 
-		#import pdb; pdb.set_trace()	
 		previous_U = np.copy(self.U_matrix)
 		self.U_matrix = eigenVectors[:,:self.k]
-
 		self.change_in_U = np.linalg.norm(previous_U - self.U_matrix)/np.linalg.norm(previous_U)
 
 	#	Main Functions
@@ -201,15 +202,12 @@ class DCN:
 				break
 	
 
-		print '\n\n------------------------\n\n'
-		Y = self.NN(self.xTor).data.numpy()
-		K = Y.dot(Y.T)
-		L_grad = np.trace(K) - 10
-		#self.lambdaV = self.lambdaV - self.alpha*L_grad
-		#import pdb; pdb.set_trace()
 
+		Y = self.NN(self.xTor)
+		self.kernel = torch.mm(Y,Y.transpose(0,1))
+		self.kernel = self.kernel.data.numpy()
 
-		import pdb; pdb.set_trace()
+	
 
 	def print_weights(self):	
 		for param in self.NN.parameters():
@@ -234,13 +232,13 @@ class DCN:
 	def initialize_W(self):		#	I initialized the weights by setting them to equal to the kernel
 		learning_rate = 1
 
-		self.calc_Kernel('RBK', self.X, True)
+		self.kernel = sklearn.metrics.pairwise.rbf_kernel(self.X, gamma=self.gamma)
 		L = torch.from_numpy(self.kernel)
 		L = Variable(L.type(self.dtype), requires_grad=False)
 
 		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.1, momentum=0.9, weight_decay=1 )
 		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.001, weight_decay=0.1 )
-		optimizer = torch.optim.Adagrad(self.NN.parameters(), lr=0.1, lr_decay=0.6, weight_decay=0.2)
+		#optimizer = torch.optim.Adagrad(self.NN.parameters(), lr=0.1, lr_decay=0.6, weight_decay=0.2)
 
 		for idx in range(10000):
 			Y = self.NN(self.xTor)
@@ -279,9 +277,7 @@ class DCN:
 					else: 
 						#learning_rate = learning_rate*1.1
 						break
-					if learning_rate < 0.000001: 
-						print 'kk'
-						import pdb; pdb.set_trace()
+					if learning_rate < 0.0000001: 
 						break
 			else:
 				optimizer.zero_grad()
@@ -294,10 +290,11 @@ class DCN:
 
 
 		#	How similar was the estimation
+		self.kernel = torch.mm(Y,Y.transpose(0,1))
 		print L 
-		print torch.mm(Y,Y.transpose(0,1))
+		print self.kernel
+		self.kernel = self.kernel.data.numpy()
 		import pdb; pdb.set_trace()
-
 	def calc_clustering_quality(self):
 		H = self.H_matrix
 
@@ -314,13 +311,18 @@ class DCN:
 
 	def run(self):
 		self.initialize_W()
+		import pdb; pdb.set_trace()
 		self.calc_U()
 		print self.get_clustering_results()
+		import pdb; pdb.set_trace()
 
-#		while(self.loop):
-#			self.update_W()
-#			self.update_K()
-#			self.calc_U()
+		while(self.loop):
+			self.update_W()
+			import pdb; pdb.set_trace()
+			self.calc_U()
+			import pdb; pdb.set_trace()
+
+#			import pdb; pdb.set_trace()
 #			self.loop = self.check_convergence()
 #
 #			#self.calc_clustering_quality()
