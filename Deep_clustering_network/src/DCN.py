@@ -236,6 +236,10 @@ class DCN:
 		L = torch.from_numpy(self.kernel)
 		L = Variable(L.type(self.dtype), requires_grad=False)
 
+		lmda = 0.1*np.ones((self.N,1))
+		lmda = torch.from_numpy(lmda)
+		lmda = Variable(lmda.type(self.dtype), requires_grad=False)
+
 		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.1, momentum=0.9, weight_decay=1 )
 		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.001, weight_decay=0.1 )
 		#optimizer = torch.optim.Adagrad(self.NN.parameters(), lr=0.1, lr_decay=0.6, weight_decay=0.2)
@@ -245,47 +249,43 @@ class DCN:
 
 			norm_size = 0
 			error = L - torch.mm(Y,Y.transpose(0,1))
-			import pdb; pdb.set_trace()
-			#for param in self.NN.parameters():
-			#	if norm_size == 0:
-			#		norm_size = param.data.norm()
-			#	else:
-			#		norm_size += param.data.norm()
-			#loss = error.norm() + norm_size
+			regularizer = torch.mm((Y.sum(1) - 1).transpose(0,1), lmda)
+			loss = error.norm() + regularizer
 
-			loss = error.norm()
 
-			if True:			#	Using my own learning_rate adaption / or using pyTorch version
-				self.NN.zero_grad()
-				loss.backward()
-				print learning_rate, loss.data.numpy()
 
-				while True:		#	Adaptive Learning Rate
+#			if True:			#	Using my own learning_rate adaption / or using pyTorch version
+			self.NN.zero_grad()
+			loss.backward()
+			print learning_rate, loss.data.numpy()
+
+			while True:		#	Adaptive Learning Rate
+				for param in self.NN.parameters():
+					param.data -= learning_rate * param.grad.data
+
+				Y = self.NN(self.xTor)
+				error = L - torch.mm(Y,Y.transpose(0,1))
+				new_loss = error.norm()
+
+				if(new_loss.data[0] >= loss.data[0]): # if got worse, undo and lower the learning rate. 
+					print 'loss'
 					for param in self.NN.parameters():
-						param.data -= learning_rate * param.grad.data
-	
-					Y = self.NN(self.xTor)
-					error = L - torch.mm(Y,Y.transpose(0,1))
-					new_loss = error.norm()
-	
-					if(new_loss.data[0] >= loss.data[0]): # if got worse, undo and lower the learning rate. 
-						print 'loss'
-						for param in self.NN.parameters():
-							param.data += learning_rate * param.grad.data
-	
-						learning_rate = learning_rate*0.5
-					else: 
-						#learning_rate = learning_rate*1.1
-						break
-					if learning_rate < 0.0000001: 
-						break
-			else:
-				optimizer.zero_grad()
-				loss.backward()
-				optimizer.step()
-				print loss.data.numpy()
+						param.data += learning_rate * param.grad.data
+
+					learning_rate = learning_rate*0.5
+				else: 
+					#learning_rate = learning_rate*1.1
+					break
+				if learning_rate < 0.0000001: 
+					break
+#			else:
+#				optimizer.zero_grad()
+#				loss.backward()
+#				optimizer.step()
+#				print loss.data.numpy()
 
 
+			lmda = lmda + 1*(Y.sum(1) - 1)
 			if learning_rate < 0.000001: break
 
 
