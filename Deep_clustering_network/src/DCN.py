@@ -10,13 +10,14 @@ import matplotlib.pyplot as plt
 import copy
 import sklearn.metrics
 
+
 class DCN:
 	def __init__(self, data_set, k):
 		self.X = data_set
 		self.k = k
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
-		self.hidden_d = self.d + 5000					# hidden layer has 1 extra dimension
+		self.hidden_d = self.d + 1000					# hidden layer has 1 extra dimension
 		self.output_d = k							# output layer has k dimensions
 		self.lambdaV = -100
 		self.alpha = 0.001
@@ -34,7 +35,7 @@ class DCN:
 		d_matrix = sklearn.metrics.pairwise.pairwise_distances(data_set, Y=None, metric='euclidean')
 		sigma = np.median(d_matrix)
 		self.gamma = 1/(2*np.power(sigma,2))
-
+		
 		
 
 		#ptorch 
@@ -157,11 +158,12 @@ class DCN:
 
 		self.calc_Kernel('linear', y_i.data.numpy())
 
-	def forward_pass(self, x_i, x_j, phi):
+	def forward_pass(self, x_i, x_j, phi, lmda):
 		y_i = self.NN(x_i)
 		y_j = self.NN(x_j)
-
-		cost = (phi*torch.mm(y_i,y_j.transpose(0,1))).sum()
+	
+		regularizer = torch.mm((y_i.sum(1) - 1).transpose(0,1), lmda)
+		cost = (phi*torch.mm(y_i,y_j.transpose(0,1))).sum() + regularizer
 		return [y_i, y_j, cost]
 
 
@@ -172,7 +174,10 @@ class DCN:
 			[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.mini_batch_size)	# x is sub batch of data, u is the corresponding clustering
 			phi = self.create_Phi(xi_idx, xj_idx)	
 			
-			[y_i, y_j, cost] = self.forward_pass(x_i, x_j, phi)
+			lmda = torch.from_numpy(self.lmda_hold)
+			lmda = Variable(lmda.type(self.dtype), requires_grad=False)
+
+			[y_i, y_j, cost] = self.forward_pass(x_i, x_j, phi, lmda)
 			
 			self.NN.zero_grad()
 			cost.backward()
@@ -241,15 +246,15 @@ class DCN:
 		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.001, weight_decay=0.1 )
 		#optimizer = torch.optim.Adagrad(self.NN.parameters(), lr=0.1, lr_decay=0.6, weight_decay=0.2)
 
-		for idx_out in range(20):		#	This is loop for lambda convergence
+		for idx_out in range(4):		#	This is loop for lambda convergence
 			learning_rate = 1
 			lmda = torch.from_numpy(lmda_hold)
 			lmda = Variable(lmda.type(self.dtype), requires_grad=False)
 
 
-			for idx in range(1000):		#	This is loop for W convergence
+			for idx in range(200):		#	This is loop for W convergence
 				Y = self.NN(self.xTor)
-	
+				#import pdb; pdb.set_trace()		
 				norm_size = 0
 				error = L - torch.mm(Y,Y.transpose(0,1))
 				regularizer = torch.mm((Y.sum(1) - 1).transpose(0,1), lmda)
@@ -307,15 +312,23 @@ class DCN:
 		print 'Clustering Quality : ' , clustering_quality
 		return clustering_quality
 
+	def load_W(self):
+		self.NN.load_state_dict(torch.load('./trained_models/model1.pt'))
+		self.lmda_hold = torch.load('./trained_models/model1_lmda_hold.pt')
+
+		Y = self.NN(self.xTor)
+		self.kernel = torch.mm(Y,Y.transpose(0,1))
+		self.kernel = self.kernel.data.numpy()
+
+	def save_W(self):
+		torch.save(self.NN.state_dict(), './trained_models/model1.pt')
 
 	def run(self):
-		self.initialize_W()
+		self.load_W()
+		self.calc_U()
+		print self.get_clustering_results()
 
-#		import pdb; pdb.set_trace()
-#		self.calc_U()
-#		print self.get_clustering_results()
-#		import pdb; pdb.set_trace()
-#
+
 #		while(self.loop):
 #			self.update_W()
 #			import pdb; pdb.set_trace()
