@@ -16,7 +16,7 @@ class DCN:
 		self.k = k
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
-		self.hidden_d = self.d + 50					# hidden layer has 1 extra dimension
+		self.hidden_d = self.d + 5000					# hidden layer has 1 extra dimension
 		self.output_d = k							# output layer has k dimensions
 		self.lambdaV = -100
 		self.alpha = 0.001
@@ -230,64 +230,63 @@ class DCN:
 		return self.allocation
 
 	def initialize_W(self):		#	I initialized the weights by setting them to equal to the kernel
-		learning_rate = 1
 
 		self.kernel = sklearn.metrics.pairwise.rbf_kernel(self.X, gamma=self.gamma)
 		L = torch.from_numpy(self.kernel)
 		L = Variable(L.type(self.dtype), requires_grad=False)
 
-		lmda = 0.1*np.ones((self.N,1))
-		lmda = torch.from_numpy(lmda)
-		lmda = Variable(lmda.type(self.dtype), requires_grad=False)
+		lmda_hold = 0.1*np.ones((self.N,1))
 
 		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.1, momentum=0.9, weight_decay=1 )
 		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.001, weight_decay=0.1 )
 		#optimizer = torch.optim.Adagrad(self.NN.parameters(), lr=0.1, lr_decay=0.6, weight_decay=0.2)
 
-		for idx in range(10000):
-			Y = self.NN(self.xTor)
-
-			norm_size = 0
-			error = L - torch.mm(Y,Y.transpose(0,1))
-			regularizer = torch.mm((Y.sum(1) - 1).transpose(0,1), lmda)
-			loss = error.norm() + regularizer
+		for idx_out in range(20):		#	This is loop for lambda convergence
+			learning_rate = 1
+			lmda = torch.from_numpy(lmda_hold)
+			lmda = Variable(lmda.type(self.dtype), requires_grad=False)
 
 
-
-#			if True:			#	Using my own learning_rate adaption / or using pyTorch version
-			self.NN.zero_grad()
-			loss.backward()
-			print learning_rate, loss.data.numpy()
-
-			while True:		#	Adaptive Learning Rate
-				for param in self.NN.parameters():
-					param.data -= learning_rate * param.grad.data
-
+			for idx in range(1000):		#	This is loop for W convergence
 				Y = self.NN(self.xTor)
+	
+				norm_size = 0
 				error = L - torch.mm(Y,Y.transpose(0,1))
-				new_loss = error.norm()
-
-				if(new_loss.data[0] >= loss.data[0]): # if got worse, undo and lower the learning rate. 
-					print 'loss'
+				regularizer = torch.mm((Y.sum(1) - 1).transpose(0,1), lmda)
+				loss = error.norm() + regularizer
+	
+				self.NN.zero_grad()
+				loss.backward()
+	
+				print idx_out, idx, learning_rate, loss.data.numpy()
+	
+				while True:		#	Adaptive Learning Rate
 					for param in self.NN.parameters():
-						param.data += learning_rate * param.grad.data
+						param.data -= learning_rate * param.grad.data
+	
+					Y = self.NN(self.xTor)
+					error = L - torch.mm(Y,Y.transpose(0,1))
+					regularizer = torch.mm((Y.sum(1) - 1).transpose(0,1), lmda)
+					new_loss = error.norm() + regularizer
+	
+					#print '\t', new_loss.data[0] , loss.data[0]
+					if(new_loss.data[0] >= loss.data[0]): # if got worse, undo and lower the learning rate. 
+						#print 'loss'
+						for param in self.NN.parameters():
+							param.data += learning_rate * param.grad.data
+	
+						learning_rate = learning_rate*0.5
+					else: 
+						#learning_rate = learning_rate*1.1
+						break
+					if learning_rate < 0.0000001: 
+						break
+				if learning_rate < 0.000001: break
+	
+			lmda_hold += 0.001*(Y.sum(1) - 1).data.numpy()
 
-					learning_rate = learning_rate*0.5
-				else: 
-					#learning_rate = learning_rate*1.1
-					break
-				if learning_rate < 0.0000001: 
-					break
-#			else:
-#				optimizer.zero_grad()
-#				loss.backward()
-#				optimizer.step()
-#				print loss.data.numpy()
-
-
-			lmda = lmda + 1*(Y.sum(1) - 1)
-			if learning_rate < 0.000001: break
-
+			print 'lambda error : ' , (Y.sum(1) - 1).sum()
+			#import pdb; pdb.set_trace()
 
 		#	How similar was the estimation
 		self.kernel = torch.mm(Y,Y.transpose(0,1))
@@ -311,16 +310,17 @@ class DCN:
 
 	def run(self):
 		self.initialize_W()
-		import pdb; pdb.set_trace()
-		self.calc_U()
-		print self.get_clustering_results()
-		import pdb; pdb.set_trace()
 
-		while(self.loop):
-			self.update_W()
-			import pdb; pdb.set_trace()
-			self.calc_U()
-			import pdb; pdb.set_trace()
+#		import pdb; pdb.set_trace()
+#		self.calc_U()
+#		print self.get_clustering_results()
+#		import pdb; pdb.set_trace()
+#
+#		while(self.loop):
+#			self.update_W()
+#			import pdb; pdb.set_trace()
+#			self.calc_U()
+#			import pdb; pdb.set_trace()
 
 #			import pdb; pdb.set_trace()
 #			self.loop = self.check_convergence()
