@@ -164,7 +164,7 @@ class DCN:
 	
 		regularizer = torch.mm((y_i.sum(1) - 1).transpose(0,1), lmda)
 		cost = (phi*torch.mm(y_i,y_j.transpose(0,1))).sum() + regularizer
-		return [y_i, y_j, cost]
+		return [y_i, y_j, cost, regularizer]
 
 
 	def update_W(self):
@@ -177,7 +177,7 @@ class DCN:
 			lmda = torch.from_numpy(self.lmda_hold)
 			lmda = Variable(lmda.type(self.dtype), requires_grad=False)
 
-			[y_i, y_j, cost] = self.forward_pass(x_i, x_j, phi, lmda)
+			[y_i, y_j, cost, regularizer] = self.forward_pass(x_i, x_j, phi, lmda)
 			
 			self.NN.zero_grad()
 			cost.backward()
@@ -186,7 +186,7 @@ class DCN:
 				for param in self.NN.parameters():
 					param.data += learning_rate * param.grad.data
 
-				[new_y_i, new_y_j, new_cost] = self.forward_pass(x_i, x_j, phi)
+				[new_y_i, new_y_j, new_cost, regularizer] = self.forward_pass(x_i, x_j, phi, lmda)
 				if(new_cost.data[0] < cost.data[0]): # if got worse, undo and lower the learning rate. 
 					for param in self.NN.parameters():
 						param.data -= learning_rate * param.grad.data
@@ -201,11 +201,13 @@ class DCN:
 				grad_norm += param.grad.data.norm()
 
 			#print(L_grad, ' , ' , learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
-			print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
+			print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm, ' , ' , regularizer.data)
 			#if grad_norm < 0.001 and np.absolute(L_grad) < 0.001:
 			if grad_norm < 0.1:
 				break
-	
+
+			if np.absolute(new_cost.data.numpy() - cost.data.numpy()) < 0.00001:
+				break;
 
 
 		Y = self.NN(self.xTor)
@@ -246,7 +248,7 @@ class DCN:
 		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.001, weight_decay=0.1 )
 		#optimizer = torch.optim.Adagrad(self.NN.parameters(), lr=0.1, lr_decay=0.6, weight_decay=0.2)
 
-		for idx_out in range(4):		#	This is loop for lambda convergence
+		for idx_out in range(10):		#	This is loop for lambda convergence
 			learning_rate = 1
 			lmda = torch.from_numpy(lmda_hold)
 			lmda = Variable(lmda.type(self.dtype), requires_grad=False)
@@ -298,6 +300,8 @@ class DCN:
 		print L 
 		print self.kernel
 		self.kernel = self.kernel.data.numpy()
+
+		self.save_W(lmda_hold)
 		import pdb; pdb.set_trace()
 	def calc_clustering_quality(self):
 		H = self.H_matrix
@@ -320,22 +324,26 @@ class DCN:
 		self.kernel = torch.mm(Y,Y.transpose(0,1))
 		self.kernel = self.kernel.data.numpy()
 
-	def save_W(self):
-		torch.save(self.NN.state_dict(), './trained_models/model1.pt')
+	def save_W(self, lmda_hold):
+		torch.save(self.NN.state_dict(), './trained_models/model2.pt')
+		torch.save(lmda_hold, './trained_models/model2_lmda_hold.pt')
 
 	def run(self):
+		#self.initialize_W()
+
+
 		self.load_W()
 		self.calc_U()
 		print self.get_clustering_results()
 
 
-#		while(self.loop):
-#			self.update_W()
-#			import pdb; pdb.set_trace()
-#			self.calc_U()
-#			import pdb; pdb.set_trace()
+		while(self.loop):
 
-#			import pdb; pdb.set_trace()
+			self.update_W()
+			import pdb; pdb.set_trace()
+			self.calc_U()
+			import pdb; pdb.set_trace()
+
 #			self.loop = self.check_convergence()
 #
 #			#self.calc_clustering_quality()
