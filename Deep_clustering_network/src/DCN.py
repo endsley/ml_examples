@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 import sklearn.metrics
 import torch
@@ -236,17 +237,33 @@ class DCN:
 		self.allocation = KMeans(self.k).fit_predict(self.U_matrix)
 		return self.allocation
 
-	def initialize_W(self):		#	I initialized the weights by setting them to equal to the kernel
+	def initial_cost(self, L, Y, lmda):	# Calculate the initial cost function
+		use_linear_kernel = True
 
+		if use_linear_kernel:
+			K = torch.mm(Y,Y.transpose(0,1))
+		else: #use_gaussian_kernel
+			K = torch.FloatTensor(self.N, self.N)
+			K = Variable(K.type(self.dtype), requires_grad=False)
+	
+			for i in range(self.N):
+				for j in range(self.N):
+					tmpY = (Y[i,:] - Y[j,:]).unsqueeze(0)
+					eVal = -torch.mm(tmpY, tmpY.transpose(0,1))
+					K[i,j] = torch.exp(eVal)
+
+		error = L - K
+		regularizer = torch.mm((torch.abs(Y).sum(1) - 1).transpose(0,1), lmda)
+		loss = error.norm() + regularizer
+		return loss
+
+	def initialize_W(self):		#	I initialized the weights by setting them to equal to the kernel
 		self.kernel = sklearn.metrics.pairwise.rbf_kernel(self.X, gamma=self.gamma)
 		L = torch.from_numpy(self.kernel)
 		L = Variable(L.type(self.dtype), requires_grad=False)
 
 		lmda_hold = 0.1*np.ones((self.N,1))
 
-		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.1, momentum=0.9, weight_decay=1 )
-		#optimizer = torch.optim.SGD(self.NN.parameters(), lr=0.001, weight_decay=0.1 )
-		#optimizer = torch.optim.Adagrad(self.NN.parameters(), lr=0.1, lr_decay=0.6, weight_decay=0.2)
 
 		for idx_out in range(10):		#	This is loop for lambda convergence
 			learning_rate = 1
@@ -256,27 +273,18 @@ class DCN:
 
 			for idx in range(200):		#	This is loop for W convergence
 				Y = self.NN(self.xTor)
-				#import pdb; pdb.set_trace()		
-				norm_size = 0
-				error = L - torch.mm(Y,Y.transpose(0,1))
-				regularizer = torch.mm((Y.sum(1) - 1).transpose(0,1), lmda)
-				loss = error.norm() + regularizer
-	
+				loss = self.initial_cost(L, Y, lmda)
+
 				self.NN.zero_grad()
 				loss.backward()
 	
 				print idx_out, idx, learning_rate, loss.data.numpy()
-	
 				while True:		#	Adaptive Learning Rate
 					for param in self.NN.parameters():
 						param.data -= learning_rate * param.grad.data
-	
+
 					Y = self.NN(self.xTor)
-					error = L - torch.mm(Y,Y.transpose(0,1))
-					regularizer = torch.mm((Y.sum(1) - 1).transpose(0,1), lmda)
-					new_loss = error.norm() + regularizer
-	
-					#print '\t', new_loss.data[0] , loss.data[0]
+					new_loss = self.initial_cost(L, Y, lmda)
 					if(new_loss.data[0] >= loss.data[0]): # if got worse, undo and lower the learning rate. 
 						#print 'loss'
 						for param in self.NN.parameters():
@@ -303,6 +311,8 @@ class DCN:
 
 		self.save_W(lmda_hold)
 		import pdb; pdb.set_trace()
+
+
 	def calc_clustering_quality(self):
 		H = self.H_matrix
 
@@ -329,20 +339,20 @@ class DCN:
 		torch.save(lmda_hold, './trained_models/model2_lmda_hold.pt')
 
 	def run(self):
-		#self.initialize_W()
+		self.initialize_W()
 
 
-		self.load_W()
-		self.calc_U()
-		print self.get_clustering_results()
-
-
-		while(self.loop):
-
-			self.update_W()
-			import pdb; pdb.set_trace()
-			self.calc_U()
-			import pdb; pdb.set_trace()
+#		self.load_W()
+#		self.calc_U()
+#		print self.get_clustering_results()
+#
+#
+#		while(self.loop):
+#
+#			self.update_W()
+#			import pdb; pdb.set_trace()
+#			self.calc_U()
+#			import pdb; pdb.set_trace()
 
 #			self.loop = self.check_convergence()
 #
