@@ -13,17 +13,18 @@ import sklearn.metrics
 
 
 class DCN:
-	def __init__(self, data_set, k):
+	def __init__(self, data_set, k, run_name):
 		self.X = data_set
 		self.k = k
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
-		self.hidden_d = self.d + 1000					# hidden layer has 1 extra dimension
+		self.hidden_d = self.d + 2000					# hidden layer has 1 extra dimension
 		self.output_d = k							# output layer has k dimensions
 		self.lambdaV = -100
 		self.alpha = 0.001
 		self.I = np.eye(self.N)
 		self.mini_batch_size = 40
+		self.run_name = run_name
 
 		self.loop = True
 		self.H_matrix = np.eye(self.N) - np.ones((self.N,self.N))/self.N
@@ -172,9 +173,10 @@ class DCN:
 		learning_rate = 0.2
 
 		while True:
-			[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.mini_batch_size)	# x is sub batch of data, u is the corresponding clustering
+			[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.N)	# x is sub batch of data, u is the corresponding clustering
 			phi = self.create_Phi(xi_idx, xj_idx)	
-			
+
+
 			lmda = torch.from_numpy(self.lmda_hold)
 			lmda = Variable(lmda.type(self.dtype), requires_grad=False)
 
@@ -186,6 +188,7 @@ class DCN:
 			while True:		#	Adaptive Learning Rate
 				for param in self.NN.parameters():
 					param.data += learning_rate * param.grad.data
+
 
 				[new_y_i, new_y_j, new_cost, regularizer] = self.forward_pass(x_i, x_j, phi, lmda)
 				if(new_cost.data[0] < cost.data[0]): # if got worse, undo and lower the learning rate. 
@@ -317,46 +320,42 @@ class DCN:
 		H = self.H_matrix
 
 		Ku = self.U_matrix.dot(self.U_matrix.T)			# kernel U
-		Phi_large = H.dot(Ku).dot(H)			
+		#Phi_large = H.dot(Ku).dot(H)			
 
-		[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.N)	
-		y_i = self.NN(x_i)
-		K = torch.mm(y_i,y_i.transpose(0,1)).numpy()
-		clustering_quality = (Phi_large*K).sum()
+		Y = self.NN(self.xTor)
+		K = torch.mm(Y,Y.transpose(0,1)).numpy()
+		clustering_quality = (Ku*K).sum()
 		print 'Clustering Quality : ' , clustering_quality
 		return clustering_quality
 
 	def load_W(self):
-		self.NN.load_state_dict(torch.load('./trained_models/model1.pt'))
-		self.lmda_hold = torch.load('./trained_models/model1_lmda_hold.pt')
+		self.NN.load_state_dict(torch.load('./trained_models/' + self.run_name + '.pt'))
+		self.lmda_hold = torch.load('./trained_models/' + self.run_name + '_lmda_hold.pt')
 
 		Y = self.NN(self.xTor)
 		self.kernel = torch.mm(Y,Y.transpose(0,1))
 		self.kernel = self.kernel.data.numpy()
 
 	def save_W(self, lmda_hold):
-		torch.save(self.NN.state_dict(), './trained_models/model2.pt')
-		torch.save(lmda_hold, './trained_models/model2_lmda_hold.pt')
+		torch.save(self.NN.state_dict(), './trained_models/' + self.run_name + '.pt')
+		torch.save(lmda_hold, './trained_models/' + self.run_name + '_lmda_hold.pt')
 
 	def run(self):
-		self.initialize_W()
+#		self.initialize_W()
+
+		self.load_W()
+		self.calc_U()
+		print self.get_clustering_results()
 
 
-#		self.load_W()
-#		self.calc_U()
-#		print self.get_clustering_results()
-#
-#
-#		while(self.loop):
-#
-#			self.update_W()
-#			import pdb; pdb.set_trace()
+		while(self.loop):
+			self.update_W()
+			import pdb; pdb.set_trace()
 #			self.calc_U()
-#			import pdb; pdb.set_trace()
-
+#
 #			self.loop = self.check_convergence()
 #
-#			#self.calc_clustering_quality()
+#			self.calc_clustering_quality()
 #			print '\n-----------\n\n'
 #
 #			#print 'Later cost : ' , self.calc_cost(self.kernel)
