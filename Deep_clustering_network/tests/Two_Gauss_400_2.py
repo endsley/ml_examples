@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-import sys
-sys.path.append('./lib')
 from DCN import *
 import numpy as np
 from numpy import genfromtxt
@@ -14,13 +12,9 @@ colors = matplotlib.colors.cnames
 
 
 #	load data
-data = genfromtxt('datasets/data_4.csv', delimiter=',')
-Y_original = genfromtxt('datasets/data_4_Y_original.csv', delimiter=',')
-U_original = genfromtxt('datasets/data_4_U_original.csv', delimiter=',')
-
-
-dcn = DCN(data,4, 'model_1000_neurons')
-dcn.hidden_d = dcn.d + 1000
+data = genfromtxt('datasets/Two_Gauss_400_2.csv', delimiter=',')
+dcn = DCN(data,2, 'Two_Gauss_400_2')
+dcn.hidden_d = dcn.d + 2000
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -34,10 +28,7 @@ dcn.NN = torch.nn.Sequential(
 	torch.nn.Sigmoid(),
 )
 
-
 allocation = dcn.run()
-
-
 
 
 if True:	#	plot the clustering result

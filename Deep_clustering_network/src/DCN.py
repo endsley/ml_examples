@@ -18,7 +18,7 @@ class DCN:
 		self.k = k
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
-		self.hidden_d = self.d + 2000					# hidden layer has 1 extra dimension
+		self.hidden_d = self.d + 1000					# hidden layer has 1 extra dimension
 		self.output_d = k							# output layer has k dimensions
 		self.lambdaV = -100
 		self.alpha = 0.001
@@ -218,6 +218,7 @@ class DCN:
 		self.kernel = torch.mm(Y,Y.transpose(0,1))
 		self.kernel = self.kernel.data.numpy()
 
+		return Y.data.numpy()
 	
 
 	def print_weights(self):	
@@ -341,16 +342,18 @@ class DCN:
 		torch.save(lmda_hold, './trained_models/' + self.run_name + '_lmda_hold.pt')
 
 	def run(self):
-#		self.initialize_W()
-
 		self.load_W()
 		self.calc_U()
 		print self.get_clustering_results()
 
+		Y = self.update_W()
+		self.allocation = KMeans(self.k).fit_predict(Y)
+		return self.allocation
 
-		while(self.loop):
-			self.update_W()
-			import pdb; pdb.set_trace()
+#		while(self.loop):
+#			self.update_W()
+#
+#
 #			self.calc_U()
 #
 #			self.loop = self.check_convergence()
@@ -371,4 +374,4 @@ class DCN:
 #
 #		self.loop = True
 
-		return #self.get_clustering_results()
+#		return #self.get_clustering_results()
