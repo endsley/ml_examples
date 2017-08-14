@@ -15,7 +15,7 @@ colors = matplotlib.colors.cnames
 data = genfromtxt('datasets/moon_400_2.csv', delimiter=',')
 dcn = DCN(data,2, 'moon_400_2')
 
-dcn.hidden_d = dcn.d + 10
+dcn.hidden_d = dcn.d + 200
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),

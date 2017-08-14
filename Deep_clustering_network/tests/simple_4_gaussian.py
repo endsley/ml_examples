@@ -15,12 +15,10 @@ colors = matplotlib.colors.cnames
 
 #	load data
 data = genfromtxt('datasets/data_4.csv', delimiter=',')
-Y_original = genfromtxt('datasets/data_4_Y_original.csv', delimiter=',')
-U_original = genfromtxt('datasets/data_4_U_original.csv', delimiter=',')
 
 
 dcn = DCN(data,4, 'model_20_neurons')
-dcn.hidden_d = dcn.d + 2000
+dcn.hidden_d = dcn.d + 200
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -31,7 +29,7 @@ dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.hidden_d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
 	torch.nn.Linear(dcn.hidden_d, dcn.output_d, bias=True),
-	torch.nn.Sigmoid(),
+#	torch.nn.Sigmoid(),
 )
 
 #dcn.initialize_W()

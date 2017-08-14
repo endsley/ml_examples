@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import time 
 import sklearn.metrics
 import torch
 from torch.autograd import Variable
@@ -92,6 +93,21 @@ class DCN:
 		
 
 	def create_Phi(self, x_i_list, x_j_list):
+#		#	Using a rbf as Phi
+#		phi = sklearn.metrics.pairwise.rbf_kernel(self.X, gamma=self.gamma)
+#		phi = torch.from_numpy(phi)
+#		phi = Variable(phi.type(self.dtype), requires_grad=False)
+#		return phi
+
+
+#	#	Using UU^T as the kernel
+#		phi = self.U_matrix.dot(self.U_matrix.T)			# kernel U
+#		phi = torch.from_numpy(phi)
+#		phi = Variable(phi.type(self.dtype), requires_grad=False)
+#		return phi
+
+
+	#	Using HUU^TH as the kernel
 		H = self.H_matrix
 		l = self.lambdaV
 
@@ -161,8 +177,6 @@ class DCN:
 		self.calc_Kernel('linear', y_i.data.numpy())
 
 	def forward_pass(self, phi, lmda):
-		#y_i = self.NN(x_i)
-		#y_j = self.NN(x_j)
 		Y = self.NN(self.xTor)
 	
 		reg_error = torch.abs(Y).sum(1) - 1
@@ -172,61 +186,69 @@ class DCN:
 		K = torch.FloatTensor(self.N, self.N)
 		K = Variable(K.type(self.dtype), requires_grad=False)
 
+		start_time = time.time() 
+		print 'Before kernel'
 		for i in range(self.N):
 			for j in range(self.N):
 				tmpY = (Y[i,:] - Y[j,:]).unsqueeze(0)
 				eVal = -torch.mm(tmpY, tmpY.transpose(0,1))
 				K[i,j] = torch.exp(eVal)
+		print 'After kernel'
+		print("--- %s seconds ---" % (time.time() - start_time))
 
 
 		cost = -(phi*K).sum() + regularizer
-		return [cost, regularizer]
+		return [cost, regularizer, reg_error]
 
 
 	def update_W(self):
 		learning_rate = 0.2
-
-		while True:
-			[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.N)	# x is sub batch of data, u is the corresponding clustering
-			phi = self.create_Phi(xi_idx, xj_idx)	
-
-
-			lmda = torch.from_numpy(self.lmda_hold)
-			lmda = Variable(lmda.type(self.dtype), requires_grad=False)
-
-			[cost, regularizer] = self.forward_pass(phi, lmda)
-			
-			self.NN.zero_grad()
-			cost.backward()
-
-			while True:		#	Adaptive Learning Rate
-				for param in self.NN.parameters():
-					param.data -= learning_rate * param.grad.data
-
-
-				[new_cost, regularizer] = self.forward_pass(phi, lmda)
-				if(new_cost.data[0] > cost.data[0]): # if got worse, undo and lower the learning rate. 
+		
+		for lmda_count in range(10):
+			while True:
+				[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.N)	# x is sub batch of data, u is the corresponding clustering
+				phi = self.create_Phi(xi_idx, xj_idx)	
+	
+	
+				lmda = torch.from_numpy(self.lmda_hold)
+				lmda = Variable(lmda.type(self.dtype), requires_grad=False)
+	
+				[cost, regularizer, reg_error] = self.forward_pass(phi, lmda)
+				
+				self.NN.zero_grad()
+				cost.backward()
+	
+				while True:		#	Adaptive Learning Rate
 					for param in self.NN.parameters():
-						param.data += learning_rate * param.grad.data
-
-					learning_rate = learning_rate*0.6
-				else: 
-					learning_rate = learning_rate*1.001
+						param.data -= learning_rate * param.grad.data
+	
+	
+					[new_cost, regularizer, reg_error] = self.forward_pass(phi, lmda)
+					if(new_cost.data[0] > cost.data[0]): # if got worse, undo and lower the learning rate. 
+						for param in self.NN.parameters():
+							param.data += learning_rate * param.grad.data
+	
+						learning_rate = learning_rate*0.6
+					else: 
+						learning_rate = learning_rate*1.001
+						break
+					if learning_rate < 0.00000001: break
+	
+	
+				grad_norm = 0	
+				for param in self.NN.parameters():
+					grad_norm += param.grad.data.norm()
+	
+				print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm, ' , ' , regularizer.data.numpy())
+				#if grad_norm < 0.001 and np.absolute(L_grad) < 0.001:
+				if grad_norm < 0.1:
 					break
-				if learning_rate < 0.00000001: break
+	
+				if (np.absolute(new_cost.data.numpy() - cost.data.numpy()))/np.absolute(new_cost.data.numpy()) < 0.0001:
+					break;
 
-
-			grad_norm = 0	
-			for param in self.NN.parameters():
-				grad_norm += param.grad.data.norm()
-
-			print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm, ' , ' , regularizer.data.numpy())
-			#if grad_norm < 0.001 and np.absolute(L_grad) < 0.001:
-			if grad_norm < 0.1:
-				break
-
-			if np.absolute(new_cost.data.numpy() - cost.data.numpy()) < 0.00001:
-				break;
+			self.lmda_hold += 0.1*reg_error.data.numpy()
+			import pdb; pdb.set_trace()
 
 
 		Y = self.NN(self.xTor)
@@ -361,11 +383,17 @@ class DCN:
 		torch.save(lmda_hold, './trained_models/' + self.run_name + '_lmda_hold.pt')
 
 	def run(self):
-		#self.load_W()
 		self.lmda_hold = 0.1*np.ones((self.N,1))
+
+		start_time = time.time() 
 		self.kernel = sklearn.metrics.pairwise.rbf_kernel(self.X, gamma=self.gamma)
+		print("--- %s seconds ---" % (time.time() - start_time))
+
+
+		self.kernel = self.H_matrix.dot(self.kernel).dot(self.H_matrix)			
 		self.calc_U()
 		print self.get_clustering_results()
+
 
 		Y = self.update_W()
 		import pdb; pdb.set_trace()

@@ -14,7 +14,7 @@ colors = matplotlib.colors.cnames
 #	load data
 data = genfromtxt('datasets/Two_Gauss_400_2.csv', delimiter=',')
 dcn = DCN(data,2, 'Two_Gauss_400_2')
-dcn.hidden_d = dcn.d + 2000
+dcn.hidden_d = dcn.d + 200
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -25,11 +25,11 @@ dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.hidden_d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
 	torch.nn.Linear(dcn.hidden_d, dcn.output_d, bias=True),
-	torch.nn.Sigmoid(),
+#	torch.nn.Sigmoid(),
 )
 
 allocation = dcn.run()
-
+import pdb; pdb.set_trace()
 
 if True:	#	plot the clustering result
 	X = data
