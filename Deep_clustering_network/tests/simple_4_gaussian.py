@@ -28,7 +28,9 @@ dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.hidden_d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
 	torch.nn.Linear(dcn.hidden_d, dcn.output_d, bias=True),
-	torch.nn.Sigmoid(),
+	#torch.nn.ReLU(),
+	#torch.nn.LeakyReLU(),
+	#torch.nn.Sigmoid(),
 )
 
 
