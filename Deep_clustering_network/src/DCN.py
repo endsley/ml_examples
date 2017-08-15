@@ -11,6 +11,7 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import copy
 import sklearn.metrics
+import numpy.matlib
 
 
 class DCN:
@@ -20,7 +21,7 @@ class DCN:
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
 		self.hidden_d = self.d + 1000					# hidden layer has 1 extra dimension
-		self.output_d = k							# output layer has k dimensions
+		self.output_d = 1							# output layer has k dimensions
 		self.lambdaV = -100
 		self.alpha = 0.001
 		self.I = np.eye(self.N)
@@ -35,8 +36,9 @@ class DCN:
 		self.max_U_loop = 100
 		self.U_loop_counter = 0
 
-		d_matrix = sklearn.metrics.pairwise.pairwise_distances(data_set, Y=None, metric='euclidean')
-		sigma = np.median(d_matrix)
+		#d_matrix = sklearn.metrics.pairwise.pairwise_distances(data_set, Y=None, metric='euclidean')
+		#sigma = np.median(d_matrix)
+		sigma = 0.1
 		self.gamma = 1/(2*np.power(sigma,2))
 		
 		
@@ -58,6 +60,21 @@ class DCN:
 		)
 		self.xTor = torch.from_numpy(data_set)
 		self.xTor = Variable(self.xTor.type(self.dtype), requires_grad=False)
+
+
+		# Random Fourier Features	
+		self.sample_num = 100
+		u = np.random.rand(self.output_d, self.sample_num)
+
+		b = np.random.rand(1, self.sample_num)
+		b = np.matlib.repmat(b, self.N, 1)
+
+		self.phase_shift = torch.from_numpy(b)
+		self.phase_shift = Variable(self.phase_shift.type(self.dtype), requires_grad=False)
+
+		self.rand_proj = torch.from_numpy(u)
+		self.rand_proj = Variable(self.rand_proj.type(self.dtype), requires_grad=False)
+
 
 
 		np.set_printoptions(precision=3)
@@ -155,13 +172,14 @@ class DCN:
 		return cost
 
 	def calc_U(self):
+		#eigenValues,eigenVectors = np.linalg.eigh(self.L)
 		eigenValues,eigenVectors = np.linalg.eigh(self.kernel)
-	
+
 		idx = eigenValues.argsort()
 		idx = idx[::-1]
 		eigenValues = eigenValues[idx]
 		eigenVectors = eigenVectors[:,idx]
-
+	
 		previous_U = np.copy(self.U_matrix)
 		self.U_matrix = eigenVectors[:,:self.k]
 		self.change_in_U = np.linalg.norm(previous_U - self.U_matrix)/np.linalg.norm(previous_U)
@@ -176,35 +194,50 @@ class DCN:
 
 		self.calc_Kernel('linear', y_i.data.numpy())
 
-	def forward_pass(self, phi, lmda):
+
+	def forward_pass(self, phi, lmda):		#	Gaussian Version
 		Y = self.NN(self.xTor)
 	
 		reg_error = torch.abs(Y).sum(1) - 1
 		reg_error = reg_error*reg_error
 		regularizer = torch.mm(reg_error.transpose(0,1), lmda)
 
-		K = torch.FloatTensor(self.N, self.N)
-		K = Variable(K.type(self.dtype), requires_grad=False)
-
-		start_time = time.time() 
-		print 'Before kernel'
-		for i in range(self.N):
-			for j in range(self.N):
-				tmpY = (Y[i,:] - Y[j,:]).unsqueeze(0)
-				eVal = -torch.mm(tmpY, tmpY.transpose(0,1))
-				K[i,j] = torch.exp(eVal)
-		print 'After kernel'
-		print("--- %s seconds ---" % (time.time() - start_time))
-
+		L = torch.cos(torch.mm(Y,self.rand_proj) + self.phase_shift)
+		K = torch.mm(L, L.transpose(0,1))
 
 		cost = -(phi*K).sum() + regularizer
 		return [cost, regularizer, reg_error]
 
 
+#	def forward_pass(self, phi, lmda):
+#		Y = self.NN(self.xTor)
+#	
+#		reg_error = torch.abs(Y).sum(1) - 1
+#		reg_error = reg_error*reg_error
+#		regularizer = torch.mm(reg_error.transpose(0,1), lmda)
+#
+#		K = torch.FloatTensor(self.N, self.N)
+#		K = Variable(K.type(self.dtype), requires_grad=False)
+#
+#		start_time = time.time() 
+#		print 'Before kernel'
+#		for i in range(self.N):
+#			for j in range(self.N):
+#				tmpY = (Y[i,:] - Y[j,:]).unsqueeze(0)
+#				eVal = -torch.mm(tmpY, tmpY.transpose(0,1))
+#				K[i,j] = torch.exp(eVal)
+#		print 'After kernel'
+#		print("--- %s seconds ---" % (time.time() - start_time))
+#
+#
+#		cost = -(phi*K).sum() + regularizer
+#		return [cost, regularizer, reg_error]
+
+
 	def update_W(self):
 		learning_rate = 0.2
 		
-		for lmda_count in range(10):
+		for lmda_count in range(2):
 			while True:
 				[xi_idx, xj_idx, x_i, x_j] = self.create_miniBatch(self.X, self.N)	# x is sub batch of data, u is the corresponding clustering
 				phi = self.create_Phi(xi_idx, xj_idx)	
@@ -248,8 +281,11 @@ class DCN:
 					break;
 
 			self.lmda_hold += 0.1*reg_error.data.numpy()
-			import pdb; pdb.set_trace()
 
+			print torch.norm(reg_error)
+			#import pdb; pdb.set_trace()
+
+		#import pdb; pdb.set_trace()
 
 		Y = self.NN(self.xTor)
 		self.kernel = torch.mm(Y,Y.transpose(0,1))
@@ -387,31 +423,36 @@ class DCN:
 
 		start_time = time.time() 
 		self.kernel = sklearn.metrics.pairwise.rbf_kernel(self.X, gamma=self.gamma)
-		print("--- %s seconds ---" % (time.time() - start_time))
+		self.D_matrix = np.diag(1/np.sqrt(np.sum(self.kernel,axis=1))) # 1/sqrt(D)
+		self.L = self.D_matrix.dot(self.kernel).dot(self.D_matrix)
+		self.L = self.H_matrix.dot(self.L).dot(self.H_matrix)
 
+		eigenValues,eigenVectors = np.linalg.eigh(self.L)
 
-		self.kernel = self.H_matrix.dot(self.kernel).dot(self.H_matrix)			
-		self.calc_U()
-		print self.get_clustering_results()
+		idx = eigenValues.argsort()
+		idx = idx[::-1]
+		eigenValues = eigenValues[idx]
+		eigenVectors = eigenVectors[:,idx]
+	
+		previous_U = np.copy(self.U_matrix)
+		self.U_matrix = eigenVectors[:,:self.k]
 
-
-		Y = self.update_W()
+		print self.U_matrix.dot(self.U_matrix.T)
 		import pdb; pdb.set_trace()
-		self.allocation = KMeans(self.k).fit_predict(Y)
-		return self.allocation
+		#self.kernel = self.H_matrix.dot(self.kernel).dot(self.H_matrix)
+		#self.calc_U()
 
-#		while(self.loop):
-#			self.update_W()
-#
-#
-#			self.calc_U()
-#
-#			self.loop = self.check_convergence()
-#
-#			self.calc_clustering_quality()
-#			print '\n-----------\n\n'
-#
-#			#print 'Later cost : ' , self.calc_cost(self.kernel)
+
+		#Y = self.update_W()
+		#import pdb; pdb.set_trace()
+		#self.allocation = KMeans(self.k).fit_predict(Y)
+		#return self.allocation
+
+		for i in range(1):	
+			Y = self.update_W()
+			self.calc_U()
+			#self.loop = self.check_convergence()
+
 #
 #			TD = self.transform_data()
 #			Y = TD.data.numpy()
@@ -424,4 +465,4 @@ class DCN:
 #
 #		self.loop = True
 
-#		return #self.get_clustering_results()
+		return self.get_clustering_results()

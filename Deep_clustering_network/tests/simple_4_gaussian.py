@@ -18,7 +18,7 @@ data = genfromtxt('datasets/data_4.csv', delimiter=',')
 
 
 dcn = DCN(data,4, 'model_20_neurons')
-dcn.hidden_d = dcn.d + 200
+dcn.hidden_d = dcn.d + 5
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),

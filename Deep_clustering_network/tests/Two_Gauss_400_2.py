@@ -29,7 +29,7 @@ dcn.NN = torch.nn.Sequential(
 )
 
 allocation = dcn.run()
-import pdb; pdb.set_trace()
+#import pdb; pdb.set_trace()
 
 if True:	#	plot the clustering result
 	X = data
