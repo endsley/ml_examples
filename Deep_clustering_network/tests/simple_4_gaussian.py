@@ -16,8 +16,8 @@ colors = matplotlib.colors.cnames
 #	load data
 data = genfromtxt('datasets/data_4.csv', delimiter=',')
 
-
-dcn = DCN(data,4, 'model_20_neurons', hidden_node_count=10)
+hidden_node_num = 10
+dcn = DCN(data, 4, 'model_20_neurons', hidden_node_count=hidden_node_num)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -33,6 +33,7 @@ dcn.NN = torch.nn.Sequential(
 	#torch.nn.Sigmoid(),
 )
 
+dcn.initialize_W_to_Gaussian()
 
 allocation = dcn.run()
 
@@ -56,4 +57,4 @@ if True:	#	plot the clustering result
 	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
 	plt.show()
 
-
+import pdb; pdb.set_trace()
