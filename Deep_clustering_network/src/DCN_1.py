@@ -147,10 +147,12 @@ class DCN:
 		K = torch.FloatTensor(self.N, self.N)
 		K = Variable(K.type(self.dtype), requires_grad=False)
 		Y = input_data
-		import pdb; pdb.set_trace()
+
+		
+		Y = Y/torch.unsqueeze(torch.sqrt((Y*Y).sum(1)),1)		#row normalized
 		#sigma = np.median(sklearn.metrics.pairwise.pairwise_distances(Y.data.numpy()))/2
 		#print 'sigma : ' , sigma
-		sigma = 2
+		sigma = 1
 
 		for i in range(self.N):
 			for j in range(self.N):
@@ -158,10 +160,10 @@ class DCN:
 				eVal = -(torch.mm(tmpY, tmpY.transpose(0,1)))/(2*sigma*sigma)
 				K[i,j] = torch.exp(eVal)
 
-		D1 = torch.sqrt(1/K.sum(1))
+		D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
 		D = torch.mm(D1, D1.transpose(0,1))	
 		L = K*D
-
+		#import pdb; pdb.set_trace()
 
 		return L
 
@@ -264,7 +266,6 @@ class DCN:
 		self.forward_pass(phi)
 		Y = self.NN(self.xTor)
 		L = self.compute_Gaussian_Laplacian(Y)
-		import pdb; pdb.set_trace()
 		return L	
 
 	def run(self):
