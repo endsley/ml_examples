@@ -28,16 +28,10 @@ dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.hidden_d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
 	torch.nn.Linear(dcn.hidden_d, dcn.output_d, bias=True),
-	#torch.nn.ReLU(),
-	#torch.nn.LeakyReLU(),
-	#torch.nn.Sigmoid(),
 )
 
 dcn.initialize_W_to_Gaussian()
-
 allocation = dcn.run()
-
-
 
 
 if True:	#	plot the clustering result
@@ -57,4 +51,7 @@ if True:	#	plot the clustering result
 	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
 	plt.show()
 
+Y = dcn.NN(dcn.xTor)
+L = dcn.compute_Gaussian_Laplacian(Y, use_RFF=True)
+dcn.draw_heatMap(L)
 import pdb; pdb.set_trace()

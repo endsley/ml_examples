@@ -6,57 +6,53 @@ import numpy as np
 import sklearn.metrics
 import numpy.matlib
 from sklearn.preprocessing import normalize
+from numpy import genfromtxt
+
 
 #	K(x, y) = exp(-gamma ||x-y||^2)
 #	sigma = sqrt( 1/(2*gamma) )
 #	gamma = 1/(2*sigma^2)
 
-np.set_printoptions(precision=4)
+np.set_printoptions(precision=3)
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 
-def RFF(X, nrmlize, m):
+def RFF(X, nrmlize, m, sigma):
 	if nrmlize:
 		X = normalize(X, norm='l2', axis=1)
 	
+	gamma = 1.0/(2*sigma*sigma)
+
 	n = X.shape[0]
 	d = X.shape[1]
-	rbk = sklearn.metrics.pairwise.rbf_kernel(X, gamma=0.5)
-	#print rbk
+	rbk = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma)
 	
-	u = np.random.randn(d, m)
+	import pdb; pdb.set_trace()
+
+	u = np.random.randn(d, m)/(sigma*sigma)
 	b = np.random.rand(1, m)
 	b = np.matlib.repmat(b, n, 1)*2*np.pi
 	
 	y = np.cos(X.dot(u) + b)
 	K = y.dot(y.T)*2/m
 	error = np.linalg.norm(rbk - K)
-	#print K , '\n'
-	#print 'Error from RFF : ' , error , '\n\n'
 
+	print rbk[0:20,0:20]
+	print K[0:20,0:20] , '\n'
+	print 'Error from RFF : ' , error , '\n\n'
+	import pdb; pdb.set_trace()
 	return error
 
 
-
-#	This example shows that normalized RFF can be approximated with lower variance
-#	The purpose of the normalized version is NOT to estimate the original kernel
-#	but a proposal of another kernel that when estimated has a lower variance.
-m = 100
-X = np.array([[1,2],[2,3],[1,1],[1,3]], dtype='f')	 
-
-RFF_error = []
-for p in range(1000):
-	RFF_error.append(RFF(X, False, m))
-
-print np.mean(RFF_error)
-
-RFF_error = []
-for p in range(1000):
-	RFF_error.append(RFF(X, True, m))
-
-print np.mean(RFF_error)
+if __name__ == "__main__":
+	X = genfromtxt('data_4.csv', delimiter=',')
+	#X = np.array([[0,0],[0,1],[0,-1],[4,4],[4,5],[3,4],[4,3]], dtype='f')	 
+	m = 1000
+	RFF(X, True, m, 1)
 
 
 
-import pdb; pdb.set_trace()
+
+
+

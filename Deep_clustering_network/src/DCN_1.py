@@ -5,16 +5,15 @@
 
 import math
 import time 
-import sklearn.metrics
-import torch
+import torch										# version : 0.2.0
 from torch.autograd import Variable
 #import autograd.numpy as np
-import numpy as np
-from sklearn.preprocessing import normalize
+import numpy as np									# version : 1.10.4
+from sklearn.preprocessing import normalize			# version : 0.17
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import copy
 import sklearn.metrics
+import matplotlib.pyplot as plt						# version : 1.3.1
+import copy
 import numpy.matlib
 import matplotlib.pyplot as plt
 
@@ -26,7 +25,7 @@ class DCN:
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
 		self.hidden_d = hidden_node_count
-		self.output_d = k							
+		self.output_d = 4
 		self.run_name = run_name
 
 		self.U_matrix = np.random.random([self.N,self.k])
@@ -42,20 +41,25 @@ class DCN:
 
 
 		# Random Fourier Features	
+		self.sigma = 1
 		self.sample_num = 100
-		u = np.random.rand(self.output_d, self.sample_num)
 
-		b = np.random.rand(1, self.sample_num)
+		b = 2*np.pi*np.random.rand(1, self.sample_num)
 		b = np.matlib.repmat(b, self.N, 1)
 
 		self.phase_shift = torch.from_numpy(b)
 		self.phase_shift = Variable(self.phase_shift.type(self.dtype), requires_grad=False)
 
+		u = np.random.randn(self.output_d, self.sample_num)/(self.sigma*self.sigma)
+		self.rand_proj = torch.from_numpy(u)
+		self.rand_proj = Variable(self.rand_proj.type(self.dtype), requires_grad=False)
+		self.use_RFF = True
+
 
 		np.set_printoptions(precision=3)
 		np.set_printoptions(threshold=np.nan)
 		np.set_printoptions(linewidth=300)
-		np.set_printoptions(suppress=True)
+		np.set_printoptions(suppress=False)
 
 
 	def initialize_W_to_Gaussian(self):
@@ -125,51 +129,46 @@ class DCN:
 
 		return L
 
-	def compute_Gaussian_Laplacian(self, input_data):
-#		# Use random fourier features
-#		d = input_data.data.numpy().shape[1]
-#		u = np.random.rand(d , self.sample_num)
-#		self.rand_proj = torch.from_numpy(u)
-#		self.rand_proj = Variable(self.rand_proj.type(self.dtype), requires_grad=False)
-#		import pdb; pdb.set_trace()
-#
-#		P = torch.cos(torch.mm(input_data,self.rand_proj) + self.phase_shift)
-#		K = torch.mm(P, P.transpose(0,1))
-#		K = (2.0/self.sample_num)*K
-#
-#		D1 = torch.sqrt(1/K.sum(1))
-#		D = torch.mm(D1, D1.transpose(0,1))	
-#		L = K*D
+	def compute_Gaussian_Laplacian(self, input_data, use_RFF=True):
 
+		# Use random fourier features
+		if use_RFF:	
+			input_data = input_data/torch.unsqueeze(torch.sqrt((input_data*input_data).sum(1)),1)		#row normalized
+			
+			P = torch.cos(torch.mm(input_data,self.rand_proj) + self.phase_shift)
+			K = torch.mm(P, P.transpose(0,1))
+			K = (2.0/self.sample_num)*K
+			#K = torch.clamp(K, 0)	#clamp doesn't seem to do back prop
+	
+			D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
+			D = torch.mm(D1, D1.transpose(0,1))	
+			L = K*D
 
-
-		# Use actual gaussian kernel
-		K = torch.FloatTensor(self.N, self.N)
-		K = Variable(K.type(self.dtype), requires_grad=False)
-		Y = input_data
-
-		
-		Y = Y/torch.unsqueeze(torch.sqrt((Y*Y).sum(1)),1)		#row normalized
-		#sigma = np.median(sklearn.metrics.pairwise.pairwise_distances(Y.data.numpy()))/2
-		#print 'sigma : ' , sigma
-		sigma = 1
-
-		for i in range(self.N):
-			for j in range(self.N):
-				tmpY = (Y[i,:] - Y[j,:]).unsqueeze(0)
-				eVal = -(torch.mm(tmpY, tmpY.transpose(0,1)))/(2*sigma*sigma)
-				K[i,j] = torch.exp(eVal)
-
-		D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
-		D = torch.mm(D1, D1.transpose(0,1))	
-		L = K*D
-		#import pdb; pdb.set_trace()
-
+		else:
+			# Use actual gaussian kernel
+			K = torch.FloatTensor(self.N, self.N)
+			K = Variable(K.type(self.dtype), requires_grad=False)
+			Y = input_data
+			
+			Y = Y/torch.unsqueeze(torch.sqrt((Y*Y).sum(1)),1)		#row normalized
+	
+			for i in range(self.N):
+				for j in range(self.N):
+					tmpY = (Y[i,:] - Y[j,:]).unsqueeze(0)
+					eVal = -(torch.mm(tmpY, tmpY.transpose(0,1)))/(2*self.sigma*self.sigma)
+					K[i,j] = torch.exp(eVal)
+	
+			D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
+			D = torch.mm(D1, D1.transpose(0,1))	
+			L = K*D
 		return L
 
 	def apply_centering(self, sqMatrix):
-		sqMatrix = sqMatrix.data.numpy()
+		if type(sqMatrix) == type(self.xTor):
+			sqMatrix = sqMatrix.data.numpy()
+
 		centered = self.H_matrix.dot(sqMatrix).dot(self.H_matrix)
+		centered = (centered + centered.T)/2
 		return centered
 
 	def calc_U(self, input_kernel):
@@ -188,20 +187,25 @@ class DCN:
 
 	def create_Phi(self, U):
 		phi = U.dot(U.T)			# kernel U
+		phi = self.apply_centering(phi)							# HUU'H
+		#phi = phi.astype(np.float32)
+		
+
 		phi = torch.from_numpy(phi)
 		phi = Variable(phi.type(self.dtype), requires_grad=False)
 		return phi
 
 	def forward_pass(self, phi):		#	Gaussian Version
-		Y = self.NN(self.xTor)	
+		Y = self.NN(self.xTor)
 	
 		#L = self.compute_Linear_Laplacian(Y)
-		L = self.compute_Gaussian_Laplacian(Y)
-
+		L = self.compute_Gaussian_Laplacian(Y, use_RFF=self.use_RFF)
+		
 		cost = -(phi*L).sum() 
 		return cost
 
 	def update_W(self, U):
+	
 		learning_rate = 1
 		phi = self.create_Phi(U)
 
@@ -263,20 +267,18 @@ class DCN:
 				#self.draw_heatMap(L)
 				#import pdb; pdb.set_trace()
 
-		self.forward_pass(phi)
 		Y = self.NN(self.xTor)
-		L = self.compute_Gaussian_Laplacian(Y)
+		L = self.compute_Gaussian_Laplacian(Y, use_RFF=self.use_RFF)
+		
 		return L	
 
 	def run(self):
-		L = self.compute_Gaussian_Laplacian(self.xTor)
-
-		L = self.apply_centering(L)
-
+		L = self.compute_Gaussian_Laplacian(self.xTor,use_RFF=False)			#  DKD
+		L = self.apply_centering(L)												# HDKDH
 		U = self.calc_U(L)
-
+		
 		Ku = U.dot(U.T)
-		original_cost = (Ku*L).sum()
+		original_cost = (Ku*L).sum()											# Tr(UU' HDKDH)
 		print '\noriginal cost : ' , -original_cost
 
 		L = self.update_W(U)
@@ -290,8 +292,7 @@ class DCN:
 		Ku = U.dot(U.T)
 		final_cost = (Ku*L).sum()
 
-		print 'final cost : ' , final_cost 
-		#import pdb; pdb.set_trace()
+		print 'final cost : ' , -final_cost 
 		return allocation
 
 
