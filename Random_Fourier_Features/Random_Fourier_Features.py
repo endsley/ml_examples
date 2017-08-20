@@ -28,9 +28,8 @@ def RFF(X, nrmlize, m, sigma):
 	d = X.shape[1]
 	rbk = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma)
 	
-	import pdb; pdb.set_trace()
 
-	u = np.random.randn(d, m)/(sigma*sigma)
+	u = np.random.randn(d, m)/(sigma)
 	b = np.random.rand(1, m)
 	b = np.matlib.repmat(b, n, 1)*2*np.pi
 	
@@ -48,8 +47,8 @@ def RFF(X, nrmlize, m, sigma):
 if __name__ == "__main__":
 	X = genfromtxt('data_4.csv', delimiter=',')
 	#X = np.array([[0,0],[0,1],[0,-1],[4,4],[4,5],[3,4],[4,3]], dtype='f')	 
-	m = 1000
-	RFF(X, True, m, 1)
+	m = 40000
+	RFF(X, True, m, 0.8)
 
 
 

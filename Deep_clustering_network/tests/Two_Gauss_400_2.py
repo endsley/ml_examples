@@ -10,11 +10,11 @@ from Y_2_allocation import *
 colors = matplotlib.colors.cnames
 
 
+hidden_node_num = 10
 
 #	load data
 data = genfromtxt('datasets/Two_Gauss_400_2.csv', delimiter=',')
-dcn = DCN(data,2, 'Two_Gauss_400_2')
-dcn.hidden_d = dcn.d + 200
+dcn = DCN(data, 2, 'Two_Gauss_400_2', hidden_node_count=hidden_node_num)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -25,11 +25,11 @@ dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.hidden_d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
 	torch.nn.Linear(dcn.hidden_d, dcn.output_d, bias=True),
-#	torch.nn.Sigmoid(),
 )
 
+dcn.initialize_W_to_Gaussian()
 allocation = dcn.run()
-#import pdb; pdb.set_trace()
+
 
 if True:	#	plot the clustering result
 	X = data
@@ -48,4 +48,8 @@ if True:	#	plot the clustering result
 	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
 	plt.show()
 
-
+if True:		# output info
+	Y = dcn.NN(dcn.xTor)
+	L = dcn.compute_Gaussian_Laplacian(Y, use_RFF=True)
+	dcn.draw_heatMap(L)
+	import pdb; pdb.set_trace()

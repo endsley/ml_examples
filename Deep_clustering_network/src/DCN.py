@@ -19,14 +19,17 @@ import matplotlib.pyplot as plt
 
 
 class DCN:
-	def __init__(self, data_set, k, run_name, hidden_node_count=10):
+	def __init__(self, data_set, k, run_name, hidden_node_count=10, sigma=1):
 		self.X = data_set
 		self.k = k
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
 		self.hidden_d = hidden_node_count
-		self.output_d = 4
+		self.output_d = 3
 		self.run_name = run_name
+
+		self.original_cost = 0
+		self.final_cost = 0
 
 		self.U_matrix = np.random.random([self.N,self.k])
 		self.H_matrix = np.eye(self.N) - np.ones((self.N,self.N))/self.N
@@ -41,8 +44,8 @@ class DCN:
 
 
 		# Random Fourier Features	
-		self.sigma = 1
-		self.sample_num = 100
+		self.sigma = sigma
+		self.sample_num = 1000
 
 		b = 2*np.pi*np.random.rand(1, self.sample_num)
 		b = np.matlib.repmat(b, self.N, 1)
@@ -50,16 +53,16 @@ class DCN:
 		self.phase_shift = torch.from_numpy(b)
 		self.phase_shift = Variable(self.phase_shift.type(self.dtype), requires_grad=False)
 
-		u = np.random.randn(self.output_d, self.sample_num)/(self.sigma*self.sigma)
+		u = np.random.randn(self.output_d, self.sample_num)/(self.sigma)
 		self.rand_proj = torch.from_numpy(u)
 		self.rand_proj = Variable(self.rand_proj.type(self.dtype), requires_grad=False)
-		self.use_RFF = True
+		self.RBF_method = 'RFF'
 
 
 		np.set_printoptions(precision=3)
 		np.set_printoptions(threshold=np.nan)
 		np.set_printoptions(linewidth=300)
-		np.set_printoptions(suppress=False)
+		np.set_printoptions(suppress=True)
 
 
 	def initialize_W_to_Gaussian(self):
@@ -129,38 +132,44 @@ class DCN:
 
 		return L
 
-	def compute_Gaussian_Laplacian(self, input_data, use_RFF=True):
+	def compute_Gaussian_Laplacian(self, input_data, RBF_method='RFF'):
+		#input_data = input_data/torch.unsqueeze(torch.sqrt((input_data*input_data).sum(1)),1)		#row normalized
 
-		# Use random fourier features
-		if use_RFF:	
-			input_data = input_data/torch.unsqueeze(torch.sqrt((input_data*input_data).sum(1)),1)		#row normalized
+		if RBF_method == 'sklearn':
+			Vgamma = 1/(2*self.sigma*self.sigma)
+
+			K = sklearn.metrics.pairwise.rbf_kernel(input_data.data.numpy(), gamma=Vgamma)
+			K = torch.from_numpy(K)
+			K = Variable(K.type(self.dtype), requires_grad=False)
+			import pdb; pdb.set_trace()
+		if RBF_method == 'RFF': # Use random fourier features
 			
 			P = torch.cos(torch.mm(input_data,self.rand_proj) + self.phase_shift)
 			K = torch.mm(P, P.transpose(0,1))
 			K = (2.0/self.sample_num)*K
 			#K = torch.clamp(K, 0)	#clamp doesn't seem to do back prop
-	
-			D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
-			D = torch.mm(D1, D1.transpose(0,1))	
-			L = K*D
+			import pdb; pdb.set_trace()
 
-		else:
-			# Use actual gaussian kernel
+		if RBF_method == 'element wise': # Use actual gaussian kernel
 			K = torch.FloatTensor(self.N, self.N)
 			K = Variable(K.type(self.dtype), requires_grad=False)
 			Y = input_data
 			
-			Y = Y/torch.unsqueeze(torch.sqrt((Y*Y).sum(1)),1)		#row normalized
+			#Y = Y/torch.unsqueeze(torch.sqrt((Y*Y).sum(1)),1)		#row normalized
 	
 			for i in range(self.N):
 				for j in range(self.N):
 					tmpY = (Y[i,:] - Y[j,:]).unsqueeze(0)
 					eVal = -(torch.mm(tmpY, tmpY.transpose(0,1)))/(2*self.sigma*self.sigma)
 					K[i,j] = torch.exp(eVal)
-	
-			D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
-			D = torch.mm(D1, D1.transpose(0,1))	
-			L = K*D
+			#import pdb; pdb.set_trace()	
+
+		D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
+		D = torch.mm(D1, D1.transpose(0,1))	
+		L = K*D
+		#import pdb; pdb.set_trace()
+
+
 		return L
 
 	def apply_centering(self, sqMatrix):
@@ -199,7 +208,7 @@ class DCN:
 		Y = self.NN(self.xTor)
 	
 		#L = self.compute_Linear_Laplacian(Y)
-		L = self.compute_Gaussian_Laplacian(Y, use_RFF=self.use_RFF)
+		L = self.compute_Gaussian_Laplacian(Y, RBF_method=self.RBF_method)
 		
 		cost = -(phi*L).sum() 
 		return cost
@@ -268,31 +277,28 @@ class DCN:
 				#import pdb; pdb.set_trace()
 
 		Y = self.NN(self.xTor)
-		L = self.compute_Gaussian_Laplacian(Y, use_RFF=self.use_RFF)
+		L = self.compute_Gaussian_Laplacian(Y, RBF_method=self.RBF_method)
 		
 		return L	
 
 	def run(self):
-		L = self.compute_Gaussian_Laplacian(self.xTor,use_RFF=False)			#  DKD
+		L = self.compute_Gaussian_Laplacian(self.xTor,RBF_method='sklearn')			#  DKD
 		L = self.apply_centering(L)												# HDKDH
 		U = self.calc_U(L)
 		
 		Ku = U.dot(U.T)
-		original_cost = (Ku*L).sum()											# Tr(UU' HDKDH)
-		print '\noriginal cost : ' , -original_cost
+		self.original_cost = -(Ku*L).sum()											# Tr(UU' HDKDH)
 
 		L = self.update_W(U)
 		L = self.apply_centering(L)
 		U = self.calc_U(L)
-		U = normalize(U, norm='l2', axis=1)
 
+		Ku = U.dot(U.T)
+		self.final_cost = -(Ku*L).sum()
+
+		U = normalize(U, norm='l2', axis=1)
 		allocation = KMeans(self.k).fit_predict(U)
 
-		print allocation
-		Ku = U.dot(U.T)
-		final_cost = (Ku*L).sum()
-
-		print 'final cost : ' , -final_cost 
 		return allocation
 
 

@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('./lib')
-from DCN_1 import *
+from DCN import *
 import numpy as np
 from numpy import genfromtxt
 import matplotlib 
@@ -17,7 +17,7 @@ colors = matplotlib.colors.cnames
 data = genfromtxt('datasets/data_4.csv', delimiter=',')
 
 hidden_node_num = 10
-dcn = DCN(data, 4, 'model_20_neurons', hidden_node_count=hidden_node_num)
+dcn = DCN(data, 4, 'model_20_neurons', hidden_node_count=hidden_node_num, sigma=0.5)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -32,6 +32,12 @@ dcn.NN = torch.nn.Sequential(
 
 dcn.initialize_W_to_Gaussian()
 allocation = dcn.run()
+
+
+if True:	#	output various metrics and info
+	print '\noriginal cost : ' , dcn.original_cost
+	print 'final cost : ' , dcn.final_cost 
+	print allocation
 
 
 if True:	#	plot the clustering result
