@@ -6,6 +6,7 @@ from numpy import genfromtxt
 import matplotlib 
 import matplotlib.pyplot as plt
 from Y_2_allocation import *
+from sklearn.cluster import SpectralClustering
 
 colors = matplotlib.colors.cnames
 
@@ -14,6 +15,7 @@ hidden_node_num = 10
 
 #	load data
 data = genfromtxt('datasets/moon_400_2.csv', delimiter=',')
+
 dcn = DCN(data, 2, 'moon_400_2', hidden_node_count=hidden_node_num, sigma=0.3)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
@@ -28,6 +30,8 @@ dcn.NN = torch.nn.Sequential(
 )
 
 dcn.initialize_W_to_Gaussian()
+#dcn.minimize_initial_error()
+
 allocation = dcn.run()
 
 
@@ -48,9 +52,9 @@ if True:	#	plot the clustering result
 	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
 	plt.show()
 
-
-if False:		# output info
-	Y = dcn.NN(dcn.xTor)
-	L = dcn.compute_Gaussian_Laplacian(Y, use_RFF=True)
-	dcn.draw_heatMap(L)
-	import pdb; pdb.set_trace()
+#
+#if False:		# output info
+#	Y = dcn.NN(dcn.xTor)
+#	L = dcn.compute_Gaussian_Laplacian(Y, use_RFF=True)
+#	dcn.draw_heatMap(L)
+#	import pdb; pdb.set_trace()

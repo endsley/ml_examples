@@ -12,11 +12,12 @@ import numpy as np									# version : 1.10.4
 from sklearn.preprocessing import normalize			# version : 0.17
 from sklearn.cluster import KMeans
 import sklearn.metrics
+import matplotlib 
 import matplotlib.pyplot as plt						# version : 1.3.1
 import copy
 import numpy.matlib
-import matplotlib.pyplot as plt
 
+colors = matplotlib.colors.cnames
 
 class DCN:
 	def __init__(self, data_set, k, run_name, hidden_node_count=10, sigma=1):
@@ -25,7 +26,7 @@ class DCN:
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
 		self.hidden_d = hidden_node_count
-		self.output_d = 3
+		self.output_d = 10
 		self.run_name = run_name
 
 		self.original_cost = 0
@@ -45,7 +46,7 @@ class DCN:
 
 		# Random Fourier Features	
 		self.sigma = sigma
-		self.sample_num = 1000
+		self.sample_num = 100
 
 		b = 2*np.pi*np.random.rand(1, self.sample_num)
 		b = np.matlib.repmat(b, self.N, 1)
@@ -56,7 +57,12 @@ class DCN:
 		u = np.random.randn(self.output_d, self.sample_num)/(self.sigma)
 		self.rand_proj = torch.from_numpy(u)
 		self.rand_proj = Variable(self.rand_proj.type(self.dtype), requires_grad=False)
-		self.RBF_method = 'RFF'
+
+		u2 = np.random.randn(self.d, self.sample_num)/(self.sigma)
+		self.rand_proj2 = torch.from_numpy(u2)
+		self.rand_proj2 = Variable(self.rand_proj2.type(self.dtype), requires_grad=False)
+
+		self.RBF_method = 'element wise'
 
 
 		np.set_printoptions(precision=3)
@@ -64,6 +70,30 @@ class DCN:
 		np.set_printoptions(linewidth=300)
 		np.set_printoptions(suppress=True)
 
+
+		Vgamma = 1/(2*self.sigma*self.sigma)
+		self.init_K = sklearn.metrics.pairwise.rbf_kernel(self.X, gamma=Vgamma)
+		self.init_K = torch.from_numpy(self.init_K)
+		self.init_K = Variable(self.init_K.type(self.dtype), requires_grad=False)
+
+
+
+	def plot_clustering(self, allocation):
+		X = self.X
+		plt.figure(1)
+		
+		plt.subplot(111)
+		plt.title('moon')
+		idx = np.unique(allocation)
+		for mm in idx:
+			subgroup = X[allocation == mm]
+			plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+		plt.xlabel('Feature 1')
+		plt.ylabel('Feature 2')
+		plt.title('Alternative Clustering')
+		
+		plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
+		plt.show()
 
 	def initialize_W_to_Gaussian(self):
 		noise = 0.05*np.min(np.absolute(self.X))
@@ -109,9 +139,55 @@ class DCN:
 		#		print self.NN[m].weight.data
 		#		print '\n'
 
+	def initial_pass(self):
+		Y = self.NN(self.xTor)
+		P = torch.cos(torch.mm(Y,self.rand_proj) + self.phase_shift)
+		K = torch.mm(P, P.transpose(0,1))
+		K = (2.0/self.sample_num)*K
+		#K = torch.clamp(K, 0)	#clamp doesn't seem to do back prop
+
+		diff = self.init_K - K
+		error = (diff*diff).sum()
+		return error
+
+	def minimize_initial_error(self):
+	
+		learning_rate = 1
+
+		while True:
+			cost = self.initial_pass()
+			
+			self.NN.zero_grad()
+			cost.backward()
+		
+			while True:		#	Adaptive Learning Rate
+				for param in self.NN.parameters():
+					param.data -= learning_rate * param.grad.data
+	
+				new_cost = self.initial_pass()
+
+				if(new_cost.data[0] > cost.data[0]): # if got worse, undo and lower the learning rate. 
+					for param in self.NN.parameters():
+						param.data += learning_rate * param.grad.data
+
+					learning_rate = learning_rate*0.6
+				else: 
+					learning_rate = learning_rate*1.01
+					break
+				if learning_rate < 0.00000001: break
 
 
+			grad_norm = 0	
+			for param in self.NN.parameters():
+				grad_norm += param.grad.data.norm()
 
+			print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
+			
+			if grad_norm < 0.01: print('Gradient Exit'); break
+			if (np.absolute(new_cost.data.numpy() - cost.data.numpy()))/np.absolute(new_cost.data.numpy()) < 0.00001: print('Cost Exit'); break;
+			if learning_rate < 0.0000001: print('Learning Rate Exit'); break
+
+		import pdb; pdb.set_trace()
 
 
 	def draw_heatMap(self, mtrix):
@@ -133,23 +209,57 @@ class DCN:
 		return L
 
 	def compute_Gaussian_Laplacian(self, input_data, RBF_method='RFF'):
-		#input_data = input_data/torch.unsqueeze(torch.sqrt((input_data*input_data).sum(1)),1)		#row normalized
+		input_data = input_data/torch.unsqueeze(torch.sqrt((input_data*input_data).sum(1)),1)		#row normalized
 
 		if RBF_method == 'sklearn':
 			Vgamma = 1/(2*self.sigma*self.sigma)
-
 			K = sklearn.metrics.pairwise.rbf_kernel(input_data.data.numpy(), gamma=Vgamma)
+
 			K = torch.from_numpy(K)
 			K = Variable(K.type(self.dtype), requires_grad=False)
-			import pdb; pdb.set_trace()
+
+
+			#D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
+			#D = torch.mm(D1, D1.transpose(0,1))	
+			#L = K*D
+			#L = self.apply_centering(L)												# HDKDH
+			#U = self.calc_U(L)
+			#Ku = U.dot(U.T)
+			#print 'Cost : ' ,  -(Ku*L).sum()											# Tr(UU' HDKDH)
+
+			#U = normalize(U, norm='l2', axis=1)
+			#allocation = KMeans(self.k).fit_predict(U)
+
+			#self.plot_clustering(allocation)
+			#import pdb; pdb.set_trace()
+
+			#RBF_method = 'RFF'
 		if RBF_method == 'RFF': # Use random fourier features
-			
-			P = torch.cos(torch.mm(input_data,self.rand_proj) + self.phase_shift)
+			if input_data.data.numpy().shape[1] == self.rand_proj.data.numpy().shape[0]:
+				P = torch.cos(torch.mm(input_data,self.rand_proj) + self.phase_shift)
+			else:
+				P = torch.cos(torch.mm(input_data,self.rand_proj2) + self.phase_shift)
+
 			K = torch.mm(P, P.transpose(0,1))
 			K = (2.0/self.sample_num)*K
+			
 			#K = torch.clamp(K, 0)	#clamp doesn't seem to do back prop
-			import pdb; pdb.set_trace()
 
+			#D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
+			#D = torch.mm(D1, D1.transpose(0,1))	
+			#L = K*D
+			#L = self.apply_centering(L)												# HDKDH
+			#U = self.calc_U(L)
+			#Ku = U.dot(U.T)
+			#print 'Cost : ' ,  -(Ku*L).sum()											# Tr(UU' HDKDH)
+
+			#U = normalize(U, norm='l2', axis=1)
+			#allocation = KMeans(self.k).fit_predict(U)
+
+			#self.plot_clustering(allocation)
+			#import pdb; pdb.set_trace()
+
+		#RBF_method = 'element wise'
 		if RBF_method == 'element wise': # Use actual gaussian kernel
 			K = torch.FloatTensor(self.N, self.N)
 			K = Variable(K.type(self.dtype), requires_grad=False)
@@ -162,7 +272,6 @@ class DCN:
 					tmpY = (Y[i,:] - Y[j,:]).unsqueeze(0)
 					eVal = -(torch.mm(tmpY, tmpY.transpose(0,1)))/(2*self.sigma*self.sigma)
 					K[i,j] = torch.exp(eVal)
-			#import pdb; pdb.set_trace()	
 
 		D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
 		D = torch.mm(D1, D1.transpose(0,1))	
@@ -181,8 +290,8 @@ class DCN:
 		return centered
 
 	def calc_U(self, input_kernel):
-		eigenValues,eigenVectors = np.linalg.eig(input_kernel)
-
+		eigenValues,eigenVectors = np.linalg.eigh(input_kernel)
+		
 		idx = eigenValues.argsort()
 		idx = idx[::-1]
 		eigenValues = eigenValues[idx]
@@ -197,9 +306,9 @@ class DCN:
 	def create_Phi(self, U):
 		phi = U.dot(U.T)			# kernel U
 		phi = self.apply_centering(phi)							# HUU'H
-		#phi = phi.astype(np.float32)
 		
-
+		phi = phi.astype(np.float32)
+	
 		phi = torch.from_numpy(phi)
 		phi = Variable(phi.type(self.dtype), requires_grad=False)
 		return phi
@@ -282,7 +391,7 @@ class DCN:
 		return L	
 
 	def run(self):
-		L = self.compute_Gaussian_Laplacian(self.xTor,RBF_method='sklearn')			#  DKD
+		L = self.compute_Gaussian_Laplacian(self.xTor,RBF_method='sklearn')			#  'element wise' sklearn, RFF, DKD
 		L = self.apply_centering(L)												# HDKDH
 		U = self.calc_U(L)
 		
@@ -298,7 +407,7 @@ class DCN:
 
 		U = normalize(U, norm='l2', axis=1)
 		allocation = KMeans(self.k).fit_predict(U)
-
+		
 		return allocation
 
 
