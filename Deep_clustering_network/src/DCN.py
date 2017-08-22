@@ -20,13 +20,13 @@ import numpy.matlib
 colors = matplotlib.colors.cnames
 
 class DCN:
-	def __init__(self, data_set, k, run_name, hidden_node_count=10, sigma=1):
+	def __init__(self, data_set, k, run_name, hidden_node_count=10, sigma=1, output_d=2):
 		self.X = data_set
 		self.k = k
 		self.N = data_set.shape[0]
 		self.d = data_set.shape[1]
 		self.hidden_d = hidden_node_count
-		self.output_d = 10
+		self.output_d = output_d
 		self.run_name = run_name
 
 		self.original_cost = 0
@@ -46,7 +46,7 @@ class DCN:
 
 		# Random Fourier Features	
 		self.sigma = sigma
-		self.sample_num = 100
+		self.sample_num = 20000
 
 		b = 2*np.pi*np.random.rand(1, self.sample_num)
 		b = np.matlib.repmat(b, self.N, 1)
@@ -62,7 +62,7 @@ class DCN:
 		self.rand_proj2 = torch.from_numpy(u2)
 		self.rand_proj2 = Variable(self.rand_proj2.type(self.dtype), requires_grad=False)
 
-		self.RBF_method = 'element wise'
+		self.RBF_method = 'RFF'
 
 
 		np.set_printoptions(precision=3)
@@ -78,16 +78,21 @@ class DCN:
 
 
 
-	def plot_clustering(self, allocation):
-		X = self.X
+	def plot_clustering(self, X=None, allocation=[]):
+		if X == None: X = self.X
+
 		plt.figure(1)
-		
 		plt.subplot(111)
 		plt.title('moon')
-		idx = np.unique(allocation)
-		for mm in idx:
-			subgroup = X[allocation == mm]
-			plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+		
+		if len(allocation) != 0:
+			idx = np.unique(allocation)
+			for mm in idx:
+				subgroup = X[allocation == mm]
+				plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
+		else:
+			plt.plot(X[:,0], X[:,1], color=colors.keys()[0] , marker='o', linestyle='None')
+
 		plt.xlabel('Feature 1')
 		plt.ylabel('Feature 2')
 		plt.title('Alternative Clustering')
@@ -209,7 +214,7 @@ class DCN:
 		return L
 
 	def compute_Gaussian_Laplacian(self, input_data, RBF_method='RFF'):
-		input_data = input_data/torch.unsqueeze(torch.sqrt((input_data*input_data).sum(1)),1)		#row normalized
+		#input_data = input_data/torch.unsqueeze(torch.sqrt((input_data*input_data).sum(1)),1)		#row normalized
 
 		if RBF_method == 'sklearn':
 			Vgamma = 1/(2*self.sigma*self.sigma)
@@ -242,7 +247,9 @@ class DCN:
 
 			K = torch.mm(P, P.transpose(0,1))
 			K = (2.0/self.sample_num)*K
-			
+			K = K + 0.03
+			print 'min K : ', K.min().data.numpy()[0]
+			#import pdb; pdb.set_trace()
 			#K = torch.clamp(K, 0)	#clamp doesn't seem to do back prop
 
 			#D1 = torch.unsqueeze(torch.sqrt(1/K.sum(1)),1)
@@ -374,7 +381,7 @@ class DCN:
 				print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
 				
 				if grad_norm < 0.01: print('Gradient Exit'); break
-				if (np.absolute(new_cost.data.numpy() - cost.data.numpy()))/np.absolute(new_cost.data.numpy()) < 0.0001: print('Cost Exit'); break;
+				if (np.absolute(new_cost.data.numpy() - cost.data.numpy()))/np.absolute(new_cost.data.numpy()) < 0.001: print('Cost Exit'); break;
 				if learning_rate < 0.0000001: print('Learning Rate Exit'); break
 
 
@@ -393,10 +400,11 @@ class DCN:
 	def run(self):
 		L = self.compute_Gaussian_Laplacian(self.xTor,RBF_method='sklearn')			#  'element wise' sklearn, RFF, DKD
 		L = self.apply_centering(L)												# HDKDH
-		U = self.calc_U(L)
+		U = self.calc_U(L) #.data.numpy())
 		
 		Ku = U.dot(U.T)
 		self.original_cost = -(Ku*L).sum()											# Tr(UU' HDKDH)
+		print 'Original cost : ' , self.original_cost
 
 		L = self.update_W(U)
 		L = self.apply_centering(L)
@@ -404,6 +412,7 @@ class DCN:
 
 		Ku = U.dot(U.T)
 		self.final_cost = -(Ku*L).sum()
+		print 'Final cost : ' , self.final_cost
 
 		U = normalize(U, norm='l2', axis=1)
 		allocation = KMeans(self.k).fit_predict(U)

@@ -1,0 +1,5 @@
+
+				NMI
+K means			0.748
+Spectral		0.775
+DCN				0.809

@@ -6,15 +6,17 @@ from numpy import genfromtxt
 import matplotlib 
 import matplotlib.pyplot as plt
 from Y_2_allocation import *
+from sklearn import preprocessing
 
-colors = matplotlib.colors.cnames
 
 
 hidden_node_num = 10
 
 #	load data
 data = genfromtxt('datasets/Two_Gauss_400_2.csv', delimiter=',')
-dcn = DCN(data, 2, 'Two_Gauss_400_2', hidden_node_count=hidden_node_num)
+data = preprocessing.scale(data)		# center and scaled
+
+dcn = DCN(data, 2, 'Two_Gauss_400_2', hidden_node_count=hidden_node_num, sigma=1, output_d=2)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -29,27 +31,11 @@ dcn.NN = torch.nn.Sequential(
 
 dcn.initialize_W_to_Gaussian()
 allocation = dcn.run()
+dcn.plot_clustering(allocation=allocation)
+print allocation
 
-
-if True:	#	plot the clustering result
-	X = data
-	plt.figure(1)
-	
-	plt.subplot(111)
-	plt.title('data_4.csv original plot')
-	idx = np.unique(allocation)
-	for mm in idx:
-		subgroup = X[allocation == mm]
-		plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
-	plt.xlabel('Feature 1')
-	plt.ylabel('Feature 2')
-	plt.title('Alternative Clustering')
-	
-	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
-	plt.show()
-
-if True:		# output info
-	Y = dcn.NN(dcn.xTor)
-	L = dcn.compute_Gaussian_Laplacian(Y, use_RFF=True)
-	dcn.draw_heatMap(L)
-	import pdb; pdb.set_trace()
+#if False:		# output info
+#	Y = dcn.NN(dcn.xTor)
+#	L = dcn.compute_Gaussian_Laplacian(Y, use_RFF=True)
+#	dcn.draw_heatMap(L)
+#	import pdb; pdb.set_trace()

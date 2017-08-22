@@ -17,7 +17,7 @@ colors = matplotlib.colors.cnames
 data = genfromtxt('datasets/data_4.csv', delimiter=',')
 
 hidden_node_num = 10
-dcn = DCN(data, 4, 'model_20_neurons', hidden_node_count=hidden_node_num, sigma=0.5)
+dcn = DCN(data, 4, 'model_20_neurons', hidden_node_count=hidden_node_num, sigma=0.5, output_d=2)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -40,7 +40,7 @@ if True:	#	output various metrics and info
 	print allocation
 
 
-dcn.plot_clustering(allocation)
+dcn.plot_clustering(allocation=allocation)
 
 Y = dcn.NN(dcn.xTor)
 L = dcn.compute_Gaussian_Laplacian(Y, RBF_method='RFF')

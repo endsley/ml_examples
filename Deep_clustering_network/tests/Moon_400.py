@@ -7,16 +7,16 @@ import matplotlib
 import matplotlib.pyplot as plt
 from Y_2_allocation import *
 from sklearn.cluster import SpectralClustering
+from sklearn import preprocessing
 
-colors = matplotlib.colors.cnames
 
 
-hidden_node_num = 10
 
 #	load data
 data = genfromtxt('datasets/moon_400_2.csv', delimiter=',')
-
-dcn = DCN(data, 2, 'moon_400_2', hidden_node_count=hidden_node_num, sigma=0.3)
+data = preprocessing.scale(data)		# center and scaled
+hidden_node_num = 10
+dcn = DCN(data, 2, 'moon_400_2', hidden_node_count=hidden_node_num, sigma=0.1, output_d=4)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
@@ -33,26 +33,10 @@ dcn.initialize_W_to_Gaussian()
 #dcn.minimize_initial_error()
 
 allocation = dcn.run()
+dcn.plot_clustering(allocation=allocation)
 
 
-if True:	#	plot the clustering result
-	X = data
-	plt.figure(1)
-	
-	plt.subplot(111)
-	plt.title('moon')
-	idx = np.unique(allocation)
-	for mm in idx:
-		subgroup = X[allocation == mm]
-		plt.plot(subgroup[:,0], subgroup[:,1], color=colors.keys()[int(mm)] , marker='o', linestyle='None')
-	plt.xlabel('Feature 1')
-	plt.ylabel('Feature 2')
-	plt.title('Alternative Clustering')
-	
-	plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.4)
-	plt.show()
 
-#
 #if False:		# output info
 #	Y = dcn.NN(dcn.xTor)
 #	L = dcn.compute_Gaussian_Laplacian(Y, use_RFF=True)
