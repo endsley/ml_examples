@@ -35,7 +35,7 @@ print "NMI : " , normalized_mutual_info_score(allocation, label)
 
 
 
-hidden_node_num = 10
+hidden_node_num = 20
 dcn = DCN(data, 2, 'breast_cancer', hidden_node_count=hidden_node_num, sigma=sigma, output_d=10)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
