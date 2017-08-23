@@ -1,5 +1,7 @@
 
-				NMI
+				NMI			# Hidden Node		# of output Nodes
 K means			0.748
 Spectral		0.775
-DCN				0.809
+DCN				0.809		20					# 10
+DCN				0.811		10					# 10
+DCN				0.822		10					# 5
