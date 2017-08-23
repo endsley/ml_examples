@@ -186,7 +186,7 @@ class DCN:
 			for param in self.NN.parameters():
 				grad_norm += param.grad.data.norm()
 
-			print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
+			#print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
 			
 			if grad_norm < 0.01: print('Gradient Exit'); break
 			if (np.absolute(new_cost.data.numpy() - cost.data.numpy()))/np.absolute(new_cost.data.numpy()) < 0.00001: print('Cost Exit'); break;
@@ -248,7 +248,7 @@ class DCN:
 			K = torch.mm(P, P.transpose(0,1))
 			K = (2.0/self.sample_num)*K
 			K = K + 0.03
-			print 'min K : ', K.min().data.numpy()[0]
+			#print 'min K : ', K.min().data.numpy()[0]
 			#import pdb; pdb.set_trace()
 			#K = torch.clamp(K, 0)	#clamp doesn't seem to do back prop
 

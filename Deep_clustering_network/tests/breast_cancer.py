@@ -14,11 +14,6 @@ from sklearn.cluster import SpectralClustering
 from sklearn import preprocessing
 
 
-
-colors = matplotlib.colors.cnames
-
-
-
 #	load data
 data = genfromtxt('datasets/breast-cancer.csv', delimiter=',')
 data = preprocessing.scale(data)
@@ -27,16 +22,16 @@ label = genfromtxt('datasets/breast-cancer-labels.csv', delimiter=',')
 d_matrix = sklearn.metrics.pairwise.pairwise_distances(data, Y=None, metric='euclidean')
 sigma = np.median(d_matrix)
 
+num_clusters = 2
 
 Vgamma = 1/(2*sigma*sigma)
-allocation = SpectralClustering(2, gamma=Vgamma).fit_predict(data)
+allocation = SpectralClustering(num_clusters, gamma=Vgamma).fit_predict(data)
 print "NMI : " , normalized_mutual_info_score(allocation, label)
 
 
 
-
 hidden_node_num = 10
-dcn = DCN(data, 2, 'breast_cancer', hidden_node_count=hidden_node_num, sigma=sigma, output_d=3)
+dcn = DCN(data, num_clusters, 'breast_cancer', hidden_node_count=hidden_node_num, sigma=sigma, output_d=5)
 dcn.NN = torch.nn.Sequential(
 	torch.nn.Linear(dcn.d, dcn.hidden_d, bias=True),
 	torch.nn.ReLU(),
