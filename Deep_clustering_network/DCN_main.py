@@ -10,4 +10,5 @@ sys.path.append('./tests')
 #import Two_Gauss_400_2
 #import Moon_400
 #import breast_cancer
-import contraceptive
+#import contraceptive
+import rcv_10000
