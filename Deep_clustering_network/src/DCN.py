@@ -189,7 +189,7 @@ class DCN:
 			#print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
 			
 			if grad_norm < 0.01: print('Gradient Exit'); break
-			if (np.absolute(new_cost.data.numpy() - cost.data.numpy()))/np.absolute(new_cost.data.numpy()) < 0.00001: print('Cost Exit'); break;
+			#if (np.absolute(new_cost.data.numpy() - cost.data.numpy()))/np.absolute(new_cost.data.numpy()) < 0.000001: print('Cost Exit'); break;
 			if learning_rate < 0.0000001: print('Learning Rate Exit'); break
 
 		import pdb; pdb.set_trace()
