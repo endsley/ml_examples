@@ -378,7 +378,7 @@ class DCN:
 				for param in self.NN.parameters():
 					grad_norm += param.grad.data.norm()
 	
-				print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
+				#print(learning_rate, ' , ' , cost.data[0], ' , ' , grad_norm)
 				
 				if grad_norm < 0.01: print('Gradient Exit'); break
 				if (np.absolute(new_cost.data.numpy() - cost.data.numpy()))/np.absolute(new_cost.data.numpy()) < 0.001: print('Cost Exit'); break;
@@ -404,7 +404,7 @@ class DCN:
 		
 		Ku = U.dot(U.T)
 		self.original_cost = -(Ku*L).sum()											# Tr(UU' HDKDH)
-		print 'Original cost : ' , self.original_cost
+		#print 'Original cost : ' , self.original_cost
 
 		L = self.update_W(U)
 		L = self.apply_centering(L)
@@ -412,7 +412,7 @@ class DCN:
 
 		Ku = U.dot(U.T)
 		self.final_cost = -(Ku*L).sum()
-		print 'Final cost : ' , self.final_cost
+		#print 'Final cost : ' , self.final_cost
 
 		U = normalize(U, norm='l2', axis=1)
 		allocation = KMeans(self.k).fit_predict(U)
