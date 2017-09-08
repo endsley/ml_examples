@@ -92,7 +92,7 @@ class CPM():
 if __name__ == "__main__":
 	from eig_sorted import *
 	d = 2
-	A = np.random.randn(5000,5000)
+	A = np.random.randn(100,100)
 	A = A.dot(A.T)
 
 
