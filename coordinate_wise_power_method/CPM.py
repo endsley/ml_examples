@@ -3,6 +3,11 @@
 
 import numpy as np
 
+np.set_printoptions(precision=4)
+np.set_printoptions(threshold=np.nan)
+np.set_printoptions(linewidth=300)
+np.set_printoptions(suppress=True)
+
 
 def CPM(A):		#	A is a symmetric np array
 	n = A.shape[0]	
@@ -30,10 +35,10 @@ def CPM(A):		#	A is a symmetric np array
 
 		y[i] = xi		# turn y into original x
 	
-		c = x - z/(y.T.dot(z_orig))
+		c = np.absolute(x - z/(y.T.dot(z_orig)))
 
 		if(np.sum(np.absolute(x - y)) < 0.00000001): 
-			print A.dot(x)
+			#print A.dot(x)
 			print A.dot(x)/x
 			print '--------'
 			break;
@@ -41,8 +46,8 @@ def CPM(A):		#	A is a symmetric np array
 	return x
 
 if __name__ == "__main__":
-	A = np.random.randn(3,3)
-	A = A + A.T
+	A = np.random.randn(10,10)
+	A = A.dot(A.T)
 	print CPM(A) , '\n'
 
 	[S,V] = np.linalg.eig(A)
