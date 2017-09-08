@@ -2,55 +2,116 @@
 #	Assume symmetric matrix
 
 import numpy as np
+import time 
+
+
 
 np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 
+class CPM():
+	#	A is a symmetric np array	::::  VERY IMPORTANT :::::::
+	#	Num_of_eigV : return the number of eigen vectors
+	#	style : 'dominant_first' , 'least_dominant_first', 'largest_first', 'smallest_first',  dominate applies absolute value first
+	def __init__(self, A, Num_of_eigV=1, style='dominant_first', init_with_power_method=True):
+		self.exit_threshold = 0.000001
+		self.n = A.shape[0]	
+		self.A = A.copy()
+		self.Num_of_eigV = Num_of_eigV
+		self.init_with_power_method = init_with_power_method
 
-def CPM(A):		#	A is a symmetric np array
-	n = A.shape[0]	
-	x = np.random.randn(n,1)
-	x = x/np.linalg.norm(x)
-	z = A.dot(x)
-	c = np.absolute(z - x)
-	loop = True
+		if self.Num_of_eigV > self.n: self.Num_of_eigV = self.n
 
 
-	while loop: 
-		i = np.argmax(c)
-	
-		y = np.copy(x)
-		z_orig = np.copy(z)
-		y[i] = (z_orig/(x.T.dot(z_orig)))[i]
+		if style == 'dominant_first': self.dominant_first(A)
+		if style == 'least_dominant_first': pass
+		if style == 'largest_first': pass
+		if style == 'smallest_first': pass
 
-		xi = x[i]
+	def dominant_first(self, A):
+		self.eigValues = np.empty((1, 0))
+		self.eigVect = np.empty((self.n, 0))
+
 		
-		z = z_orig + (A[:, np.argmax(c)]*(y[i] - x[i])).reshape(n,1)
+		for eig_id in range(self.Num_of_eigV):
+			x = self.CPM(A)
+			eigValue = np.mean(A.dot(x)/x)
+			
+			self.eigVect = np.hstack((self.eigVect,x))	
+			self.eigValues = np.append(self.eigValues,eigValue)
 
-		yn = np.linalg.norm(y)
-		z = z/yn
-		x = y/yn
+			A = A - eigValue*x.dot(x.T)
 
-		y[i] = xi		# turn y into original x
+
+
+	def power_method(self, A, x):
+		loop = True
+
+		while loop:
+			z = A.dot(x)
+
+			eigs = z/x
+			eig_diff = np.absolute(np.max(eigs) - np.min(eigs))
+			if(eig_diff < 0.001): break;
+			x = z/x.T.dot(z)
+		return x
+
+	def CPM(self, A):												#	A is a symmetric PSD np array
+		x = np.random.randn(self.n,1)
+		x = x/np.linalg.norm(x)
+		if self.init_with_power_method: x = self.power_method(A, x)
+
+		z = A.dot(x)
+		c = np.absolute(z - x)
+		loop = True
 	
-		c = np.absolute(x - z/(y.T.dot(z_orig)))
+	
+		while loop: 
+			i = np.argmax(c)
+			denom = x.T.dot(z)
+	
+			yi = (z/(x.T.dot(z)))[i]
+			xi = x[i]
+			
+			z = z + (A[:, np.argmax(c)]*(yi-xi)).reshape(self.n,1)
+	
+			x[i] = yi
+			yn = np.linalg.norm(x)
+			z = z/yn
+			x = x/yn
+	
+			c = np.absolute(x - z/denom)
+			max_c = np.max(c)
 
-		if(np.sum(np.absolute(x - y)) < 0.00000001): 
-			#print A.dot(x)
-			print A.dot(x)/x
-			print '--------'
-			break;
+			if(max_c < self.exit_threshold): break;
 
-	return x
+		return x
 
 if __name__ == "__main__":
-	A = np.random.randn(10,10)
+	from eig_sorted import *
+	d = 2
+	A = np.random.randn(5000,5000)
 	A = A.dot(A.T)
-	print CPM(A) , '\n'
 
-	[S,V] = np.linalg.eig(A)
-	print V, '\n\n'
-	print S 
+
+	#	Ran coordinate wise power method
+	start_time = time.time() 
+	cpm = CPM(A, Num_of_eigV=d, style='dominant_first')
+	cpm_time = (time.time() - start_time)
+
+
+	#	Ran regular eig decomposition method
+	start_time = time.time() 
+	[V,D] = eig_sorted(A)
+	eig_time = (time.time() - start_time)
+
+
+
+	print cpm.eigValues , D[0:d]
+	print np.hstack((cpm.eigVect[0:4, 0:d], V[0:4, 0:d]))
+	print 'cpm_time : ' , cpm_time , '  ,  ' , 'eig_time : ', eig_time
+
+
 	import pdb; pdb.set_trace()
