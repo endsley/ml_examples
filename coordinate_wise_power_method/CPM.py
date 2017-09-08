@@ -18,12 +18,13 @@ class CPM():
 	def __init__(self, A, Num_of_eigV=1, style='dominant_first', init_with_power_method=True):
 		self.exit_threshold = 0.000001
 		self.n = A.shape[0]	
+		self.top_pcnt = int(np.round(self.n/50.0))		# number of rows to keep
 		self.A = A.copy()
 		self.Num_of_eigV = Num_of_eigV
 		self.init_with_power_method = init_with_power_method
 
 		if self.Num_of_eigV > self.n: self.Num_of_eigV = self.n
-
+		if self.top_pcnt < 1: self.top_pcnt = 1
 
 		if style == 'dominant_first': self.dominant_first(A)
 		if style == 'least_dominant_first': pass
@@ -58,7 +59,7 @@ class CPM():
 			x = z/x.T.dot(z)
 		return x
 
-	def CPM(self, A):												#	A is a symmetric PSD np array
+	def CPM_single(self, A):												#	A is a symmetric PSD np array
 		x = np.random.randn(self.n,1)
 		x = x/np.linalg.norm(x)
 		if self.init_with_power_method: x = self.power_method(A, x)
@@ -75,7 +76,7 @@ class CPM():
 			yi = (z/(x.T.dot(z)))[i]
 			xi = x[i]
 			
-			z = z + (A[:, np.argmax(c)]*(yi-xi)).reshape(self.n,1)
+			z = z + (A[:, i]*(yi-xi)).reshape(self.n,1)
 	
 			x[i] = yi
 			yn = np.linalg.norm(x)
@@ -89,10 +90,48 @@ class CPM():
 
 		return x
 
+	def CPM(self, A):												#	A is a symmetric PSD np array
+		x = np.random.randn(self.n,1)
+		x = x/np.linalg.norm(x)
+		if self.init_with_power_method: x = self.power_method(A, x)
+
+		z = A.dot(x)
+		c = np.absolute(z - x)
+		loop = True
+	
+	
+		while loop: 
+			i = np.argpartition(c.reshape((self.n,)), -self.top_pcnt)[-self.top_pcnt:] 
+			denom = x.T.dot(z)
+
+			yi = (z/(x.T.dot(z)))[i]
+			xi = x[i]
+
+			z = z + (A[:, i].dot(yi-xi))
+	
+			x[i] = yi
+			yn = np.linalg.norm(x)
+			z = z/yn
+			x = x/yn
+	
+			c = np.absolute(x - z/denom)
+			max_c = np.max(c)
+
+			if(max_c < 100000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			if(max_c < 10000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			if(max_c < 1000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			if(max_c < 100*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			if(max_c < 10*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			if(max_c < 5*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			if(max_c < self.exit_threshold): break;
+
+		return x
+
+
 if __name__ == "__main__":
 	from eig_sorted import *
 	d = 2
-	A = np.random.randn(5000,5000)
+	A = np.random.randn(100,100)
 	A = A.dot(A.T)
 
 
