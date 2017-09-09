@@ -18,7 +18,7 @@ class CPM():
 	def __init__(self, A, Num_of_eigV=1, style='dominant_first', init_with_power_method=True):
 		self.exit_threshold = 0.000001
 		self.n = A.shape[0]	
-		self.top_pcnt = int(np.round(self.n/50.0))		# number of rows to keep
+		self.top_pcnt = int(np.round(self.n/2.0))		# number of rows to keep
 		self.A = A.copy()
 		self.Num_of_eigV = Num_of_eigV
 		self.init_with_power_method = init_with_power_method
@@ -78,7 +78,6 @@ class CPM():
 			A = A - eigValue*x.dot(x.T)
 
 
-
 	def power_method(self, A, x):
 		loop = True
 
@@ -122,8 +121,8 @@ class CPM():
 		z = A.dot(x)
 		c = np.absolute(z - x)
 		loop = True
-	
-	
+		orig_percent = self.top_pcnt
+		
 		while loop: 
 			i = np.argpartition(c.reshape((self.n,)), -self.top_pcnt)[-self.top_pcnt:] 
 			denom = x.T.dot(z)
@@ -141,21 +140,33 @@ class CPM():
 			c = np.absolute(x - z/denom)
 			max_c = np.max(c)
 
-			if(max_c < 100000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			if(max_c < 10000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			if(max_c < 1000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			if(max_c < 100*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			if(max_c < 10*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			if(max_c < 5*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
 			if(max_c < self.exit_threshold): break;
+
+			if(self.top_pcnt == 2): pass
+			elif((max_c < 10000*self.exit_threshold) and (self.top_pcnt == orig_percent)): 
+				self.top_pcnt = int(self.top_pcnt/2) + 1
+			elif((max_c < 1000*self.exit_threshold) and (self.top_pcnt == int(orig_percent/2) + 1)): 
+				self.top_pcnt = int(self.top_pcnt/2) + 1
+			elif((max_c < 100*self.exit_threshold) and (self.top_pcnt == int(orig_percent/4) + 1)): 
+				self.top_pcnt = int(self.top_pcnt/2) + 1
+	
+			#print self.top_pcnt
+			#import pdb; pdb.set_trace()
+
+			#if(max_c < 5*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			#elif(max_c < 10*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			#elif(max_c < 100*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			#elif(max_c < 1000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			#elif(max_c < 10000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
+			#elif(max_c < 100000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
 
 		return x
 
 
 if __name__ == "__main__":
 	from eig_sorted import *
-	d = 2
-	A = np.random.randn(20,20)
+	d = 5
+	A = np.random.randn(2000,2000)
 	A = A + A.T
 	#A = A.dot(A.T)
 
@@ -170,11 +181,11 @@ if __name__ == "__main__":
 	[V,D] = eig_sorted(A)
 	eig_time = (time.time() - start_time)
 
-	print cpm.eigValues
-	print cpm.eigVect , '\n\n'
-
-	print V
-	print D
+#	print cpm.eigValues
+#	print cpm.eigVect , '\n\n'
+#
+#	print V
+#	print D
 
 	#print cpm.eigValues , D[0:d]
 	#print np.hstack((cpm.eigVect[0:4, 0:d], V[0:4, 0:d]))
