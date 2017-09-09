@@ -58,9 +58,20 @@ class CPM():
 
 		
 		for eig_id in range(self.Num_of_eigV):
-			x = self.CPM(A)
+			x = np.random.randn(self.n,1)
+			x = x/np.linalg.norm(x)
+
+			if(self.eigVect.shape[1] > 0):
+				[Q,R] = np.linalg.qr(np.hstack((self.eigVect, x)))
+				x = Q[:,-1].reshape((self.n,1))
+
+			if self.init_with_power_method: x = self.power_method(A, x)
+
+
+			x = self.CPM(A, x)
 			eigValue = np.mean(A.dot(x)/x)
-			
+
+
 			self.eigVect = np.hstack((self.eigVect,x))	
 			self.eigValues = np.append(self.eigValues,eigValue)
 
@@ -80,11 +91,7 @@ class CPM():
 			x = z/x.T.dot(z)
 		return x
 
-	def CPM_single(self, A):												#	A is a symmetric PSD np array
-		x = np.random.randn(self.n,1)
-		x = x/np.linalg.norm(x)
-		if self.init_with_power_method: x = self.power_method(A, x)
-
+	def CPM_single(self, A, x):												#	A is a symmetric PSD np array
 		z = A.dot(x)
 		c = np.absolute(z - x)
 		loop = True
@@ -111,11 +118,7 @@ class CPM():
 
 		return x
 
-	def CPM(self, A):												#	A is a symmetric PSD np array
-		x = np.random.randn(self.n,1)
-		x = x/np.linalg.norm(x)
-		if self.init_with_power_method: x = self.power_method(A, x)
-
+	def CPM(self, A, x):												#	A is a symmetric PSD np array
 		z = A.dot(x)
 		c = np.absolute(z - x)
 		loop = True
@@ -151,7 +154,7 @@ class CPM():
 
 if __name__ == "__main__":
 	from eig_sorted import *
-	d = 4
+	d = 2
 	A = np.random.randn(20,20)
 	A = A + A.T
 	#A = A.dot(A.T)
