@@ -27,9 +27,16 @@ class CPM():
 		if self.top_pcnt < 1: self.top_pcnt = 1
 
 		if style == 'dominant_first': self.dominant_first(A)
-		if style == 'least_dominant_first': pass
-		if style == 'largest_first': self.largest_first(A)
-		if style == 'smallest_first': self.smallest_first(A)
+		elif style == 'least_dominant_first': self.least_dominant_first(A)
+		elif style == 'largest_first': self.largest_first(A)
+		elif style == 'smallest_first': self.smallest_first(A)
+
+	def least_dominant_first(self, A):
+		A = A.dot(A.T)
+		self.smallest_first(A)
+		self.eigValues = np.sqrt(self.eigValues)
+
+		self.eigValues = np.mean(self.A.dot(self.eigVect)/self.eigVect, axis=0)
 
 	def smallest_first(self, A):
 		shift = np.linalg.norm(A, 1)
@@ -144,13 +151,14 @@ class CPM():
 
 if __name__ == "__main__":
 	from eig_sorted import *
-	d = 10
+	d = 4
 	A = np.random.randn(20,20)
 	A = A + A.T
+	#A = A.dot(A.T)
 
 	#	Ran coordinate wise power method
 	start_time = time.time() 
-	cpm = CPM(A, Num_of_eigV=d, style='smallest_first') #largest_first, dominant_first, smallest_first
+	cpm = CPM(A, Num_of_eigV=d, style='dominant_first') #largest_first, dominant_first, smallest_first, least_dominant_first
 	cpm_time = (time.time() - start_time)
 
 
@@ -165,9 +173,9 @@ if __name__ == "__main__":
 	print V
 	print D
 
-#	print cpm.eigValues , D[0:d]
-#	print np.hstack((cpm.eigVect[0:4, 0:d], V[0:4, 0:d]))
-#	print 'cpm_time : ' , cpm_time , '  ,  ' , 'eig_time : ', eig_time
+	#print cpm.eigValues , D[0:d]
+	#print np.hstack((cpm.eigVect[0:4, 0:d], V[0:4, 0:d]))
+	print 'cpm_time : ' , cpm_time , '  ,  ' , 'eig_time : ', eig_time
 
 
 	import pdb; pdb.set_trace()
