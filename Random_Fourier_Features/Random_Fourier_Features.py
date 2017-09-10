@@ -7,6 +7,12 @@ import sklearn.metrics
 import numpy.matlib
 from sklearn.preprocessing import normalize
 from numpy import genfromtxt
+import time
+
+import sklearn.metrics
+from sklearn.kernel_approximation import RBFSampler
+from sklearn.linear_model import SGDClassifier
+
 
 
 #	K(x, y) = exp(-gamma ||x-y||^2)
@@ -19,60 +25,18 @@ np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 
 def RFF(X, nrmlize, m, sigma):
+	N = X.shape[0]
+	d = X.shape[1]
 
+	phase_shift = 2*np.pi*np.random.rand(1, m)
+	phase_shift = np.matlib.repmat(phase_shift, N, 1)
+	rand_proj = np.random.randn(d, m)/(sigma)
 
+	P = np.cos(X.dot(rand_proj) + phase_shift)
+	K = (2.0/m)*P.dot(P.T)
 
-	b = 2*np.pi*np.random.rand(1, m)
-	b = np.matlib.repmat(b, self.N, 1)
+	return K
 
-	self.phase_shift = torch.from_numpy(b)
-	self.phase_shift = Variable(self.phase_shift.type(self.dtype), requires_grad=False)
-
-	u = np.random.randn(self.output_d, m)/(self.sigma)
-	self.rand_proj = torch.from_numpy(u)
-	self.rand_proj = Variable(self.rand_proj.type(self.dtype), requires_grad=False)
-
-	u2 = np.random.randn(self.d, m)/(self.sigma)
-	self.rand_proj2 = torch.from_numpy(u2)
-	self.rand_proj2 = Variable(self.rand_proj2.type(self.dtype), requires_grad=False)
-
-	P = torch.cos(torch.mm(input_data,self.rand_proj) + self.phase_shift)
-
-	K = torch.mm(P, P.transpose(0,1))
-	K = (2.0/m)*K
-	
-	#K = K + 0.02
-	#K = 1 - torch.sigmoid(-7*K + 3.5)
-	#K = 1 - torch.sigmoid(-8*K + 5)
-	#K = K.clamp(min=0)	#clamp doesn't seem to do back prop
-	K = torch.abs(K)
-
-
-
-
-
-#	if nrmlize:
-#		X = normalize(X, norm='l2', axis=1)
-#	
-#	gamma = 1.0/(2*sigma*sigma)
-#
-#	n = X.shape[0]
-#	d = X.shape[1]
-#	rbk = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma)
-#	
-#	u = np.random.randn(d, m)/(sigma)
-#	b = np.random.rand(1, m)
-#	b = np.matlib.repmat(b, n, 1)*2*np.pi
-#	
-#	y = np.cos(X.dot(u) + b)
-#	K = y.dot(y.T)*2/m
-#	error = np.linalg.norm(rbk - K)
-#
-#	print rbk[0:20,0:20]
-#	print K[0:20,0:20] , '\n'
-#	print 'Error from RFF : ' , error , '\n\n'
-#	import pdb; pdb.set_trace()
-#	return error
 
 
 if __name__ == "__main__":
@@ -82,14 +46,25 @@ if __name__ == "__main__":
 	m = 2000
 
 
-	RFF(X, True, m, sigma)
-
+	start_time = time.time() 
+	K = RFF(X, True, m, sigma)
+	K_time = (time.time() - start_time)
 
 
 	gamma = 1.0/(2*sigma*sigma)
+	start_time = time.time() 
 	rbk = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma)
+	rbk_time = (time.time() - start_time)
 
 
+	start_time = time.time() 
+	rbf_feature = RBFSampler(gamma=1, random_state=1, n_components=2000)
+	Z = rbf_feature.fit_transform(X)
+	rff_K = Z.dot(Z.T)
+	rff_time = (time.time() - start_time)
 
 
+	print K_time, rbk_time, rff_time
+
+	import pdb; pdb.set_trace()
 
