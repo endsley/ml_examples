@@ -41,7 +41,12 @@ def RFF(X, nrmlize, m, sigma):
 
 if __name__ == "__main__":
 	#X = np.array([[0,0],[0,1],[0,-1],[4,4],[4,5],[3,4],[4,3]], dtype='f')	 
-	X = genfromtxt('data_4.csv', delimiter=',')
+	#X = genfromtxt('../dataset/data_4.csv', delimiter=',')
+	#X = genfromtxt('../dataset/breast-cancer.csv', delimiter=',')
+	#X = genfromtxt('../dataset/facial_85.csv', delimiter=',')
+	X = genfromtxt('../dataset/moon_40000x7.csv', delimiter=',')
+	
+	
 	sigma = 0.5
 	m = 2000
 
