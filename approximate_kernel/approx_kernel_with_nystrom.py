@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import numpy as np
 from sklearn.kernel_approximation import Nystroem
+from sklearn.kernel_approximation import RBFSampler
 import sklearn.metrics
 import time 
 
@@ -15,6 +16,18 @@ import time
 num_of_samples = 14000
 X = np.random.random((num_of_samples,5))
 sampling_percentage = 0.05
+
+
+
+
+
+start_time = time.time() 
+RFF = RBFSampler(gamma=1,n_components= int(num_of_samples*sampling_percentage))
+V = RFF.fit_transform(X)
+RFF_estimated_kernel = V.dot(V.T)
+print("--- RFF Time : %s seconds ---" % (time.time() - start_time))
+
+
 
 
 start_time = time.time() 
@@ -33,7 +46,8 @@ print("--- Real Time : %s seconds ---" % (time.time() - start_time))
 print estimated_kernel[0:5, 0:5]
 print '\n\n'
 print real_kernel[0:5, 0:5]
-
+print '\n\n'
+print RFF_estimated_kernel[0:5, 0:5]
 
 
 

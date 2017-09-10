@@ -16,7 +16,7 @@ class CPM():
 	#	Num_of_eigV : return the number of eigen vectors
 	#	style : 'dominant_first' , 'least_dominant_first', 'largest_first', 'smallest_first',  dominate applies absolute value first
 	def __init__(self, A, Num_of_eigV=1, style='dominant_first', init_with_power_method=True):
-		self.exit_threshold = 0.000001
+		self.exit_threshold = 0.00001
 		self.n = A.shape[0]	
 		self.top_pcnt = int(np.round(self.n/2.0))		# number of rows to keep
 		self.A = A.copy()
@@ -61,13 +61,13 @@ class CPM():
 			x = np.random.randn(self.n,1)
 			x = x/np.linalg.norm(x)
 
-			if(self.eigVect.shape[1] > 0):
-				[Q,R] = np.linalg.qr(np.hstack((self.eigVect, x)))
-				x = Q[:,-1].reshape((self.n,1))
+			#if(self.eigVect.shape[1] > 0):
+			#	[Q,R] = np.linalg.qr(np.hstack((self.eigVect, x)))
+			#	x = Q[:,-1].reshape((self.n,1))
 
 			if self.init_with_power_method: x = self.power_method(A, x)
-
-
+			
+			
 			x = self.CPM(A, x)
 			eigValue = np.mean(A.dot(x)/x)
 
@@ -86,7 +86,8 @@ class CPM():
 
 			eigs = z/x
 			eig_diff = np.absolute(np.max(eigs) - np.min(eigs))
-			if(eig_diff < 0.001): break;
+			if(eig_diff < 0.1):
+				break;
 			x = z/x.T.dot(z)
 		return x
 
@@ -142,6 +143,7 @@ class CPM():
 
 			if(max_c < self.exit_threshold): break;
 
+			#print self.top_pcnt
 			if(self.top_pcnt == 2): pass
 			elif((max_c < 10000*self.exit_threshold) and (self.top_pcnt == orig_percent)): 
 				self.top_pcnt = int(self.top_pcnt/2) + 1
@@ -149,26 +151,16 @@ class CPM():
 				self.top_pcnt = int(self.top_pcnt/2) + 1
 			elif((max_c < 100*self.exit_threshold) and (self.top_pcnt == int(orig_percent/4) + 1)): 
 				self.top_pcnt = int(self.top_pcnt/2) + 1
-	
-			#print self.top_pcnt
-			#import pdb; pdb.set_trace()
-
-			#if(max_c < 5*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			#elif(max_c < 10*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			#elif(max_c < 100*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			#elif(max_c < 1000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			#elif(max_c < 10000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
-			#elif(max_c < 100000*self.exit_threshold): self.top_pcnt = int(self.top_pcnt/2) + 1
 
 		return x
 
 
 if __name__ == "__main__":
 	from eig_sorted import *
-	d = 5
-	A = np.random.randn(2000,2000)
-	A = A + A.T
-	#A = A.dot(A.T)
+	d = 1
+	A = np.random.randn(600,600)
+	#A = A + A.T
+	A = A.dot(A.T)
 
 	#	Ran coordinate wise power method
 	start_time = time.time() 
@@ -187,8 +179,8 @@ if __name__ == "__main__":
 #	print V
 #	print D
 
-	#print cpm.eigValues , D[0:d]
-	#print np.hstack((cpm.eigVect[0:4, 0:d], V[0:4, 0:d]))
+	print cpm.eigValues , D[0:d]
+	print np.hstack((cpm.eigVect[0:4, 0:d], V[0:4, 0:d]))
 	print 'cpm_time : ' , cpm_time , '  ,  ' , 'eig_time : ', eig_time
 
 
