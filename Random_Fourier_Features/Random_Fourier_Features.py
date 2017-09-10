@@ -44,7 +44,7 @@ if __name__ == "__main__":
 	#X = genfromtxt('../dataset/data_4.csv', delimiter=',')
 	#X = genfromtxt('../dataset/breast-cancer.csv', delimiter=',')
 	#X = genfromtxt('../dataset/facial_85.csv', delimiter=',')
-	X = genfromtxt('../dataset/moon_40000x7.csv', delimiter=',')
+	X = genfromtxt('../dataset/moon_30000x4.csv', delimiter=',')
 	
 	
 	sigma = 0.5
