@@ -141,7 +141,9 @@ class CPM():
 			c = np.absolute(x - z/denom)
 			max_c = np.max(c)
 
-			if(max_c < self.exit_threshold): break;
+			if(max_c < self.exit_threshold): 
+				print max_c , ' ' , 
+				break;
 
 			#print self.top_pcnt
 			if(self.top_pcnt == 2): pass

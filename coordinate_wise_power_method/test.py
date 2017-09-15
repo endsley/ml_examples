@@ -40,7 +40,7 @@ def very_large_matrix():
 	#	Ran coordinate wise power method
 	#largest_first, dominant_first, smallest_first, least_dominant_first
 	start_time = time.time() 
-	cpm = CPM(A, Num_of_eigV=d, style='largest_first', init_with_power_method=False, starting_percentage=0.0001) 
+	cpm = CPM(A, Num_of_eigV=d, style='largest_first', init_with_power_method=False, starting_percentage=0.004) 
 	cpm_time = (time.time() - start_time)
 
 	print 'cpm_time : ' , cpm_time 
