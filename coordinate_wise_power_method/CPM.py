@@ -2,7 +2,6 @@
 #	Assume symmetric matrix
 
 import numpy as np
-import time 
 
 
 
@@ -15,10 +14,10 @@ class CPM():
 	#	A is a symmetric np array	::::  VERY IMPORTANT :::::::
 	#	Num_of_eigV : return the number of eigen vectors
 	#	style : 'dominant_first' , 'least_dominant_first', 'largest_first', 'smallest_first',  dominate applies absolute value first
-	def __init__(self, A, Num_of_eigV=1, style='dominant_first', init_with_power_method=True):
+	def __init__(self, A, Num_of_eigV=1, style='dominant_first', init_with_power_method=True, starting_percentage=0.5):
 		self.exit_threshold = 0.00001
 		self.n = A.shape[0]	
-		self.top_pcnt = int(np.round(self.n/2.0))		# number of rows to keep
+		self.top_pcnt = int(np.round(self.n*starting_percentage))		# number of rows to keep
 		self.A = A.copy()
 		self.Num_of_eigV = Num_of_eigV
 		self.init_with_power_method = init_with_power_method
@@ -30,6 +29,7 @@ class CPM():
 		elif style == 'least_dominant_first': self.least_dominant_first(A)
 		elif style == 'largest_first': self.largest_first(A)
 		elif style == 'smallest_first': self.smallest_first(A)
+
 
 	def least_dominant_first(self, A):
 		A = A.dot(A.T)
@@ -155,33 +155,3 @@ class CPM():
 		return x
 
 
-if __name__ == "__main__":
-	from eig_sorted import *
-	d = 1
-	A = np.random.randn(600,600)
-	#A = A + A.T
-	A = A.dot(A.T)
-
-	#	Ran coordinate wise power method
-	start_time = time.time() 
-	cpm = CPM(A, Num_of_eigV=d, style='dominant_first') #largest_first, dominant_first, smallest_first, least_dominant_first
-	cpm_time = (time.time() - start_time)
-
-
-	#	Ran regular eig decomposition method
-	start_time = time.time() 
-	[V,D] = eig_sorted(A)
-	eig_time = (time.time() - start_time)
-
-#	print cpm.eigValues
-#	print cpm.eigVect , '\n\n'
-#
-#	print V
-#	print D
-
-	print cpm.eigValues , D[0:d]
-	print np.hstack((cpm.eigVect[0:4, 0:d], V[0:4, 0:d]))
-	print 'cpm_time : ' , cpm_time , '  ,  ' , 'eig_time : ', eig_time
-
-
-	import pdb; pdb.set_trace()
