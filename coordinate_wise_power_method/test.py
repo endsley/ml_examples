@@ -6,7 +6,7 @@ from CPM import *
 
 def basic_test():
 	d = 1
-	A = np.random.randn(600,600)
+	A = np.random.randn(2048,2048)
 	#A = A + A.T
 	A = A.dot(A.T)
 
@@ -27,14 +27,14 @@ def basic_test():
 #	print V
 #	print D
 
-	print cpm.eigValues , D[0:d]
+	print cpm.eigValues , ' , ' , D[0:d]
 	print np.hstack((cpm.eigVect[0:4, 0:d], V[0:4, 0:d]))
 	print 'cpm_time : ' , cpm_time , '  ,  ' , 'eig_time : ', eig_time
 
 
 def very_large_matrix():
 	d = 1
-	A = np.random.randn(100000,100000)
+	A = np.random.randn(50000,50000)
 	A = A + A.T
 
 	#	Ran coordinate wise power method
@@ -46,5 +46,5 @@ def very_large_matrix():
 	print 'cpm_time : ' , cpm_time 
 
 
-very_large_matrix()
-#basic_test()
+#very_large_matrix()
+basic_test()

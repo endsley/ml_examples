@@ -80,13 +80,14 @@ class CPM():
 
 	def power_method(self, A, x):
 		loop = True
+		diff_exit = A.shape[0]*A.shape[1]/50
 
 		while loop:
 			z = A.dot(x)
 
 			eigs = z/x
 			eig_diff = np.absolute(np.max(eigs) - np.min(eigs))
-			if(eig_diff < 0.1):
+			if(eig_diff < diff_exit):
 				break;
 			x = z/x.T.dot(z)
 		return x
@@ -142,7 +143,7 @@ class CPM():
 			max_c = np.max(c)
 
 			if(max_c < self.exit_threshold): 
-				print max_c , ' ' , 
+				#print max_c , ' ' , 
 				break;
 
 			#print self.top_pcnt
