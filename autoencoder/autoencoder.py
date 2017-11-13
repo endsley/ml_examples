@@ -4,69 +4,97 @@ import torch
 from torch.autograd import Variable
 import numpy as np
 
-dtype = torch.FloatTensor
-N, D_in, D_out = 20, 20, 4
+class autoencoder():
+	def __init__(self, X, D_out):
+		self.dtype = torch.FloatTensor
+		self.data = X
+		self.N = X.shape[0]
+		self.D_in = X.shape[1]
+		self.D_out = D_out
+		tmpX = torch.from_numpy(X)
+		self.X = Variable(tmpX.type(self.dtype), requires_grad=False)
 
-layers = int(np.floor(np.log(D_in)/np.log(D_out)))
-W = {}
-
-
-layer_id = 0
-for m in range(layers):
-	Din = int(D_in/np.power(2.0,m))
-	Dout = int(D_in/np.power(2.0,m+1))
-	W[layer_id] = Variable(torch.randn(Din, Dout).type(dtype), requires_grad=True)
-	layer_id += 1
-
-W[layer_id] = Variable(torch.randn(Dout, D_out).type(dtype), requires_grad=True)
-layer_id += 1
-W[layer_id] = Variable(torch.randn(D_out, Dout).type(dtype), requires_grad=True)
-layer_id += 1
-
-for m in range(layers)[::-1]:
-	Din = int(D_in/np.power(2.0,m+1))
-	Dout = int(D_in/np.power(2.0,m))
+		layers = int(np.floor(np.log(self.D_in)/np.log(self.D_out)))
+		self.W = {}
 		
-	W[layer_id] = Variable(torch.randn(Din, Dout).type(dtype), requires_grad=True)
-	layer_id += 1
-	
-for i,j in W.items():	
-	print i , j.data.numpy().shape
+		
+		layer_id = 0
+		for m in range(layers):
+			Din = int(self.D_in/np.power(2.0,m))
+			Dout = int(self.D_in/np.power(2.0,m+1))
+			self.W[layer_id] = Variable(torch.randn(Din, Dout).type(self.dtype), requires_grad=True)
+			layer_id += 1
+		
+		self.W[layer_id] = Variable(torch.randn(Dout, self.D_out).type(self.dtype), requires_grad=True)
+		layer_id += 1
+		self.W[layer_id] = Variable(torch.randn(self.D_out, Dout).type(self.dtype), requires_grad=True)
+		layer_id += 1
+		
+		for m in range(layers)[::-1]:
+			Din = int(self.D_in/np.power(2.0,m+1))
+			Dout = int(self.D_in/np.power(2.0,m))
+				
+			self.W[layer_id] = Variable(torch.randn(Din, Dout).type(self.dtype), requires_grad=True)
+			layer_id += 1
+			
+	def print_W_shapes(self):
+		for i,j in self.W.items():	
+			print i , j.data.numpy().shape
+
+
+	def forward(self):
+		h = self.X
+		for i, j in self.W.items():
+			h = h.mm(self.W[i])
+
+			if i < (len(self.W)-1):
+				h = h.clamp(min=0)
+
+		loss = (h - self.X).pow(2).sum()
+		return loss
+
+	def step_forward(self, lr):
+		loss = self.forward()
+		loss.backward()
+
+		for i, j in self.W.items():
+			self.W[i].data -= lr * self.W[i].grad.data
+
+		loss_after = self.forward()
+		return [loss, loss_after]
+
+	def step_back(self, lr):
+		for i, j in self.W.items():
+			self.W[i].data += lr * self.W[i].grad.data
+
+	def optimize(self):
+		lr = 1e-3
+
+		for m in range(1000):
+			[loss, loss_after] = self.step_forward(lr)
+
+			if loss_after.data[0] > loss.data[0]: 
+				self.step_back(lr)
+				lr = lr * 0.6
+			else:
+				lr = lr * 1.05
+
+			print loss.data[0], lr
 
 
 
 
-x = Variable(torch.randn(N, D_in).type(dtype), requires_grad=False)
+			#loss = self.forward()
+			#loss.backward()
+
+			#print loss.data[0]
+			#for i, j in self.W.items():
+			#	self.W[i].data -= lr * self.W[i].grad.data
+			#	self.W[i].grad.data.zero_()
 
 
-learning_rate = 1e-6
-#for t in range(500):
+x = np.random.randn(30,20)
+#x = np.ones((10,9))
+AE = autoencoder(x,4)
+AE.optimize()
 
-h = x
-for i, j in W.items():
-	h = h.mm(W[i])
-	if i < len(W):
-		h = h.clamp(min=0)
-
-	#if i == layers: 
-	#	h
-	#import pdb; pdb.set_trace()
-
-loss = (h - x).pow(2).sum()
-loss.backward()
-
-
-import pdb; pdb.set_trace()
-
-
-
-  #  y_pred = x.mm(w1).clamp(min=0).mm(w2)
-  #  loss = (y_pred - y).pow(2).sum()
-  #  print(t, loss.data[0])
-  #  loss.backward()
-  #  w1.data -= learning_rate * w1.grad.data
-  #  w2.data -= learning_rate * w2.grad.data
-
-  #  # Manually zero the gradients after updating weights
-  #  w1.grad.data.zero_()
-  #  w2.grad.data.zero_()
