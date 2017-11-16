@@ -6,6 +6,14 @@ from torch.autograd import Variable
 import numpy as np
 import collections
 import pickle
+import sklearn
+from sklearn.cluster import SpectralClustering
+from numpy import genfromtxt
+from sklearn.metrics.cluster import normalized_mutual_info_score
+from sklearn.metrics.cluster import adjusted_rand_score
+from sklearn.cluster import KMeans
+
+
 
 class autoencoder():
 	def __init__(self, X, n_encoding_layers, D_out):	#D_out is the Dimension of bottleneck
@@ -143,17 +151,11 @@ class autoencoder():
 
 
 		return loss
-		#encode_X = self.encoder(self.X)
-		#print encode_X
-
-	def save_result(self):
-		result = { "lion": "yellow", "kitty": "red" }
-		pickle.dump( favorite_color, open( "save.p", "wb" ) )
-
 
 def train():
-	x = np.random.randn(30, 5)
-	AE = autoencoder(x, 2, 2)
+	x = genfromtxt('data/breast-cancer.csv', delimiter=',')
+
+	AE = autoencoder(x, 2, 7)
 	loss = AE.optimize_autoencoder()
 	
 	if os.path.exists('results.pk'):
@@ -170,10 +172,29 @@ def train():
 	pickle.dump(res, open('results.pk','wb'))
 
 def load():
-	if os.path.exists('results.pk'):
-		res = pickle.load(open('results.pk','rb'))
+	data = genfromtxt('data/breast-cancer.csv', delimiter=',')
+	label = genfromtxt('data/breast-cancer-labels.csv', delimiter=',')
+	res = pickle.load(open('results.pk','rb'))
+	AE = res['autoencoder']
+	encodedX = AE.encoder(AE.X)
 
-		print res['loss']
-		print res['autoencoder']
+	d_matrix = sklearn.metrics.pairwise.pairwise_distances(encodedX.data.numpy(), Y=None, metric='euclidean')
+	s = np.median(d_matrix)
+	Vgamma = 1/(2*s*s)
+	spAlloc = SpectralClustering(2, gamma=Vgamma).fit_predict(encodedX.data.numpy())
+	nmi_sp = np.around(normalized_mutual_info_score(label, spAlloc), 3)
+
+
+	kmAlloc = KMeans(2).fit_predict(encodedX.data.numpy())
+	nmi_km = np.around(normalized_mutual_info_score(label, kmAlloc), 3)
+
+	print encodedX
+
+	print nmi_sp
+	print nmi_km
+
+	print res['loss']
+	print res['autoencoder']
 		
+#train()
 load()
