@@ -12,6 +12,7 @@ from numpy import genfromtxt
 from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.cluster import KMeans
+from sklearn import preprocessing
 
 
 
@@ -154,8 +155,9 @@ class autoencoder():
 
 def train():
 	x = genfromtxt('data/breast-cancer.csv', delimiter=',')
+	x = preprocessing.scale(x)
 
-	AE = autoencoder(x, 2, 7)
+	AE = autoencoder(x, 2, 6)
 	loss = AE.optimize_autoencoder()
 	
 	if os.path.exists('results.pk'):
