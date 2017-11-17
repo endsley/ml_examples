@@ -142,6 +142,7 @@ class autoencoder():
 			new_loss = self.forward_autoencoder()
 			lossDiff = loss.data[0] - new_loss.data[0]
 
+			print loss.data[0]
 			if lossDiff <= 0.00000000001:
 				lr = lr*0.7
 				optimizer = self.get_optimizer(lr, opt='Adam')
@@ -154,14 +155,20 @@ class autoencoder():
 		return loss
 
 def train():
-	x = genfromtxt('data/breast-cancer.csv', delimiter=',')
+	dataFile = 'breast-cancer'
+	num_of_layers = 2
+	num_of_output = 8
+	FN = 'networks/AutoNN_' + dataFile + '_' + str(num_of_layers) + '_' + str(num_of_output) + '.pk'
+
+	x = genfromtxt('data/' + dataFile + '.csv', delimiter=',')
 	x = preprocessing.scale(x)
 
-	AE = autoencoder(x, 2, 6)
+	AE = autoencoder(x, num_of_layers, num_of_output)
 	loss = AE.optimize_autoencoder()
 	
-	if os.path.exists('results.pk'):
-		res = pickle.load(open('results.pk','rb'))
+
+	if os.path.exists(FN):
+		res = pickle.load(open(FN,'rb'))
 		if loss.data[0] < res['loss']:
 			res['loss'] = loss.data[0]
 			res['autoencoder'] = AE
@@ -171,12 +178,17 @@ def train():
 		res['loss'] = loss.data[0]
 		res['autoencoder'] = AE
 	
-	pickle.dump(res, open('results.pk','wb'))
+	pickle.dump(res, open(FN,'wb'))
 
 def load():
+	dataFile = 'breast-cancer'
+	num_of_layers = 2
+	num_of_output = 6
+	FN = 'networks/AutoNN_' + dataFile + '_' + num_of_layers + '_' + num_of_output + '.pk'
+
 	data = genfromtxt('data/breast-cancer.csv', delimiter=',')
 	label = genfromtxt('data/breast-cancer-labels.csv', delimiter=',')
-	res = pickle.load(open('results.pk','rb'))
+	res = pickle.load(open(FN,'rb'))
 	AE = res['autoencoder']
 	encodedX = AE.encoder(AE.X)
 
@@ -197,6 +209,7 @@ def load():
 
 	print res['loss']
 	print res['autoencoder']
+	import pdb; pdb.set_trace()
 		
-#train()
-load()
+train()
+#load()
