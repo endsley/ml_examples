@@ -13,7 +13,21 @@ from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
+import time 
 
+#dataFile = 'breast-cancer'
+#labelFile = 'breast-cancer-labels'
+#num_of_layers = 1
+#num_of_output = 2
+
+
+
+dataFile = 'mnist_10000_784'
+labelFile = 'mnist_10000_784_label'
+num_of_layers = 2
+num_of_output = 10
+
+FN = 'networks/AutoNN_' + dataFile + '_' + str(num_of_layers) + '_' + str(num_of_output) + '.pk'
 
 
 class autoencoder():
@@ -32,6 +46,7 @@ class autoencoder():
 		[self.encoder, encodeElements] = self.build_encoder(n_encoding_layers)
 		[self.decoder, decodeElements] = self.build_decoder(n_encoding_layers)
 
+		#import pdb; pdb.set_trace()
 		self.jointParams = [p for p in self.encoder.parameters()] + [p for p in self.decoder.parameters()]
 
 
@@ -49,10 +64,15 @@ class autoencoder():
 			layer_index += 1
 			layer_list.append(linLayer)
 
-			if i < (n_encoding_layers-1):
-				Relayer = ('Relu:' + str(layer_index), torch.nn.ReLU())
-				layer_index += 1
-				layer_list.append(Relayer)
+			Relayer = ('Relu:' + str(layer_index), torch.nn.ReLU())
+			layer_index += 1
+			layer_list.append(Relayer)
+
+			btn = torch.nn.BatchNorm1d(l2, eps=1e-05, momentum=0.1, affine=False)
+			btNorm = ('BatchNorm:' + str(layer_index), btn)
+			layer_index += 1
+			layer_list.append(btNorm)
+
 
 			l = l2
 
@@ -89,6 +109,16 @@ class autoencoder():
 			layer_list.append(linLayer)
 
 			if i < (n_encoding_layers-1):
+				btn = torch.nn.BatchNorm1d(l2, eps=1e-05, momentum=0.1, affine=False)
+				btNorm = ('BatchNorm:' + str(layer_index), btn)
+				layer_index += 1
+				layer_list.append(btNorm)
+
+				#DP = ('Dropout:' + str(layer_index), torch.nn.Dropout(0.1))
+				#layer_index += 1
+				#layer_list.append(DP)
+
+
 				Relayer = ('Relu:' + str(layer_index), torch.nn.ReLU())
 				layer_index += 1
 				layer_list.append(Relayer)
@@ -96,6 +126,15 @@ class autoencoder():
 			l = l2
 
 		if l > self.D_out:
+			btn = torch.nn.BatchNorm1d(l2, eps=1e-05, momentum=0.1, affine=False)
+			btNorm = ('BatchNorm:' + str(layer_index), btn)
+			layer_index += 1
+			layer_list.append(btNorm)
+
+			#DP = ('Dropout:' + str(layer_index), torch.nn.Dropout(0.5))
+			#layer_index += 1
+			#layer_list.append(DP)
+
 			Relayer = ('Relu:' + str(layer_index), torch.nn.ReLU())
 			layer_index += 1
 			layer_list.append(Relayer)
@@ -107,7 +146,13 @@ class autoencoder():
 
 		OD = collections.OrderedDict(layer_list)
 		encoder = torch.nn.Sequential(OD)
-		
+
+		for param in encoder.parameters():
+			if(len(param.data.numpy().shape)) > 1:
+				torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
+			else:
+				param.data = torch.zeros(param.data.size())
+
 		return [encoder, layer_list]
 
 
@@ -154,13 +199,11 @@ class autoencoder():
 
 		return loss
 
-def train():
-	dataFile = 'breast-cancer'
-	num_of_layers = 2
-	num_of_output = 8
-	FN = 'networks/AutoNN_' + dataFile + '_' + str(num_of_layers) + '_' + str(num_of_output) + '.pk'
 
-	x = genfromtxt('data/' + dataFile + '.csv', delimiter=',')
+
+def train():
+
+	x = genfromtxt('../dataset/' + dataFile + '.csv', delimiter=',')
 	x = preprocessing.scale(x)
 
 	AE = autoencoder(x, num_of_layers, num_of_output)
@@ -181,16 +224,12 @@ def train():
 	pickle.dump(res, open(FN,'wb'))
 
 def load():
-	dataFile = 'breast-cancer'
-	num_of_layers = 2
-	num_of_output = 6
-	FN = 'networks/AutoNN_' + dataFile + '_' + num_of_layers + '_' + num_of_output + '.pk'
-
-	data = genfromtxt('data/breast-cancer.csv', delimiter=',')
-	label = genfromtxt('data/breast-cancer-labels.csv', delimiter=',')
+	data = genfromtxt('../dataset/' + dataFile + '.csv', delimiter=',')
+	label = genfromtxt('../dataset/' + labelFile + '.csv', delimiter=',')
 	res = pickle.load(open(FN,'rb'))
 	AE = res['autoencoder']
 	encodedX = AE.encoder(AE.X)
+
 
 	d_matrix = sklearn.metrics.pairwise.pairwise_distances(encodedX.data.numpy(), Y=None, metric='euclidean')
 	s = np.median(d_matrix)
@@ -208,8 +247,19 @@ def load():
 	print nmi_km
 
 	print res['loss']
-	print res['autoencoder']
-	import pdb; pdb.set_trace()
+	#print res['autoencoder']
+
+	txt = dataFile + ' nmiSP : ' + str(nmi_sp) + ' , nmiKM : ' + str(nmi_km) + ' , num_of_layers:' + str(num_of_layers) + ' , num_of_output:' +  str(num_of_output) + '\n'
+
+	fin = open('auto_out.txt','a')
+	fin.write(txt)
+	fin.close()
 		
+	
+#for m in range(100):
+#	train()
+
+start_time = time.time() 
 train()
-#load()
+load()
+print("--- %s seconds ---" % (time.time() - start_time))
