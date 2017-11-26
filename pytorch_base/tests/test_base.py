@@ -13,3 +13,6 @@ class test_base():
 
 	def train(self):
 		self.tbase.optimize()
+		x = self.db['dataset'].get_data()
+
+		self.db['y_pred'] = self.db['model']( x )

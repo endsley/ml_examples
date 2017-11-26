@@ -17,6 +17,13 @@ class basic_neural_net(torch.nn.Module):
 
 		self.criterion = torch.nn.MSELoss(size_average=False)
 
+		for param in self.parameters():
+			if(len(param.data.numpy().shape)) > 1:
+				torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
+			else:
+				param.data = torch.zeros(param.data.size())
+
+
 	def get_optimizer(self, learning_rate):
 		return torch.optim.Adam(self.parameters(), lr=learning_rate)
 
