@@ -9,15 +9,22 @@ import torch.nn.functional as F
 
 
 class basic_neural_net(torch.nn.Module):
-    def __init__(self):
+	def __init__(self):
 		super(basic_neural_net, self).__init__()
 
 		self.l1 = torch.nn.Linear(2, 2, bias=True)
 		self.l2 = torch.nn.Linear(2, 1, bias=True)
 
-		self.optimizer = torch.optim.SGD(self.parameters(), lr=0.1)
+		self.criterion = torch.nn.MSELoss(size_average=False)
 
-    def forward(self, x):
+	def get_optimizer(self, learning_rate):
+		return torch.optim.Adam(self.parameters(), lr=learning_rate)
+
+	def compute_loss(self, labels, y_pred):
+		#return (y_pred - labels).norm()
+		return self.criterion(y_pred, labels)
+
+	def forward(self, x):
 		y1 = F.relu(self.l1(x))
 		y_pred = self.l2(y1)
 		

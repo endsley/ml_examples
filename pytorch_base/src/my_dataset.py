@@ -8,17 +8,21 @@ from torch.utils.data import Dataset, DataLoader
 
 
 class my_dataset(Dataset):
-    def __init__(self, db):
-        self.x = np.loadtxt(db['data_file_name'], delimiter=',', dtype=np.float32)
-        self.y = np.loadtxt(db['label_file_name'], delimiter=',', dtype=np.int32)
+	def __init__(self, db):
+		self.x = np.loadtxt(db['data_file_name'], delimiter=',', dtype=np.float32)
+		self.y = np.loadtxt(db['label_file_name'], delimiter=',', dtype=np.int32)
+		self.y = self.y.reshape((self.y.shape[0],1))
 
-        self.len = self.x.shape[0]
+		self.x = torch.from_numpy(self.x)
+		self.y = torch.from_numpy(self.y)
 
-    def __getitem__(self, index):
-        return self.x[index], self.y[index]
+		self.len = self.x.shape[0]
 
-    def __len__(self):
-        return self.len
+	def __getitem__(self, index):
+		return self.x[index], self.y[index]
+
+	def __len__(self):
+		return self.len
 
 
 
