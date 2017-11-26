@@ -12,7 +12,7 @@ class basic_net_test(test_base):
 		db['label_file_name'] = '../dataset/data_4_label.csv'
 		db['epoc_loop'] = 1000			#	How many time to repeat the epoch
 		db['batch_size'] = 4			#	Size for each batch
-		db['learning_rate'] = 0.005	
+		db['learning_rate'] = 0.01
 		db['print_loss'] = True
 		db['dataType'] = torch.FloatTensor
 		db['model'] = basic_neural_net()

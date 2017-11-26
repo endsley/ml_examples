@@ -13,19 +13,24 @@ class basic_neural_net(torch.nn.Module):
 		super(basic_neural_net, self).__init__()
 
 		self.l1 = torch.nn.Linear(2, 2, bias=True)
-		self.l2 = torch.nn.Linear(2, 1, bias=True)
+		self.l2 = torch.nn.Linear(2, 2, bias=True)
+		self.l3 = torch.nn.Linear(2, 1, bias=True)
+		self.bN = torch.nn.BatchNorm1d(2)
 
 		self.criterion = torch.nn.MSELoss(size_average=False)
 
-		for param in self.parameters():
-			if(len(param.data.numpy().shape)) > 1:
-				torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
-			else:
-				param.data = torch.zeros(param.data.size())
+		#for param in self.parameters():
+		#	if(len(param.data.numpy().shape)) > 1:
+		#		torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
+		#	else:
+		#		param.data = torch.zeros(param.data.size())
 
 
 	def get_optimizer(self, learning_rate):
 		return torch.optim.Adam(self.parameters(), lr=learning_rate)
+		#return torch.optim.Adagrad(self.parameters(), lr=learning_rate)
+		#return torch.optim.LBFGS(self.parameters(), lr=learning_rate)
+		
 
 	def compute_loss(self, labels, y_pred):
 		#return (y_pred - labels).norm()
@@ -33,6 +38,9 @@ class basic_neural_net(torch.nn.Module):
 
 	def forward(self, x):
 		y1 = F.relu(self.l1(x))
-		y_pred = self.l2(y1)
+		y2 = self.bN(y1)
+		y3 = self.l2(y2)
+		y4 = self.bN(y3)
+		y_pred = self.l3(y4)
 		
 		return y_pred
