@@ -15,17 +15,17 @@ from sklearn.cluster import KMeans
 from sklearn import preprocessing
 import time 
 
-#dataFile = 'breast-cancer'
-#labelFile = 'breast-cancer-labels'
-#num_of_layers = 1
-#num_of_output = 2
+dataFile = 'breast-cancer'
+labelFile = 'breast-cancer-labels'
+num_of_layers = 1
+num_of_output = 2
 
 
+#dataFile = 'mnist_10000_784'
+#labelFile = 'mnist_10000_784_label'
+#num_of_layers = 10
+#num_of_output = 10
 
-dataFile = 'mnist_10000_784'
-labelFile = 'mnist_10000_784_label'
-num_of_layers = 2
-num_of_output = 10
 
 FN = 'networks/AutoNN_' + dataFile + '_' + str(num_of_layers) + '_' + str(num_of_output) + '.pk'
 
@@ -45,9 +45,26 @@ class autoencoder():
 		
 		[self.encoder, encodeElements] = self.build_encoder(n_encoding_layers)
 		[self.decoder, decodeElements] = self.build_decoder(n_encoding_layers)
-
-		#import pdb; pdb.set_trace()
 		self.jointParams = [p for p in self.encoder.parameters()] + [p for p in self.decoder.parameters()]
+
+		#self.plot_initial_weights()
+	
+
+	def plot_initial_weights(self):
+		#This part plots out the initialization weights
+		M = None
+		for params in self.jointParams:
+			if len(params.data.size()) == 2:
+				if type(M) == type(None):
+					M = params.data.numpy()[0]
+				else:
+					M = np.append(M, params.data.numpy()[0])
+	
+		import matplotlib.pyplot as plt
+		plt.hist(M, normed=True, bins=100)
+		plt.ylabel('Probability');
+		#plt.title('kaiming_normal');
+		plt.show()
 
 
 	def build_decoder(self, n_encoding_layers):
@@ -90,6 +107,9 @@ class autoencoder():
 		OD = collections.OrderedDict(layer_list)
 		decoder = torch.nn.Sequential(OD)
 	
+
+		self.initialize_weights(decoder)
+
 		return [decoder, layer_list] 
 
 
@@ -147,14 +167,29 @@ class autoencoder():
 		OD = collections.OrderedDict(layer_list)
 		encoder = torch.nn.Sequential(OD)
 
-		for param in encoder.parameters():
-			if(len(param.data.numpy().shape)) > 1:
-				torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
-			else:
-				param.data = torch.zeros(param.data.size())
+
+		self.initialize_weights(encoder)
+
+#		for param in encoder.parameters():
+#			if(len(param.data.numpy().shape)) > 1:
+#				torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
+#				#torch.nn.init.kaiming_uniform(param.data , a=0, mode='fan_in')	
+#				#torch.nn.init.xavier_normal(param.data)
+#				#torch.nn.init.xavier_uniform(param.data)
+#			else:
+#				param.data = torch.zeros(param.data.size())
 
 		return [encoder, layer_list]
 
+	def initialize_weights(self, network):
+		for param in network.parameters():
+			if(len(param.data.numpy().shape)) > 1:
+				torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
+				#torch.nn.init.kaiming_uniform(param.data , a=0, mode='fan_in')	
+				#torch.nn.init.xavier_normal(param.data)
+				#torch.nn.init.xavier_uniform(param.data)
+			else:
+				param.data = torch.zeros(param.data.size())
 
 	def show_autoencoder_layers(self):
 		for m in self.layer_list: print m
@@ -230,18 +265,21 @@ def load():
 	AE = res['autoencoder']
 	encodedX = AE.encoder(AE.X)
 
+	X = encodedX.data.numpy()
+	#X = preprocessing.scale(encodedX.data.numpy())
 
-	d_matrix = sklearn.metrics.pairwise.pairwise_distances(encodedX.data.numpy(), Y=None, metric='euclidean')
+
+	d_matrix = sklearn.metrics.pairwise.pairwise_distances(X, Y=None, metric='euclidean')
 	s = np.median(d_matrix)
 	Vgamma = 1/(2*s*s)
-	spAlloc = SpectralClustering(2, gamma=Vgamma).fit_predict(encodedX.data.numpy())
+	spAlloc = SpectralClustering(2, gamma=Vgamma).fit_predict(X)
 	nmi_sp = np.around(normalized_mutual_info_score(label, spAlloc), 3)
 
 
-	kmAlloc = KMeans(2).fit_predict(encodedX.data.numpy())
+	kmAlloc = KMeans(2).fit_predict(X)
 	nmi_km = np.around(normalized_mutual_info_score(label, kmAlloc), 3)
 
-	print encodedX
+	print X
 
 	print nmi_sp
 	print nmi_km
