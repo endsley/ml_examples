@@ -21,6 +21,7 @@ class basic_net_test(test_base):
 
 
 B = basic_net_test()
+
 B.train()
 print B.db['y_pred']
 import pdb; pdb.set_trace()

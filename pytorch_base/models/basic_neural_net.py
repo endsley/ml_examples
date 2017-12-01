@@ -7,8 +7,6 @@ import torch.nn.functional as F
 from SGD import *
 
 
-
-
 class basic_neural_net(torch.nn.Module):
 	def __init__(self, num_input, num_hidden):
 		super(basic_neural_net, self).__init__()
@@ -44,7 +42,6 @@ class basic_neural_net(torch.nn.Module):
 
 	def forward(self, x):
 		#x1 = self.bn(x)
-
 		y1 = F.relu(self.l1(x))
 		#y2 = self.bN(y1)
 		y3 = self.l2(y1)
