@@ -9,10 +9,14 @@ from skimage import io, transform
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
+import torch.nn as nn
+import torch.nn.functional as F
 from torchvision import transforms, utils
 import types
 from os import listdir
 from os.path import isfile, join
+from torch.autograd import Variable
+
 
 
 class image_datasets(Dataset):
@@ -54,11 +58,16 @@ class image_datasets(Dataset):
 		image = torch.from_numpy(image)
 		return image
 
-face_data = image_datasets(root_dir='./dataset_img/')
-data_loader = DataLoader(face_data, batch_size=5, shuffle=True, num_workers=4)
+#face_data = image_datasets(root_dir='./imgs')
+face_data = image_datasets(root_dir='../dataset/faces/')
+data_loader = DataLoader(face_data, batch_size=2, shuffle=True, num_workers=4)
+conv1 = nn.Conv1d(1, 10, kernel_size=5)
 
 for i, data in enumerate(data_loader, 0):
 	print(data.shape)
-	face_data.display_image(data[0,:,:])
+	data = Variable(data.type(torch.FloatTensor), requires_grad=False)
+
+
+	#face_data.display_image(data[0,:,:])
 	import pdb; pdb.set_trace()	
 
