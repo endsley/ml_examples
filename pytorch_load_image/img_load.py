@@ -32,7 +32,6 @@ class image_datasets(Dataset):
 				self.image_files.append(i)
 
 	def display_image(self, img_id):
-
 		if type(img_id) == torch.ByteTensor:
 			image = img_id
 		elif type(img_id) == types.IntType:
@@ -55,19 +54,24 @@ class image_datasets(Dataset):
 	def __getitem__(self, idx):
 		img_name = os.path.join(self.root_dir, self.image_files[idx])
 		image = io.imread(img_name)
+		if len(image.shape) == 2:
+			image = np.expand_dims(image,0)
+		elif len(image.shape) == 3:
+			image = np.moveaxis(image, -1, 0)
+
 		image = torch.from_numpy(image)
 		return image
 
-#face_data = image_datasets(root_dir='./imgs')
+
 face_data = image_datasets(root_dir='../dataset/faces/')
-data_loader = DataLoader(face_data, batch_size=2, shuffle=True, num_workers=4)
-conv1 = nn.Conv1d(1, 10, kernel_size=5)
+data_loader = DataLoader(face_data, batch_size=5, shuffle=True, num_workers=4)
+conv1 = nn.Conv2d(1, 10, kernel_size=5)
 
 for i, data in enumerate(data_loader, 0):
 	print(data.shape)
 	data = Variable(data.type(torch.FloatTensor), requires_grad=False)
-
-
-	#face_data.display_image(data[0,:,:])
+	print(data.shape)
+	x = conv1(data)
+	print(x.shape)
 	import pdb; pdb.set_trace()	
 
