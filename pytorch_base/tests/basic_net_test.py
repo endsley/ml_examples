@@ -14,8 +14,15 @@ class basic_net_test(test_base):
 		db['batch_size'] = 5		#	Size for each batch
 		db['learning_rate'] = 0.001
 		db['print_loss'] = True
-		db['dataType'] = torch.FloatTensor
-		db['model'] = basic_neural_net(2, 50)	#	num_of_input, num_of_hidden
+		using_cuda = True
+
+		if using_cuda:
+			db['dataType'] = torch.cuda.FloatTensor # or torch.FloatTensor on CPU
+			db['model'] = basic_neural_net(2, 50).cuda()	#	num_of_input, num_of_hidden
+		else:
+			db['dataType'] = torch.FloatTensor # or torch.FloatTensor on CPU
+			db['model'] = basic_neural_net(2, 50)	#	num_of_input, num_of_hidden
+
 
 		test_base.__init__(self, db)
 

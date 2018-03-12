@@ -23,8 +23,7 @@ class basic_neural_net(torch.nn.Module):
 			if(len(param.data.numpy().shape)) > 1:
 				torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
 			else:
-				pass
-				#param.data = torch.zeros(param.data.size())
+				param.data = torch.zeros(param.data.size())
 
 
 	def get_optimizer(self, learning_rate):
