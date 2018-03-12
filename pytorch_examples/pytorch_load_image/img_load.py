@@ -63,15 +63,16 @@ class image_datasets(Dataset):
 		return image
 
 
-face_data = image_datasets(root_dir='../dataset/faces/')
-data_loader = DataLoader(face_data, batch_size=5, shuffle=True, num_workers=4)
-conv1 = nn.Conv2d(1, 10, kernel_size=5)
-
-for i, data in enumerate(data_loader, 0):
-	print(data.shape)
-	data = Variable(data.type(torch.FloatTensor), requires_grad=False)
-	print(data.shape)
-	x = conv1(data)
-	print(x.shape)
-	import pdb; pdb.set_trace()	
+if __name__ == '__main__':
+	face_data = image_datasets(root_dir='../../dataset/faces/')
+	data_loader = DataLoader(face_data, batch_size=5, shuffle=True, num_workers=4)
+	conv1 = nn.Conv2d(1, 10, kernel_size=5)
+	
+	for i, data in enumerate(data_loader, 0):
+		print(data.shape)
+		data = Variable(data.type(torch.FloatTensor), requires_grad=False)
+		print(data.shape)
+		x = conv1(data)
+		print(x.shape)
+		import pdb; pdb.set_trace()	
 
