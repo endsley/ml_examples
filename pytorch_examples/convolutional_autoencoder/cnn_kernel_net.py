@@ -18,12 +18,13 @@ np.set_printoptions(suppress=True)
 
 
 class cnn_kernel_net(torch.nn.Module):
-	def __init__(self, db, learning_rate=0.001):
+	def __init__(self, db, learning_rate=0.001, exit_loss=0.001):
 		super(cnn_kernel_net, self).__init__()
 		self.db = db
 		self.filter_len = 5
 		self.training_mode = 'autoencoder'		#	autoencoder vs kernel_net
 		self.num_output_channels = 128
+		self.exit_loss = exit_loss
 		[H,W] = self.extract_HW(db)
 
 		self.conv1 = nn.Conv2d(1,16,	self.filter_len,stride=2)
@@ -53,14 +54,11 @@ class cnn_kernel_net(torch.nn.Module):
 		y3 = F.relu(self.conv3(y2))
 		return y3
 
-	def compute_loss(self, y0):
-		try:
-			y_pred = self.forward(y0)
-		except:
-			import pdb; pdb.set_trace()
+	def CAE_compute_loss(self, y0):
+		y_pred = self.CAE_forward(y0)
 		return self.criterion(y_pred, y0)
 
-	def forward(self, y0):
+	def CAE_forward(self, y0):
 		y1 = self.encoder(y0)
 		y2 = y1.view(db['batch_size'],-1)
 
@@ -73,6 +71,13 @@ class cnn_kernel_net(torch.nn.Module):
 		y8 = F.relu(self.conv6(y7))
 
 		return y8
+
+	def forward(self, y0):
+		y1 = self.encoder(y0)
+		y2 = y1.view(db['batch_size'],-1)
+
+		y3 = self.l1(y2)
+		return y3
 
 
 
@@ -95,8 +100,8 @@ if __name__ == '__main__':
 		
 		return LR.coef_
 
-	dtype = torch.cuda.FloatTensor
-	#dtype = torch.FloatTensor
+	if torch.cuda.is_available(): dtype = torch.cuda.FloatTensor
+	else: dtype = torch.FloatTensor
 	face_data = image_datasets(root_dir='../../dataset/faces/')
 	data_loader = DataLoader(face_data, batch_size=5, shuffle=True, drop_last=True)
 	
@@ -107,11 +112,16 @@ if __name__ == '__main__':
 	db['batch_size'] = 5
 
 	epoc_loop = 5000
-	ckernel_net = cnn_kernel_net(db).cuda()
+
+	if torch.cuda.is_available(): ckernel_net = cnn_kernel_net(db).cuda()
+	else: cnn_kernel_net(db)
+
+
 	learning_rate = 1e-3
 	optimizer = torch.optim.Adam(ckernel_net.parameters(), lr=learning_rate, weight_decay=1e-5)
 	avgLoss_cue = collections.deque([], 400)
 
+	import pdb; pdb.set_trace()
 
 	for epoch in range(epoc_loop):
 		running_avg = []
@@ -119,10 +129,9 @@ if __name__ == '__main__':
 
 		for idx, data in enumerate(data_loader):
 			data = Variable(data.type(dtype), requires_grad=False)
-			#data = Variable(data.cuda(), requires_grad=False)
 	
 			optimizer.zero_grad()
-			loss = ckernel_net.compute_loss(data)
+			loss = ckernel_net.CAE_compute_loss(data)
 			loss.backward()
 			optimizer.step()
 	
@@ -139,6 +148,9 @@ if __name__ == '__main__':
 		progression_slope = get_slope(avgLoss_cue)
 
 		loss_optimization_printout(epoch, maxLoss, avgGrad, epoc_loop, progression_slope)
+
+		if maxLoss < self.exit_loss: break;
+		if len(avgLoss_cue) > 300 and progression_slope > 0: break;
 
 		#import pdb; pdb.set_trace()	
 
