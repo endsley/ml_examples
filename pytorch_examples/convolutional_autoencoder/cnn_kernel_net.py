@@ -174,7 +174,12 @@ if __name__ == '__main__':
 	avgLoss = get_loss(ckernel_net, data_loader)
 	print('\nEnding avg loss %.3f.'%avgLoss)
 
-	prev_result = pickle.load( open( "face.p", "rb" ) )
+	try:
+		prev_result = pickle.load( open( "face.p", "rb" ) )
+	except:
+		prev_result = {}
+		prev_result['avgLoss'] = 1000000
+
 	if prev_result['avgLoss'] > avgLoss:
 		result = {}
 		result['avgLoss'] = avgLoss
