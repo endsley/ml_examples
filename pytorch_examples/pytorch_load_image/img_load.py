@@ -34,6 +34,10 @@ class image_datasets(Dataset):
 	def display_image(self, img_id):
 		if type(img_id) == torch.ByteTensor:
 			image = img_id
+		elif type(img_id) == torch.DoubleTensor:
+			image = img_id
+		elif type(img_id) == np.ndarray:
+			image = img_id
 		elif type(img_id) == types.IntType:
 			img_name = os.path.join(self.root_dir, self.image_files[img_id])
 			image = io.imread(img_name, as_grey=self.gray)

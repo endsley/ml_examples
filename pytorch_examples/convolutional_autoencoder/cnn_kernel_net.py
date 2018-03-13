@@ -10,6 +10,9 @@ import matplotlib
 from img_load import *
 from sklearn import linear_model
 import collections
+import pickle
+
+
 
 np.set_printoptions(precision=4)
 np.set_printoptions(threshold=np.nan)
@@ -18,13 +21,12 @@ np.set_printoptions(suppress=True)
 
 
 class cnn_kernel_net(torch.nn.Module):
-	def __init__(self, db, learning_rate=0.001, exit_loss=0.001):
+	def __init__(self, db, learning_rate=0.001):
 		super(cnn_kernel_net, self).__init__()
 		self.db = db
 		self.filter_len = 5
 		self.training_mode = 'autoencoder'		#	autoencoder vs kernel_net
 		self.num_output_channels = 128
-		self.exit_loss = exit_loss
 		[H,W] = self.extract_HW(db)
 
 		self.conv1 = nn.Conv2d(1,16,	self.filter_len,stride=2)
@@ -100,8 +102,21 @@ if __name__ == '__main__':
 		
 		return LR.coef_
 
+	def get_loss(ckernel_net, data_loader):
+		#	Compute final average loss
+		loss_sum = 0
+		for idx, data in enumerate(data_loader):
+			data = Variable(data.type(dtype), requires_grad=False)
+			loss = ckernel_net.CAE_compute_loss(data).data.numpy()
+			loss_sum += loss
+		
+		return loss_sum/idx
+
+
+
 	if torch.cuda.is_available(): dtype = torch.cuda.FloatTensor
 	else: dtype = torch.FloatTensor
+	exit_loss=0.001
 	face_data = image_datasets(root_dir='../../dataset/faces/')
 	data_loader = DataLoader(face_data, batch_size=5, shuffle=True, drop_last=True)
 	
@@ -114,14 +129,17 @@ if __name__ == '__main__':
 	epoc_loop = 5000
 
 	if torch.cuda.is_available(): ckernel_net = cnn_kernel_net(db).cuda()
-	else: cnn_kernel_net(db)
+	else: ckernel_net = cnn_kernel_net(db)
 
 
 	learning_rate = 1e-3
 	optimizer = torch.optim.Adam(ckernel_net.parameters(), lr=learning_rate, weight_decay=1e-5)
 	avgLoss_cue = collections.deque([], 400)
 
-	import pdb; pdb.set_trace()
+
+	avgLoss = get_loss(ckernel_net, data_loader)
+	print('Starting avg loss %.3f.'%avgLoss)
+
 
 	for epoch in range(epoc_loop):
 		running_avg = []
@@ -149,11 +167,19 @@ if __name__ == '__main__':
 
 		loss_optimization_printout(epoch, maxLoss, avgGrad, epoc_loop, progression_slope)
 
-		if maxLoss < self.exit_loss: break;
+		if maxLoss < exit_loss: break;
 		if len(avgLoss_cue) > 300 and progression_slope > 0: break;
 
-		#import pdb; pdb.set_trace()	
 
+	avgLoss = get_loss(ckernel_net, data_loader)
+	print('\nEnding avg loss %.3f.'%avgLoss)
+
+	prev_result = pickle.load( open( "face.p", "rb" ) )
+	if prev_result['avgLoss'] > avgLoss:
+		result = {}
+		result['avgLoss'] = avgLoss
+		result['kernel_net'] = ckernel_net
+		pickle.dump( result, open( "face.p", "wb" ) )
 
 
 
