@@ -95,8 +95,8 @@ if __name__ == '__main__':
 		
 		return LR.coef_
 
-
-
+	dtype = torch.cuda.FloatTensor
+	#dtype = torch.FloatTensor
 	face_data = image_datasets(root_dir='../../dataset/faces/')
 	data_loader = DataLoader(face_data, batch_size=5, shuffle=True, drop_last=True)
 	
@@ -106,8 +106,8 @@ if __name__ == '__main__':
 	db['img_width'] = 29
 	db['batch_size'] = 5
 
-	epoc_loop = 2000
-	ckernel_net = cnn_kernel_net(db)
+	epoc_loop = 5000
+	ckernel_net = cnn_kernel_net(db).cuda()
 	learning_rate = 1e-3
 	optimizer = torch.optim.Adam(ckernel_net.parameters(), lr=learning_rate, weight_decay=1e-5)
 	avgLoss_cue = collections.deque([], 400)
@@ -118,7 +118,8 @@ if __name__ == '__main__':
 		running_avg_grad = []
 
 		for idx, data in enumerate(data_loader):
-			data = Variable(data.type(torch.FloatTensor), requires_grad=False)
+			data = Variable(data.type(dtype), requires_grad=False)
+			#data = Variable(data.cuda(), requires_grad=False)
 	
 			optimizer.zero_grad()
 			loss = ckernel_net.compute_loss(data)
