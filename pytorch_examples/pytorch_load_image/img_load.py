@@ -54,6 +54,8 @@ class image_datasets(Dataset):
 	def __getitem__(self, idx):
 		img_name = os.path.join(self.root_dir, self.image_files[idx])
 		image = io.imread(img_name)
+		image = transform.resize(image, (29,29), mode='constant')
+
 		if len(image.shape) == 2:
 			image = np.expand_dims(image,0)
 		elif len(image.shape) == 3:
