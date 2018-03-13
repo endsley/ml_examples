@@ -16,20 +16,21 @@ import types
 from os import listdir
 from os.path import isfile, join
 from torch.autograd import Variable
-
+from numpy import genfromtxt
 
 
 class image_datasets(Dataset):
-	def __init__(self, root_dir, gray=True, transform=None):
+	def __init__(self, root_dir, input_file, gray=True, transform=None):
 		self.root_dir = root_dir
 		self.transform = transform
 		self.gray = gray
 
-		self.allfiles = [f for f in listdir(root_dir) if isfile(join(root_dir, f))]
-		self.image_files = []
-		for i in self.allfiles:
-			if i.find('.jpg') != -1 or i.find('.pgm') != -1 :
-				self.image_files.append(i)
+		data_file = join(root_dir, input_file + '.csv')
+		label_file = join(root_dir, input_file + '_label.csv')
+
+		with open(data_file) as f: self.image_files = f.read().splitlines() 
+		self.y = genfromtxt(label_file, delimiter=',')
+
 
 	def display_image(self, img_id):
 		if type(img_id) == torch.ByteTensor:
@@ -70,7 +71,7 @@ class image_datasets(Dataset):
 
 
 if __name__ == '__main__':
-	face_data = image_datasets(root_dir='../../dataset/faces/')
+	face_data = image_datasets('../../dataset/faces/', 'face_img')
 	data_loader = DataLoader(face_data, batch_size=5, shuffle=True, num_workers=4)
 	conv1 = nn.Conv2d(1, 10, kernel_size=5)
 	

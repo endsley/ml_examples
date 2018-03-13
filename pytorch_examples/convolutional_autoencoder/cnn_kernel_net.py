@@ -120,7 +120,7 @@ if __name__ == '__main__':
 	if torch.cuda.is_available(): dtype = torch.cuda.FloatTensor
 	else: dtype = torch.FloatTensor
 	exit_loss=0.001
-	face_data = image_datasets(root_dir='../../dataset/faces/')
+	face_data = image_datasets('../../dataset/faces/', 'face_img')
 	data_loader = DataLoader(face_data, batch_size=5, shuffle=True, drop_last=True)
 	
 
