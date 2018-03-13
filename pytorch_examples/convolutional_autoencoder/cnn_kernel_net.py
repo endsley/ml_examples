@@ -113,8 +113,8 @@ if __name__ == '__main__':
 				import pdb; pdb.set_trace()
 			loss_sum += loss
 		
-		return loss_sum/idx
-
+		avgL = loss_sum/idx
+		return avgL.cpu().data.numpy()[0]
 
 
 	if torch.cuda.is_available(): dtype = torch.cuda.FloatTensor
