@@ -107,7 +107,10 @@ if __name__ == '__main__':
 		loss_sum = 0
 		for idx, data in enumerate(data_loader):
 			data = Variable(data.type(dtype), requires_grad=False)
-			loss = ckernel_net.CAE_compute_loss(data).data.numpy()
+			try:
+				loss = ckernel_net.CAE_compute_loss(data).data.numpy()
+			except:
+				import pdb; pdb.set_trace()
 			loss_sum += loss
 		
 		return loss_sum/idx
