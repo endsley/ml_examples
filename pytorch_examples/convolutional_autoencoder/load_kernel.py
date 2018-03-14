@@ -15,7 +15,8 @@ db = {}
 db['img_height'] = 29
 db['img_width'] = 29
 db['batch_size'] = 5
-dtype = torch.cuda.FloatTensor
+#dtype = torch.cuda.FloatTensor
+dtype = torch.FloatTensor
 
 def load_data():
 	face_data = image_datasets('../../dataset/faces/', 'face_img')
@@ -41,9 +42,8 @@ def get_loss(ckernel_net, data_loader):
 
 def update_kernel_to_lates():
 	[face_data, data_loader, result] = load_data()
-	with_cuda = False
 
-	if with_cuda:
+	if dtype == torch.cuda.FloatTensor:
 		ckernel_net = cnn_kernel_net(db).cuda()
 		batch = zip(ckernel_net.children(), result['kernel_net'].children())
 		
@@ -57,21 +57,18 @@ def update_kernel_to_lates():
 		
 		for a, b in batch:
 			if hasattr(a, 'weight'):
-				import pdb; pdb.set_trace()
-				a.weight = b.weight.cpu()
-				a.bias = b.bias.cpu()
 
-
+				a.weight.data = b.weight.data.cpu()
+				a.bias.data = b.bias.data.cpu()
 	
 	avgLoss = get_loss(ckernel_net, data_loader)
 	print('avgLoss : %.3f'%avgLoss)
 
-	result = {}
-	result['avgLoss'] = avgLoss
-	result['kernel_net'] = ckernel_net
-	pickle.dump( result, open( "face.p", "wb" ) )
+	new_result = {}
+	new_result['avgLoss'] = avgLoss
+	new_result['kernel_net'] = ckernel_net
+	pickle.dump( new_result, open( "face.p", "wb" ) )
 	
-	import pdb; pdb.set_trace()
 
 
 def view_xout():
