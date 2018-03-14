@@ -47,6 +47,7 @@ def update_kernel_to_lates():
 	
 	for a, b in batch:
 		if hasattr(a, 'weight'):
+			import pdb; pdb.set_trace()
 			a.weight = b.weight
 			a.bias = b.bias
 	
