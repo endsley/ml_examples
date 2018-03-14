@@ -41,16 +41,27 @@ def get_loss(ckernel_net, data_loader):
 
 def update_kernel_to_lates():
 	[face_data, data_loader, result] = load_data()
-	#ckernel_net = cnn_kernel_net(db).cuda()
-	ckernel_net = cnn_kernel_net(db)
-	batch = zip(ckernel_net.children(), result['kernel_net'].children())
-	
-	for a, b in batch:
-		if hasattr(a, 'weight'):
-			import pdb; pdb.set_trace()
-			a.weight = b.weight
-			a.bias = b.bias
-	
+	with_cuda = True
+
+	if with_cuda:
+		ckernel_net = cnn_kernel_net(db).cuda()
+		batch = zip(ckernel_net.children(), result['kernel_net'].children())
+		
+		for a, b in batch:
+			if hasattr(a, 'weight'):
+				a.weight = b.weight
+				a.bias = b.bias
+	else:	
+		ckernel_net = cnn_kernel_net(db)
+		batch = zip(ckernel_net.children(), result['kernel_net'].children())
+		
+		for a, b in batch:
+			if hasattr(a, 'weight'):
+				import pdb; pdb.set_trace()
+				a.weight = b.weight.cpu()
+				a.bias = b.bias.cpu()
+
+
 	
 	avgLoss = get_loss(ckernel_net, data_loader)
 	print('avgLoss : %.3f'%avgLoss)
@@ -72,7 +83,6 @@ def view_xout():
 		xout = ckernel_net.CAE_forward(data)
 
 		face_data.display_image(xout[1,0,:,:].cpu().data.numpy())
-		import pdb; pdb.set_trace()
 
 	#avgLoss = get_loss(ckernel_net, data_loader)
 	#print('avgLoss : %.3f'%avgLoss)
