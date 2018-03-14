@@ -41,7 +41,8 @@ def get_loss(ckernel_net, data_loader):
 
 def update_kernel_to_lates():
 	[face_data, data_loader, result] = load_data()
-	ckernel_net = cnn_kernel_net(db).cuda()
+	#ckernel_net = cnn_kernel_net(db).cuda()
+	ckernel_net = cnn_kernel_net(db)
 	batch = zip(ckernel_net.children(), result['kernel_net'].children())
 	
 	for a, b in batch:
@@ -75,7 +76,8 @@ def view_xout():
 	#avgLoss = get_loss(ckernel_net, data_loader)
 	#print('avgLoss : %.3f'%avgLoss)
 
-view_xout()
+update_kernel_to_lates()
+#view_xout()
 
 
 #for idx, data in enumerate(data_loader):
