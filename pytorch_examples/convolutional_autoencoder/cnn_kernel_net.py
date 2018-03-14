@@ -62,7 +62,7 @@ class cnn_kernel_net(torch.nn.Module):
 
 	def CAE_forward(self, y0):
 		y1 = self.encoder(y0)
-		y2 = y1.view(db['batch_size'],-1)
+		y2 = y1.view(self.db['batch_size'],-1)
 
 		y3 = self.l1(y2)
 		y4 = F.relu(self.l2(y3))
@@ -76,7 +76,7 @@ class cnn_kernel_net(torch.nn.Module):
 
 	def forward(self, y0):
 		y1 = self.encoder(y0)
-		y2 = y1.view(db['batch_size'],-1)
+		y2 = y1.view(self.db['batch_size'],-1)
 
 		y3 = self.l1(y2)
 		return y3
