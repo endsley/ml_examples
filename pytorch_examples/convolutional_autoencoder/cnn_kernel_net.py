@@ -41,6 +41,14 @@ class cnn_kernel_net(torch.nn.Module):
 		self.conv6 = nn.ConvTranspose2d(16, 1, self.filter_len, stride=2)
 
 		self.criterion = torch.nn.MSELoss(size_average=False)
+		self.learning_rate = learning_rate
+
+	def set_Y(self, Y_matrix):
+		Y_matrix = torch.from_numpy(Y_matrix)
+		self.Y = Variable(Y_matrix.type(self.db['dataType']), requires_grad=False)
+
+	def get_optimizer(self):
+		return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
 	def extract_HW(self, db):
 		H = db['img_height']
@@ -62,7 +70,7 @@ class cnn_kernel_net(torch.nn.Module):
 
 	def CAE_forward(self, y0):
 		y1 = self.encoder(y0)
-		y2 = y1.view(self.db['batch_size'],-1)
+		y2 = y1.view(y0.shape[0],-1)
 
 		y3 = self.l1(y2)
 		y4 = F.relu(self.l2(y3))
@@ -74,10 +82,34 @@ class cnn_kernel_net(torch.nn.Module):
 
 		return y8
 
+	def gaussian_kernel(self, x):			#Each row is a sample
+		bs = x.shape[0]
+		s = self.sigma
+
+		K = self.db['dataType'](bs, bs)
+		K = Variable(K.type(self.db['dataType']), requires_grad=False)		
+
+		for i in range(bs):
+			for j in range(bs):
+				tmpY = (x[i,:] - x[j,:]).unsqueeze(0)
+				eVal = -(torch.mm(tmpY, tmpY.transpose(0,1)))/(2*s*s)
+				K[i,j] = torch.exp(eVal)
+
+		return K
+
+	def compute_loss(self, x, label, indices):
+		x_out = self.forward(x)
+		rbk = self.gaussian_kernel(x_out)
+
+		PP = self.Y[indices, :]
+		Ysmall = PP[:, indices]
+		cost = -torch.sum(rbk*Ysmall)
+
+		return cost
+
 	def forward(self, y0):
 		y1 = self.encoder(y0)
-		y2 = y1.view(self.db['batch_size'],-1)
-
+		y2 = y1.view(y0.shape[0],-1)
 		y3 = self.l1(y2)
 		return y3
 

@@ -29,6 +29,10 @@ class image_datasets(Dataset):
 		label_file = join(root_dir, input_file + '_label.csv')
 
 		with open(data_file) as f: self.image_files = f.read().splitlines() 
+		#	load the subset of images into memory
+		#	pass it through the network, xout
+		#	use xout to compute mpd, U_init, and D
+
 		self.y = genfromtxt(label_file, delimiter=',')
 
 
