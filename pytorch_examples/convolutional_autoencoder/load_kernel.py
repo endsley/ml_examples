@@ -80,12 +80,13 @@ def view_xout():
 		xout = ckernel_net.CAE_forward(data)
 
 		face_data.display_image(xout[1,0,:,:].cpu().data.numpy())
+		import pdb; pdb.set_trace()
 
 	#avgLoss = get_loss(ckernel_net, data_loader)
 	#print('avgLoss : %.3f'%avgLoss)
 
-update_kernel_to_lates()
-#view_xout()
+#update_kernel_to_lates()
+view_xout()
 
 
 #for idx, data in enumerate(data_loader):
