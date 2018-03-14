@@ -41,7 +41,7 @@ def get_loss(ckernel_net, data_loader):
 
 def update_kernel_to_lates():
 	[face_data, data_loader, result] = load_data()
-	with_cuda = True
+	with_cuda = False
 
 	if with_cuda:
 		ckernel_net = cnn_kernel_net(db).cuda()
