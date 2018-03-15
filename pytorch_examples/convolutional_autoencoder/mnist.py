@@ -153,81 +153,126 @@ exit_loss=0.001
 #
 
 #----------------------------------------------------------------
+#
+#def rescale(data, db):
+#
+#	Dnumpy = data.numpy()
+#	full_stack = None
+#	for m in range(Dnumpy.shape[0]):
+#		image = transform.resize(Dnumpy[m,0,:,:], (29,29), mode='constant')
+#
+#		#plt.imshow(image, cmap='gray')
+#		#plt.show()
+#		#import pdb; pdb.set_trace()
+#	
+#		image = torch.from_numpy(image)
+#		image = image.unsqueeze(dim=0).unsqueeze(dim=0)
+#	
+#		if type(full_stack) == type(None):
+#			full_stack = image
+#		else:
+#			full_stack = torch.cat((full_stack, image), dim=0)
+#
+#	full_stack = Variable(full_stack.type(db['dataType']))
+#	return full_stack
+#
+#def write2(v1):
+#		sys.stdout.write("\rbatch : %d" % (v1))
+#		sys.stdout.flush()
+#
+#def get_loss(ckernel_net, data_loader):
+#	#	Compute final average loss
+#	loss_sum = 0
+#	for idx, (data, target) in enumerate(data_loader):
+#		write2(idx)
+#		data = rescale(data, db)
+#		loss = ckernel_net.CAE_compute_loss(data)
+#		loss_sum += loss
+#	
+#	avgL = loss_sum/idx
+#	return avgL.cpu().data.numpy()[0]
+#
+#def save_to_img(ckernel_net, data_loader):
+#	#	Compute final average loss
+#	loss_sum = 0
+#
+#	total_tensor = None
+#	total_label = None
+#	for idx, (data, target) in enumerate(data_loader):
+#		write2(idx)
+#		data = rescale(data, db)
+#
+#		if type(total_tensor) == type(None):
+#			total_tensor = data
+#		else:
+#			total_tensor = torch.cat((total_tensor, data), dim=0)
+#
+#		if type(total_label) == type(None):
+#			total_label = target
+#		else:
+#			total_label = torch.cat((total_label, target), dim=0)
+#
+#		#import pdb; pdb.set_trace()
+#		#data = data.squeeze(dim=0).squeeze(dim=0)
+#		#x = data.cpu().data.numpy()
+#		#plt.imshow(x, cmap='gray')
+#		#plt.savefig('imgs/' + str(idx) + '.png')
+#	
+#		#fin.write(str(idx) + '.png\n')
+#		#fin2.write(str(target.numpy()[0]) + '\n')
+#
+#
+#	pickle.dump( total_tensor , open( 'mnist_30_validation.pk', "wb" ) )
+#	pickle.dump( total_label , open( 'mnist_30_label_validation.pk', "wb" ) )
+#	import pdb; pdb.set_trace()
+#		#import pdb; pdb.set_trace()	
+#
+#imgT = transforms.ToTensor()
+#dset = datasets.MNIST('./data', train=True, download=True, transform=imgT )
+#tset = datasets.MNIST('./data', train=False, transform=imgT )
+#train_loader = torch.utils.data.DataLoader( dset, batch_size=5, shuffle=True)
+#test_loader = torch.utils.data.DataLoader(tset, batch_size=100, shuffle=True)
+#
+#
+#prev_result = pickle.load( open( "mnist.p", "rb" ) )
+#print('Loss : %.3f'%prev_result['avgLoss'])
+#ckernel_net = prev_result['kernel_net']
+##outLoss = get_loss(ckernel_net, train_loader)
+##print('Loss : %.3f'%outLoss)
+#
+#save_to_img(ckernel_net, test_loader)
+#
+#
 
-def rescale(data, db):
-
-	Dnumpy = data.numpy()
-	full_stack = None
-	for m in range(Dnumpy.shape[0]):
-		image = transform.resize(Dnumpy[m,0,:,:], (29,29), mode='constant')
-
-		#plt.imshow(image, cmap='gray')
-		#plt.show()
-		#import pdb; pdb.set_trace()
-	
-		image = torch.from_numpy(image)
-		image = image.unsqueeze(dim=0).unsqueeze(dim=0)
-	
-		if type(full_stack) == type(None):
-			full_stack = image
-		else:
-			full_stack = torch.cat((full_stack, image), dim=0)
-
-	full_stack = Variable(full_stack.type(db['dataType']))
-	return full_stack
-
-def write2(v1):
-		sys.stdout.write("\rbatch : %d" % (v1))
-		sys.stdout.flush()
-
-def get_loss(ckernel_net, data_loader):
-	#	Compute final average loss
-	loss_sum = 0
-	for idx, (data, target) in enumerate(data_loader):
-		write2(idx)
-		data = rescale(data, db)
-		loss = ckernel_net.CAE_compute_loss(data)
-		loss_sum += loss
-	
-	avgL = loss_sum/idx
-	return avgL.cpu().data.numpy()[0]
-
-def save_to_img(ckernel_net, data_loader):
-	#	Compute final average loss
-	loss_sum = 0
-	fin = open('mnist_30_validation.csv','a')
-	fin2 = open('mnist_30_label_validation.csv','a')
-
-	for idx, (data, target) in enumerate(data_loader):
-		write2(idx)
-		data = rescale(data, db)
-		data = data.squeeze(dim=0).squeeze(dim=0)
-
-		x = data.cpu().data.numpy()
-		plt.imshow(x, cmap='gray')
-		plt.savefig('imgs/' + str(idx) + '.png')
-	
-		fin.write(str(idx) + '.png\n')
-		fin2.write(str(target.numpy()[0]) + '\n')
-
-	fin.close()
-	fin2.close()
-
-		#import pdb; pdb.set_trace()	
-
-imgT = transforms.ToTensor()
-dset = datasets.MNIST('./data', train=True, download=True, transform=imgT )
-tset = datasets.MNIST('./data', train=False, transform=imgT )
-train_loader = torch.utils.data.DataLoader( dset, batch_size=5, shuffle=True)
-test_loader = torch.utils.data.DataLoader(tset, batch_size=1, shuffle=True)
 
 
-prev_result = pickle.load( open( "mnist.p", "rb" ) )
-print('Loss : %.3f'%prev_result['avgLoss'])
-ckernel_net = prev_result['kernel_net']
-#outLoss = get_loss(ckernel_net, train_loader)
-#print('Loss : %.3f'%outLoss)
+#----------------------------------------------------------------
 
-save_to_img(ckernel_net, test_loader)
+perm = np.random.permutation(10000)[0:2000]
+
+#perm = np.random.permutation(10)[0:3]
+#A = np.empty((10,1,29,29))
+#B = torch.Tensor(A)
+#C = B[perm, :,:,:]
+#print C.shape
+#import pdb; pdb.set_trace()
 
 
+data = pickle.load( open( "mnist_20_validation.pk", "rb" ) )
+labels = pickle.load( open( "mnist_20_label_validation.pk", "rb" ) )
+
+D = data[perm,:,:,:].cpu()
+L = labels[perm].cpu()
+
+pickle.dump( D, open( "mnist_20.pk", "wb" ) )
+pickle.dump( L, open( "mnist_20_label.pk", "wb" ) )
+
+
+import pdb; pdb.set_trace()
+
+plt.imshow(D[0,0,:,:].cpu().data.numpy(), cmap='gray')
+plt.show()
+
+print L[0]
+
+import pdb; pdb.set_trace()
