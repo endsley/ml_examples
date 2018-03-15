@@ -101,8 +101,7 @@ for epoch in range(epoc_loop):
 	avgLoss_cue = collections.deque([], 400)
 
 	for idx, (data, target) in enumerate(train_loader):
-		write2(epoch, idx)
-
+		#write2(epoch, idx)
 		data = rescale(data, db)
 		dataOut = ckernel_net.CAE_forward(data)
 
