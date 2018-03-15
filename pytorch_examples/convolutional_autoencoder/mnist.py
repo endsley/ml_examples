@@ -131,21 +131,22 @@ for epoch in range(epoc_loop):
 	if len(avgLoss_cue) > 300 and progression_slope > 0: break;
 
 
-avgLoss = get_loss(ckernel_net, train_loader)
-print('\nEnding avg loss %.3f.'%avgLoss)
-
-
-try:
-	prev_result = pickle.load( open( "mnist.p", "rb" ) )
-except:
-	prev_result = {}
-	prev_result['avgLoss'] = 1000000
-
-if prev_result['avgLoss'] > avgLoss:
-	result = {}
-	result['avgLoss'] = avgLoss
-	result['kernel_net'] = ckernel_net
-	pickle.dump( result, open( "mnist.p", "wb" ) )
+	#	Save result
+	avgLoss = get_loss(ckernel_net, train_loader)
+	print('\nEnding avg loss %.3f.'%avgLoss)
+	
+	
+	try:
+		prev_result = pickle.load( open( "mnist.p", "rb" ) )
+	except:
+		prev_result = {}
+		prev_result['avgLoss'] = 1000000
+	
+	if prev_result['avgLoss'] > avgLoss:
+		result = {}
+		result['avgLoss'] = avgLoss
+		result['kernel_net'] = ckernel_net
+		pickle.dump( result, open( "mnist.p", "wb" ) )
 
 
 import pdb; pdb.set_trace()
