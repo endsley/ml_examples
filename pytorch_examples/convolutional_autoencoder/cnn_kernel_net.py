@@ -66,7 +66,8 @@ class cnn_kernel_net(torch.nn.Module):
 
 	def CAE_compute_loss(self, y0):
 		y_pred = self.CAE_forward(y0)
-		return self.criterion(y_pred, y0)
+		loss = torch.sum((y_pred - y0)**2) / y0.data.nelement()
+		return loss
 
 	def CAE_forward(self, y0):
 		y1 = self.encoder(y0)
@@ -97,7 +98,7 @@ class cnn_kernel_net(torch.nn.Module):
 
 		return K
 
-	def compute_loss(self, x, label, indices):
+	def compute_loss(self, x, indices):
 		x_out = self.forward(x)
 		rbk = self.gaussian_kernel(x_out)
 
