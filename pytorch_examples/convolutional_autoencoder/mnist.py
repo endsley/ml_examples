@@ -16,8 +16,8 @@ db = {}
 db['img_height'] = 29
 db['img_width'] = 29
 db['batch_size'] = 5
-db['dataType'] = torch.FloatTensor
-#db['dataType'] = torch.cuda.FloatTensor
+#db['dataType'] = torch.FloatTensor
+db['dataType'] = torch.cuda.FloatTensor
 epoc_loop = 5000
 learning_rate = 1e-3
 exit_loss=0.001
@@ -42,11 +42,11 @@ def get_loss(ckernel_net, data_loader):
 	return avgL.cpu().data.numpy()[0]
 
 def write2(epoch, v1):
-		sys.stdout.write("\r\t\tepoch : %d, batch : %d" % (epoch, v1))
+		sys.stdout.write("\repoch : %d, batch : %d" % (epoch, v1))
 		sys.stdout.flush()
 
 def loss_optimization_printout(epoch, avgLoss, avgGrad, epoc_loop, slope):
-		sys.stdout.write("\r\t\t%d/%d, MaxLoss : %f, AvgGra : %f, progress slope : %f" % (epoch, epoc_loop, avgLoss, avgGrad, slope))
+		sys.stdout.write("\r\t\t\t%d/%d, MaxLoss : %f, AvgGra : %f, progress slope : %f" % (epoch, epoc_loop, avgLoss, avgGrad, slope))
 		sys.stdout.flush()
 
 def get_slope(y_axis):
@@ -89,10 +89,10 @@ def rescale(data, db):
 train_loader = torch.utils.data.DataLoader( dset, batch_size=5, shuffle=True)
 test_loader = torch.utils.data.DataLoader(tset, batch_size=5, shuffle=True)
 
-#if torch.cuda.is_available(): ckernel_net = cnn_kernel_net(db).cuda()
-#else: ckernel_net = cnn_kernel_net(db)
+if torch.cuda.is_available(): ckernel_net = cnn_kernel_net(db).cuda()
+else: ckernel_net = cnn_kernel_net(db)
+#ckernel_net = cnn_kernel_net(db)
 
-ckernel_net = cnn_kernel_net(db)
 optimizer = ckernel_net.get_optimizer()
 
     
@@ -103,7 +103,7 @@ for epoch in range(epoc_loop):
 	avgLoss_cue = collections.deque([], 400)
 
 	for idx, (data, target) in enumerate(train_loader):
-		#write2(epoch, idx)
+		write2(epoch, idx)
 		data = rescale(data, db)
 		dataOut = ckernel_net.CAE_forward(data)
 
