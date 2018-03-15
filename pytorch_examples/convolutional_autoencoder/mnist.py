@@ -188,6 +188,15 @@ def get_loss(ckernel_net, data_loader):
 	avgL = loss_sum/idx
 	return avgL.cpu().data.numpy()[0]
 
+def save_to_img(ckernel_net, data_loader):
+	#	Compute final average loss
+	loss_sum = 0
+	for idx, (data, target) in enumerate(data_loader):
+		data = rescale(data, db)
+		print(data.shape)
+
+		import pdb; pdb.set_trace()	
+
 imgT = transforms.ToTensor()
 dset = datasets.MNIST('./data', train=True, download=True, transform=imgT )
 tset = datasets.MNIST('./data', train=False, transform=imgT )
@@ -198,6 +207,9 @@ test_loader = torch.utils.data.DataLoader(tset, batch_size=5, shuffle=True)
 prev_result = pickle.load( open( "mnist.p", "rb" ) )
 print('Loss : %.3f'%prev_result['avgLoss'])
 ckernel_net = prev_result['kernel_net']
-outLoss = get_loss(ckernel_net, train_loader)
-print('Loss : %.3f'%outLoss)
+#outLoss = get_loss(ckernel_net, train_loader)
+#print('Loss : %.3f'%outLoss)
+
+save_to_img(ckernel_net, train_loader)
+
 
