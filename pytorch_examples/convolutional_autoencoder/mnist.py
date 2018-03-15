@@ -177,7 +177,7 @@ def rescale(data, db):
 	return full_stack
 
 def write2(v1):
-		sys.stdout.write("\rbatch : %d" % (epoch, v1))
+		sys.stdout.write("\rbatch : %d" % (v1))
 		sys.stdout.flush()
 
 def get_loss(ckernel_net, data_loader):
@@ -195,17 +195,31 @@ def get_loss(ckernel_net, data_loader):
 def save_to_img(ckernel_net, data_loader):
 	#	Compute final average loss
 	loss_sum = 0
-	for idx, (data, target) in enumerate(data_loader):
-		data = rescale(data, db)
-		print(data.shape)
+	fin = open('mnist_30_validation.csv','a')
+	fin2 = open('mnist_30_label_validation.csv','a')
 
-		import pdb; pdb.set_trace()	
+	for idx, (data, target) in enumerate(data_loader):
+		write2(idx)
+		data = rescale(data, db)
+		data = data.squeeze(dim=0).squeeze(dim=0)
+
+		x = data.cpu().data.numpy()
+		plt.imshow(x, cmap='gray')
+		plt.savefig('imgs/' + str(idx) + '.png')
+	
+		fin.write(str(idx) + '.png\n')
+		fin2.write(str(target.numpy()[0]) + '\n')
+
+	fin.close()
+	fin2.close()
+
+		#import pdb; pdb.set_trace()	
 
 imgT = transforms.ToTensor()
 dset = datasets.MNIST('./data', train=True, download=True, transform=imgT )
 tset = datasets.MNIST('./data', train=False, transform=imgT )
 train_loader = torch.utils.data.DataLoader( dset, batch_size=5, shuffle=True)
-test_loader = torch.utils.data.DataLoader(tset, batch_size=5, shuffle=True)
+test_loader = torch.utils.data.DataLoader(tset, batch_size=1, shuffle=True)
 
 
 prev_result = pickle.load( open( "mnist.p", "rb" ) )
@@ -214,6 +228,6 @@ ckernel_net = prev_result['kernel_net']
 #outLoss = get_loss(ckernel_net, train_loader)
 #print('Loss : %.3f'%outLoss)
 
-save_to_img(ckernel_net, train_loader)
+save_to_img(ckernel_net, test_loader)
 
 
