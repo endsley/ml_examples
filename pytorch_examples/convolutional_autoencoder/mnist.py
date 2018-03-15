@@ -20,6 +20,7 @@ db['batch_size'] = 5
 db['dataType'] = torch.cuda.FloatTensor
 epoc_loop = 5000
 learning_rate = 1e-3
+exit_loss=0.001
 
 #imgT = transforms.Compose([transforms.ToTensor()])
 #imgT = None		#transforms.ToPILImage()
