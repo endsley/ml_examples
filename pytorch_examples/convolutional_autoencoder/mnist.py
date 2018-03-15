@@ -89,8 +89,10 @@ def rescale(data, db):
 train_loader = torch.utils.data.DataLoader( dset, batch_size=5, shuffle=True)
 test_loader = torch.utils.data.DataLoader(tset, batch_size=5, shuffle=True)
 
-if torch.cuda.is_available(): ckernel_net = cnn_kernel_net(db).cuda()
-else: ckernel_net = cnn_kernel_net(db)
+#if torch.cuda.is_available(): ckernel_net = cnn_kernel_net(db).cuda()
+#else: ckernel_net = cnn_kernel_net(db)
+
+ckernel_net = cnn_kernel_net(db)
 optimizer = ckernel_net.get_optimizer()
 
     
