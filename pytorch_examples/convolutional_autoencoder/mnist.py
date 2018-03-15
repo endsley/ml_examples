@@ -16,7 +16,8 @@ db = {}
 db['img_height'] = 29
 db['img_width'] = 29
 db['batch_size'] = 5
-db['dataType'] = torch.FloatTensor
+#db['dataType'] = torch.FloatTensor
+db['dataType'] = torch.cuda.FloatTensor
 epoc_loop = 5000
 learning_rate = 1e-3
 
