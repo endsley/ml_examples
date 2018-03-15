@@ -29,7 +29,7 @@ tset = datasets.MNIST('./data', train=False, transform=imgT )
 def get_loss(ckernel_net, data_loader):
 	#	Compute final average loss
 	loss_sum = 0
-	for idx, data in enumerate(data_loader):
+	for idx, (data, target) in enumerate(data_loader):
 		data = rescale(data, db)
 		dataOut = ckernel_net.CAE_forward(data)
 
