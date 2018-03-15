@@ -47,7 +47,7 @@ def write2(epoch, v1):
 		sys.stdout.flush()
 
 def loss_optimization_printout(epoch, avgLoss, avgGrad, epoc_loop, slope):
-		sys.stdout.write("\r\t\t\t%d/%d, MaxLoss : %f, AvgGra : %f, progress slope : %f" % (epoch, epoc_loop, avgLoss, avgGrad, slope))
+		sys.stdout.write("\r\t\t\t\t%d/%d, MaxLoss : %f, AvgGra : %f, progress slope : %f" % (epoch, epoc_loop, avgLoss, avgGrad, slope))
 		sys.stdout.flush()
 
 def get_slope(y_axis):
