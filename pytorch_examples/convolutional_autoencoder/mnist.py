@@ -176,11 +176,15 @@ def rescale(data, db):
 	full_stack = Variable(full_stack.type(db['dataType']))
 	return full_stack
 
+def write2(v1):
+		sys.stdout.write("\rbatch : %d" % (epoch, v1))
+		sys.stdout.flush()
 
 def get_loss(ckernel_net, data_loader):
 	#	Compute final average loss
 	loss_sum = 0
 	for idx, (data, target) in enumerate(data_loader):
+		write2(idx)
 		data = rescale(data, db)
 		loss = ckernel_net.CAE_compute_loss(data)
 		loss_sum += loss
