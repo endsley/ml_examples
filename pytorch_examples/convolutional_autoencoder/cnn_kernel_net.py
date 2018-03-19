@@ -21,12 +21,14 @@ np.set_printoptions(suppress=True)
 
 
 class cnn_kernel_net(torch.nn.Module):
-	def __init__(self, db, learning_rate=0.001):
+	def __init__(self, db, innerLayer, learning_rate=0.001):
 		super(cnn_kernel_net, self).__init__()
 		self.db = db
 		self.filter_len = 5
 		self.training_mode = 'autoencoder'		#	autoencoder vs kernel_net
 		self.num_output_channels = 128
+		self.innerLayer = innerLayer
+
 		[H,W] = self.extract_HW(db)
 
 		self.conv1 = nn.Conv2d(1,16,	self.filter_len,stride=2)
@@ -34,8 +36,8 @@ class cnn_kernel_net(torch.nn.Module):
 		self.conv3 = nn.Conv2d(32,self.num_output_channels,	self.filter_len,stride=2)
 		final_layer_size = self.num_output_channels*H*W
 
-		self.l1 = torch.nn.Linear(final_layer_size , 10, bias=True)
-		self.l2 = torch.nn.Linear(10, final_layer_size , bias=True)
+		self.l1 = torch.nn.Linear(final_layer_size , innerLayer, bias=True)
+		self.l2 = torch.nn.Linear(innerLayer, final_layer_size , bias=True)
 		self.conv4 = nn.ConvTranspose2d(self.num_output_channels, 32, self.filter_len, stride=2)
 		self.conv5 = nn.ConvTranspose2d(32, 16, self.filter_len, stride=2)
 		self.conv6 = nn.ConvTranspose2d(16, 1, self.filter_len, stride=2)
