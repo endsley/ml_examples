@@ -122,7 +122,6 @@ for epoch in range(epoc_loop):
 	maxLoss = np.max(np.array(running_avg))		#/db['num_of_output']
 	avgGrad = np.mean(np.array(running_avg_grad))
 	avgLoss_cue.append(maxLoss)
-	print avgLoss_cue
 	progression_slope = get_slope(avgLoss_cue)
 
 	loss_optimization_printout(epoch, maxLoss, avgGrad, epoc_loop, progression_slope)
