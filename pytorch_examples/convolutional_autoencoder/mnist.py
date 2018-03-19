@@ -97,10 +97,10 @@ optimizer = ckernel_net.get_optimizer()
 
     
 
+avgLoss_cue = collections.deque([], 400)
 for epoch in range(epoc_loop):
 	running_avg = []
 	running_avg_grad = []
-	avgLoss_cue = collections.deque([], 400)
 
 	for idx, (data, target) in enumerate(train_loader):
 		write2(epoch, idx)
@@ -122,12 +122,13 @@ for epoch in range(epoc_loop):
 	maxLoss = np.max(np.array(running_avg))		#/db['num_of_output']
 	avgGrad = np.mean(np.array(running_avg_grad))
 	avgLoss_cue.append(maxLoss)
+	print avgLoss_cue
 	progression_slope = get_slope(avgLoss_cue)
 
 	loss_optimization_printout(epoch, maxLoss, avgGrad, epoc_loop, progression_slope)
 
 	if maxLoss < exit_loss: break;
-	if len(avgLoss_cue) > 300 and progression_slope > 0: break;
+	if len(avgLoss_cue) > 50 and progression_slope > 0: break;
 
 
 	#	Save result
