@@ -18,7 +18,7 @@ def gen_spiral(N,D,K, valid):
 	
 	
 	labels = np.vstack((np.ones((N,1)), 2*np.ones((N,1)), 3*np.ones((N,1))))
-	np.savetxt('spiral_arm' + valid + '.csv', X, delimiter=',', fmt='%d') 
+	np.savetxt('spiral_arm' + valid + '.csv', X, delimiter=',', fmt='%.3f') 
 	np.savetxt('spiral_arm_label' + valid + '.csv', labels, delimiter=',', fmt='%d') 
 	
 	plt.scatter(X[0:N, 0], X[0:N, 1], c='blue')
@@ -34,8 +34,9 @@ def load_spiral():
 	plt.show()
 
 if __name__ == '__main__':
-	N = 400 # number of points per class
+	N = 100 # number of points per class
 	D = 2 # dimensionality
 	K = 3 # number of classes
 
-	gen_spiral(N,D,K, '_validation')
+	#gen_spiral(N,D,K, '')
+	gen_spiral(4*N,D,K, '_validation')
