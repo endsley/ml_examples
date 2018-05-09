@@ -30,6 +30,8 @@ class pytorch_base():
 				loss.backward()
 				optimizer.step()
 
+				print loss.grad
+				import pdb; pdb.set_trace()	
 
 				#lr = lr*0.999
 				#optimizer = db['model'].get_optimizer(lr)

@@ -11,7 +11,7 @@ class my_dataset(Dataset):
 	def __init__(self, db):
 		self.db = db
 		self.x = np.loadtxt(db['data_file_name'], delimiter=',', dtype=np.float32)
-		import pdb; pdb.set_trace()		
+
 		self.x = preprocessing.scale(self.x)
 		self.y = np.loadtxt(db['label_file_name'], delimiter=',', dtype=np.int32)
 		self.y = self.y.reshape((self.y.shape[0],1))
