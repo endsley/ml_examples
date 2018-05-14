@@ -8,7 +8,11 @@ from my_dataset import *
 class basic_net_test(test_base):
 	def __init__(self):
 		db = {}
+<<<<<<< HEAD
 		db['data_file_name'] = '../../dataset/data_4.csv'
+=======
+		db['data_file_name'] =  '../../dataset/data_4.csv'
+>>>>>>> 280461aada85fddba5ad25bb742b11c3245e3125
 		db['label_file_name'] = '../../dataset/data_4_label.csv'
 		db['epoc_loop'] = 4000			#	How many time to repeat the epoch
 		db['batch_size'] = 5		#	Size for each batch

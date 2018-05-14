@@ -15,10 +15,12 @@ import numpy as np
 db = {}
 db['img_height'] = 29
 db['img_width'] = 29
-db['batch_size'] = 5
+db['batch_size'] = 100
 
 if torch.cuda.is_available(): db['dataType'] = torch.cuda.FloatTensor
 else: db['dataType'] = torch.FloatTensor
+
+print db['dataType']
 epoc_loop = 5000
 learning_rate = 1e-3
 exit_loss=0.001
