@@ -8,9 +8,11 @@ import numpy as np
 import torch.nn.functional as F
 import matplotlib
 from img_load import *
+from RFF import *
 from sklearn import linear_model
 import collections
 import pickle
+import time
 
 
 
@@ -21,14 +23,11 @@ np.set_printoptions(suppress=True)
 
 
 class cnn_kernel_net(torch.nn.Module):
-	def __init__(self, db, innerLayer, learning_rate=0.001):
+	def __init__(self, db, learning_rate=0.001):
 		super(cnn_kernel_net, self).__init__()
 		self.db = db
 		self.filter_len = 5
-		self.training_mode = 'autoencoder'		#	autoencoder vs kernel_net
 		self.num_output_channels = 128
-		self.innerLayer = innerLayer
-
 		[H,W] = self.extract_HW(db)
 
 		self.conv1 = nn.Conv2d(1,16,	self.filter_len,stride=2)
@@ -36,14 +35,29 @@ class cnn_kernel_net(torch.nn.Module):
 		self.conv3 = nn.Conv2d(32,self.num_output_channels,	self.filter_len,stride=2)
 		final_layer_size = self.num_output_channels*H*W
 
-		self.l1 = torch.nn.Linear(final_layer_size , innerLayer, bias=True)
-		self.l2 = torch.nn.Linear(innerLayer, final_layer_size , bias=True)
+		self.l1 = torch.nn.Linear(final_layer_size , 10, bias=True)
+		self.l2 = torch.nn.Linear(10, final_layer_size , bias=True)
 		self.conv4 = nn.ConvTranspose2d(self.num_output_channels, 32, self.filter_len, stride=2)
 		self.conv5 = nn.ConvTranspose2d(32, 16, self.filter_len, stride=2)
 		self.conv6 = nn.ConvTranspose2d(16, 1, self.filter_len, stride=2)
 
 		self.criterion = torch.nn.MSELoss(size_average=False)
 		self.learning_rate = learning_rate
+	
+		self.initialize()
+
+
+	def initialize(self):
+		for param in self.parameters():
+			if(len(param.data.numpy().shape)) > 1:
+				torch.nn.init.kaiming_normal(param.data , a=0, mode='fan_in')	
+			else:
+				param.data = torch.zeros(param.data.size())
+
+
+	def initialize_RFF(self, db, sigma):
+		self.rff = RFF(30000)
+		self.rff.manual_init(db['batch_size'], db['output_dim'], sigma, db['dataType'])
 
 	def set_Y(self, Y_matrix):
 		Y_matrix = torch.from_numpy(Y_matrix)
@@ -66,8 +80,13 @@ class cnn_kernel_net(torch.nn.Module):
 		y3 = F.relu(self.conv3(y2))
 		return y3
 
-	def CAE_compute_loss(self, y0):
+	def CAE_compute_loss(self, y0, indices=None):
 		y_pred = self.CAE_forward(y0)
+
+		#print(y0.shape)
+		#print(y_pred.shape)
+		#import pdb; pdb.set_trace()
+		#return torch.sum((y_pred - y0) ** 2)
 		return self.criterion(y_pred, y0)
 
 	def CAE_forward(self, y0):
@@ -80,7 +99,7 @@ class cnn_kernel_net(torch.nn.Module):
 
 		y6 = F.relu(self.conv4(y5))
 		y7 = F.relu(self.conv5(y6))
-		y8 = F.relu(self.conv6(y7))
+		y8 = self.conv6(y7)
 
 		return y8
 
@@ -88,26 +107,39 @@ class cnn_kernel_net(torch.nn.Module):
 		bs = x.shape[0]
 		s = self.sigma
 
-		K = self.db['dataType'](bs, bs)
-		K = Variable(K.type(self.db['dataType']), requires_grad=False)		
-
-		for i in range(bs):
-			for j in range(bs):
-				tmpY = (x[i,:] - x[j,:]).unsqueeze(0)
-				eVal = -(torch.mm(tmpY, tmpY.transpose(0,1)))/(2*s*s)
-				K[i,j] = torch.exp(eVal)
-
+		if bs < 50:	# Compute raw RBF kernel
+			K = self.db['dataType'](bs, bs)
+			K = Variable(K.type(self.db['dataType']), requires_grad=False)		
+	
+			for i in range(bs):
+				for j in range(bs):
+					tmpY = (x[i,:] - x[j,:]).unsqueeze(0)
+					eVal = -(torch.mm(tmpY, tmpY.transpose(0,1)))/(2*s*s)
+					K[i,j] = torch.exp(eVal)
+		else: # use RFF
+			K = self.rff.get_rbf(x, s, True)
+			
 		return K
+
+
 
 	def compute_loss(self, x, indices):
 		x_out = self.forward(x)
 		rbk = self.gaussian_kernel(x_out)
-
+		
 		PP = self.Y[indices, :]
 		Ysmall = PP[:, indices]
 		cost = -torch.sum(rbk*Ysmall)
 
+#		print rbk
+#		print Ysmall
+#		print self.db['dataset'].y[indices]
+#		print indices
+#		import pdb; pdb.set_trace()
 		return cost
+
+	def kernel_net_output(self, y0):
+		return self.forward(y0)
 
 	def forward(self, y0):
 		y1 = self.encoder(y0)
@@ -150,6 +182,8 @@ if __name__ == '__main__':
 		avgL = loss_sum/idx
 		return avgL.cpu().data.numpy()[0]
 
+
+	start_time = time.time() 
 
 	if torch.cuda.is_available(): dtype = torch.cuda.FloatTensor
 	else: dtype = torch.FloatTensor
@@ -223,7 +257,7 @@ if __name__ == '__main__':
 		result['kernel_net'] = ckernel_net
 		pickle.dump( result, open( "face.p", "wb" ) )
 
-
+	print("\n--- Run Time : %s seconds ---\n" % (time.time() - start_time))
 
 
 
