@@ -9,18 +9,36 @@ class subset_select():
 			self.X = np.loadtxt(X, delimiter=',', dtype=np.float64)
 		else:
 			self.X = X
+		self.threashold = 0.01
 
-	def rbk_sklearn(self, data, σ):
+	def rbk_sklearn(self, data, σ, center=False):
 		γ = 1.0/(2*σ*σ)
 		rbk = sklearn.metrics.pairwise.rbf_kernel(data, gamma=γ)
+		N = rbk.shape[0]
+		H = np.eye(N) - np.ones((N,N))/float(N)
+		rbk = H.dot(rbk).dot(H)
+
+
 		return rbk
+
+	def save_subset_to_file(self, name, Y=None):
+		filename = name + '.csv'
+		np.savetxt(filename, self.new_X, delimiter=',', fmt='%.3f') 
+
+		if Y is not None:
+			if isinstance(Y, str):
+				Y = np.loadtxt(Y, delimiter=',', dtype=np.float64)
+
+			new_Y = Y[self.best_test_sample_id]
+			filename = name + '_label.csv'
+			np.savetxt(filename, new_Y, delimiter=',', fmt='%.1f') 
+
+
 
 	def get_subset(self):
 		σ = np.median(sklearn.metrics.pairwise.pairwise_distances(self.X))
 		N = self.X.shape[0]
 		K_orig = self.rbk_sklearn(self.X, σ)
-		H = np.eye(N) - np.ones((N,N))/float(N)
-		K_orig = H.dot(K_orig).dot(H)
 		[D,V] = np.linalg.eigh(K_orig)
 
 		scaled_cumsum_D = np.cumsum(np.flip(D,0)/np.sum(D))
@@ -28,7 +46,6 @@ class subset_select():
 		largest_eigs = np.flip(D,0)[0:eigLen]
 		largest_eigs = largest_eigs/np.sum(largest_eigs)
 
-		
 		for test_percent in np.arange(0.05,0.9,0.05):
 			kd_list = []
 			lowest_Kd = 100
@@ -42,9 +59,6 @@ class subset_select():
 				sample_X = self.X[test_set_id,:]
 		
 				K_new = self.rbk_sklearn(sample_X, σ)
-				small_N = K_new.shape[0]
-				H = np.eye(small_N) - np.ones((small_N,small_N))/float(small_N)
-				K_new = H.dot(K_new).dot(H)
 
 				[D,V] = np.linalg.eigh(K_new)
 				small_eigs = np.flip(D,0)[0:eigLen]
@@ -61,14 +75,11 @@ class subset_select():
 		
 			avg_kd = np.mean(kd_list)
 			print('At %.3f percent, avg error : %.3f'%(test_percent, avg_kd))
-			if avg_kd < 0.009: break
+			if avg_kd < self.threashold: break
 	
-	
-		new_X = self.X[best_test_sample_id,:]
-		K_new = self.rbk_sklearn(new_X, σ)
-		small_N = K_new.shape[0]
-		H = np.eye(small_N) - np.ones((small_N,small_N))/float(small_N)
-		K_new = H.dot(K_new).dot(H)
+		self.best_test_sample_id = best_test_sample_id
+		self.new_X = self.X[best_test_sample_id,:]
+		K_new = self.rbk_sklearn(self.new_X, σ)
 
 		[D,V] = np.linalg.eigh(K_new)
 		small_eigs = np.flip(D,0)[0:eigLen]
@@ -76,5 +87,5 @@ class subset_select():
 		Kd = np.max(np.absolute(largest_eigs - small_eigs))
 		print('\n%.3f percent was chosen with kernel divergence error of %.3f'%(test_percent, Kd))
 
-		return [new_X, best_test_sample_id]
+		return [self.new_X, best_test_sample_id]
 
