@@ -85,7 +85,7 @@ def STSC(X, k):
 
 	σ2 = σ_list.dot(σ_list.T)
 
-	K = np.exp(-(D*D)/σ2)
+	K = np.exp(-(D*D)/(2*σ2))
 	np.fill_diagonal(K,0)
 
 	D_inv = 1.0/np.sqrt(np.sum(K, axis=1))
@@ -166,7 +166,7 @@ def STSC_σ(X, k):
 
 	#σ2 = σ_col.dot(σ_col.T)
 
-	K = np.exp(-(D*D)/σ2)
+	K = np.exp(-(D*D)/(2*σ2))
 	np.fill_diagonal(K,0)
 
 	D_inv = 1.0/np.sqrt(np.sum(K, axis=1))
@@ -207,31 +207,31 @@ def STSC_σ(X, k):
 
 #X = genfromtxt('../dataset/facial_85.csv', delimiter=','); k = 20
 #Y = genfromtxt('../dataset/facial_true_labels_624x960.csv', delimiter=','); 
-##X = genfromtxt('../dataset/breast-cancer.csv', delimiter=','); k = 2
-##Y = genfromtxt('../dataset/breast-cancer-labels.csv', delimiter=',')	# k = 2
-##X = genfromtxt('../dataset/wine.csv', delimiter=','); k = 3
-##Y = genfromtxt('../dataset/wine_label.csv', delimiter=',')	# k = 2
-#
-#X = preprocessing.scale(X)
-#result = STSC_σ(X,k)
-##result = STSC(X,k)
-##labels = spectral(X, 9.0, 20)
-#
-#
-#nmi = normalized_mutual_info_score(result['allocation'], Y)
-#print(nmi)
+#X = genfromtxt('../dataset/breast-cancer.csv', delimiter=','); k = 2
+#Y = genfromtxt('../dataset/breast-cancer-labels.csv', delimiter=',')	# k = 2
+X = genfromtxt('../dataset/wine.csv', delimiter=','); k = 3
+Y = genfromtxt('../dataset/wine_label.csv', delimiter=',')	# k = 2
+
+X = preprocessing.scale(X)
+result = STSC_σ(X,k)
+#result = STSC(X,k)
+#labels = spectral(X, 9.0, 20)
+
+
+nmi = normalized_mutual_info_score(result['allocation'], Y)
+print(nmi)
 
 
 
 #----------------------------------------------------------------------
 
-#n = 1000
-x1 = np.random.randn(6,2) + np.array([4,4]); k = 2
-x2 = np.random.randn(6,2) + np.array([-4,-4])
-X = np.vstack((x1,x2))
-
-#result = STSC_σ(X,k)
-result = STSC(X,k)
-
-cluster_plot(X, result['allocation'], result['σ_list'])
+##n = 1000
+#x1 = np.random.randn(6,2) + np.array([4,4]); k = 2
+#x2 = np.random.randn(6,2) + np.array([-4,-4])
+#X = np.vstack((x1,x2))
+#
+##result = STSC_σ(X,k)
+#result = STSC(X,k)
+#
+#cluster_plot(X, result['allocation'], result['σ_list'])
 
