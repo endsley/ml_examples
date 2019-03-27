@@ -85,7 +85,7 @@ def STSC(X, k):
 
 	σ2 = σ_list.dot(σ_list.T)
 
-	K = np.exp(-(D*D)/(2*σ2))
+	K = np.exp(-(D*D)/(σ2))
 	np.fill_diagonal(K,0)
 
 	D_inv = 1.0/np.sqrt(np.sum(K, axis=1))
@@ -112,10 +112,10 @@ def STSC_σ(X, k):
 	else:
 		num_of_samples = 50
 	
-	print(num_of_samples)
 
 	unique_X = np.unique(X, axis=0)
-	neigh = NearestNeighbors(num_of_samples)
+	#neigh = NearestNeighbors(num_of_samples)
+	neigh = NearestNeighbors(num_of_samples, p=1)
 
 	neigh.fit(unique_X)
 	
@@ -143,30 +143,14 @@ def STSC_σ(X, k):
 		Δ2 = Δ*Δ
 		d = np.sum(Δ2,axis=1)
 		σ = np.sqrt(np.sum(dr*d))
-		σ_list[i] = σ#*10
+		σ_list[i] = σ
 
 		result_store_dictionary[str(X[i,:])] = σ
 
 	σ2 = σ_list.dot(σ_list.T)
-
-	#n = X.shape[0]
 	D = sklearn.metrics.pairwise.pairwise_distances(X, metric='euclidean', n_jobs=1)
-	#sD = np.sort(D, axis=1)
 
-	#print(sD[:,1:20])
-	#import pdb; pdb.set_trace()
-	#σ_col = np.reshape(sD[:,6], (n, 1))
-	#σ_col = np.reshape(sD[:,20], (n, 1))
-	#σ_col[σ_col == 0] = 10
-
-
-	#print(σ_col[σ_col == 0])
-	#import pdb; pdb.set_trace()
-	#σ_col = σ_col + 0.00001			# add noise in case of 0
-
-	#σ2 = σ_col.dot(σ_col.T)
-
-	K = np.exp(-(D*D)/(2*σ2))
+	K = np.exp(-(D*D)/(σ2))
 	np.fill_diagonal(K,0)
 
 	D_inv = 1.0/np.sqrt(np.sum(K, axis=1))
@@ -193,11 +177,11 @@ def STSC_σ(X, k):
 #X = genfromtxt('../dataset/four_lines.csv', delimiter=','); k = 4
 
 #X = preprocessing.scale(X)
-#result = STSC(X,k)
+##result = STSC(X,k)
 #result = STSC_σ(X,k)
-
-#labels = spectral(X, 1.0, k)
-#cluster_plot(X, result['allocation'], result['σ_list'])
+#
+##labels = spectral(X, 1.0, k)
+##cluster_plot(X, result['allocation'], result['σ_list'])
 #cluster_plot(X, result['allocation'])
 
 
@@ -215,10 +199,10 @@ Y = genfromtxt('../dataset/wine_label.csv', delimiter=',')	# k = 2
 X = preprocessing.scale(X)
 result = STSC_σ(X,k)
 #result = STSC(X,k)
-#labels = spectral(X, 9.0, 20)
-
+labels = spectral(X, 1.0, 20)
 
 nmi = normalized_mutual_info_score(result['allocation'], Y)
+
 print(nmi)
 
 
