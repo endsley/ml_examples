@@ -4,12 +4,12 @@ import numpy as np
 import numpy.matlib
 import matplotlib.pyplot as plt
 import sklearn.metrics
-import sklearn.metrics
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.preprocessing import normalize			# version : 0.17
 import matplotlib.pyplot as plt
 from numpy import genfromtxt
+from relative_kernel import *
 from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn import preprocessing
 import numpy as np
@@ -30,17 +30,6 @@ def spectral(X, sigma, k):
 	Vgamma = 1/(2*sigma*sigma)
 	return SpectralClustering(k, gamma=Vgamma).fit_predict(X)
 
-
-def L_to_U(L, k):
-	eigenValues,eigenVectors = np.linalg.eigh(L)
-
-	n2 = len(eigenValues)
-	n1 = n2 - k
-	U = eigenVectors[:, n1:n2]
-	U_lambda = eigenValues[n1:n2]
-	U_normalized = normalize(U, norm='l2', axis=1)
-	
-	return [U, U_normalized]
 
 def get_k_nearest_samples(X, x):
 	samples = [[0, 0, 2], [1, 0, 1], [0, 0, 1], [1,1,1]]
@@ -107,12 +96,9 @@ def STSC_σ(X, k):
 	n = X.shape[0]
 	if n < 50:
 		num_of_samples = n
-#	elif n/(2*k) < 50 and n/(2*k) > 10:
-#		num_of_samples = int(n/(2*k))
 	else:
 		num_of_samples = 50
-	
-
+		
 	unique_X = np.unique(X, axis=0)
 	#neigh = NearestNeighbors(num_of_samples)
 	neigh = NearestNeighbors(num_of_samples, p=1)
@@ -153,11 +139,15 @@ def STSC_σ(X, k):
 	K = np.exp(-(D*D)/(σ2))
 	np.fill_diagonal(K,0)
 
+	H = np.eye(n) - (1.0/n)*np.ones((n,n))
 	D_inv = 1.0/np.sqrt(np.sum(K, axis=1))
 	Dv = np.outer(D_inv, D_inv)
 	DKD = Dv*K
+	HDKDH = H.dot(DKD).dot(H)
 
-	[U, U_normalized] = L_to_U(DKD, k)
+	#[U, U_normalized] = L_to_U(DKD, k)
+	[U, U_normalized] = L_to_U(HDKDH, k)
+
 	allocation = KMeans(k).fit_predict(U_normalized)
 
 	result = {}
@@ -171,18 +161,24 @@ def STSC_σ(X, k):
 
 
 #X = genfromtxt('../dataset/smiley.csv', delimiter=','); k = 3
-#X = genfromtxt('../dataset/spiral_arm.csv', delimiter=','); k = 3
+X = genfromtxt('../dataset/spiral_arm.csv', delimiter=','); k = 3
 #X = genfromtxt('../dataset/inner_rings.csv', delimiter=','); k = 3
 #X = genfromtxt('../dataset/noisy_two_clusters.csv', delimiter=','); k = 3
 #X = genfromtxt('../dataset/four_lines.csv', delimiter=','); k = 4
 
-#X = preprocessing.scale(X)
-##result = STSC(X,k)
-#result = STSC_σ(X,k)
-#
-##labels = spectral(X, 1.0, k)
-##cluster_plot(X, result['allocation'], result['σ_list'])
-#cluster_plot(X, result['allocation'])
+X = preprocessing.scale(X)
+
+if True:
+	rK = relative_kernel(X)
+	labels = rK.get_clustering_result(k, center_kernel=True)
+	#cluster_plot(X, labels, rk.σ_list)
+	cluster_plot(X, labels)
+else:
+	#labels = spectral(X, 1.0, k)
+	result = STSC(X,k)
+	#cluster_plot(X, result['allocation'], result['σ_list'])
+	cluster_plot(X, result['allocation'])
+
 
 
 
@@ -193,17 +189,21 @@ def STSC_σ(X, k):
 #Y = genfromtxt('../dataset/facial_true_labels_624x960.csv', delimiter=','); 
 #X = genfromtxt('../dataset/breast-cancer.csv', delimiter=','); k = 2
 #Y = genfromtxt('../dataset/breast-cancer-labels.csv', delimiter=',')	# k = 2
-X = genfromtxt('../dataset/wine.csv', delimiter=','); k = 3
-Y = genfromtxt('../dataset/wine_label.csv', delimiter=',')	# k = 2
+#X = genfromtxt('../dataset/wine.csv', delimiter=','); k = 3
+#Y = genfromtxt('../dataset/wine_label.csv', delimiter=',')	# k = 2
 
-X = preprocessing.scale(X)
-result = STSC_σ(X,k)
-#result = STSC(X,k)
-labels = spectral(X, 1.0, 20)
-
-nmi = normalized_mutual_info_score(result['allocation'], Y)
-
-print(nmi)
+#X = preprocessing.scale(X)
+#
+#if True:
+#	rK = relative_kernel(X)
+#	labels = rK.get_clustering_result(k, center_kernel=True)
+#	nmi = normalized_mutual_info_score(labels, Y)
+#else:
+#	result = STSC(X,k)
+#	##labels = spectral(X, 1.0, 20)
+#	nmi = normalized_mutual_info_score(result['allocation'], Y)
+#
+#print(nmi)
 
 
 
