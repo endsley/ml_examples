@@ -10,6 +10,8 @@ from sklearn.preprocessing import normalize			# version : 0.17
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 from numpy import genfromtxt
+from sklearn.metrics.cluster import normalized_mutual_info_score
+
 
 np.set_printoptions(precision=4)
 np.set_printoptions(threshold=3000)
@@ -58,6 +60,7 @@ class relative_kernel():
 	
 			result_store_dictionary[str(X[i,:])] = σ
 	
+
 		self.σ_list = σ_list
 		self.σ2 = σ_list.dot(σ_list.T)
 		self.D = None
@@ -161,23 +164,23 @@ class relative_kernel():
 if __name__ == "__main__":
 
 	#X = genfromtxt('../dataset/smiley.csv', delimiter=','); k = 3
-	X = genfromtxt('../dataset/spiral_arm.csv', delimiter=','); k = 3
+	#X = genfromtxt('../dataset/spiral_arm.csv', delimiter=','); k = 3
 	#X = genfromtxt('../dataset/inner_rings.csv', delimiter=','); k = 3
 	#X = genfromtxt('../dataset/noisy_two_clusters.csv', delimiter=','); k = 3
 	#X = genfromtxt('../dataset/four_lines.csv', delimiter=','); k = 4
 	
-	X = preprocessing.scale(X)
-	
-	if True:
-		rK = relative_kernel(X)
-		labels = rK.get_clustering_result(k, center_kernel=True)
-		#rK.cluster_plot(X, labels, rk.σ_list)
-		rK.cluster_plot(X, labels)
-	else:
-		#labels = spectral(X, 1.0, k)
-		result = STSC(X,k)
-		#rK.cluster_plot(X, result['allocation'], result['σ_list'])
-		rK.cluster_plot(X, result['allocation'])
+	#X = preprocessing.scale(X)
+	#
+	#if True:
+	#	rK = relative_kernel(X)
+	#	labels = rK.get_clustering_result(k, center_kernel=True)
+	#	#rK.cluster_plot(X, labels, rk.σ_list)
+	#	rK.cluster_plot(X, labels)
+	#else:
+	#	#labels = spectral(X, 1.0, k)
+	#	result = STSC(X,k)
+	#	#rK.cluster_plot(X, result['allocation'], result['σ_list'])
+	#	rK.cluster_plot(X, result['allocation'])
 	
 	
 	
@@ -187,23 +190,23 @@ if __name__ == "__main__":
 	
 	#X = genfromtxt('../dataset/facial_85.csv', delimiter=','); k = 20
 	#Y = genfromtxt('../dataset/facial_true_labels_624x960.csv', delimiter=','); 
-	#X = genfromtxt('../dataset/breast-cancer.csv', delimiter=','); k = 2
-	#Y = genfromtxt('../dataset/breast-cancer-labels.csv', delimiter=',')	# k = 2
+	X = genfromtxt('../dataset/breast-cancer.csv', delimiter=','); k = 2
+	Y = genfromtxt('../dataset/breast-cancer-labels.csv', delimiter=',')	# k = 2
 	#X = genfromtxt('../dataset/wine.csv', delimiter=','); k = 3
 	#Y = genfromtxt('../dataset/wine_label.csv', delimiter=',')	# k = 2
 	
-	#X = preprocessing.scale(X)
-	#
-	#if True:
-	#	rK = relative_kernel(X)
-	#	labels = rK.get_clustering_result(k, center_kernel=True)
-	#	nmi = normalized_mutual_info_score(labels, Y)
-	#else:
-	#	result = STSC(X,k)
-	#	##labels = spectral(X, 1.0, 20)
-	#	nmi = normalized_mutual_info_score(result['allocation'], Y)
-	#
-	#print(nmi)
+	X = preprocessing.scale(X)
+	
+	if True:
+		rK = relative_kernel(X)
+		labels = rK.get_clustering_result(k, center_kernel=True)
+		nmi = normalized_mutual_info_score(labels, Y)
+	else:
+		result = STSC(X,k)
+		##labels = spectral(X, 1.0, 20)
+		nmi = normalized_mutual_info_score(result['allocation'], Y)
+	
+	print(nmi)
 	
 	
 	
