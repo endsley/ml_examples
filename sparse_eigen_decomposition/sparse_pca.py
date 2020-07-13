@@ -9,6 +9,9 @@ from numpy.random import rand
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
+from sklearn.metrics.cluster import normalized_mutual_info_score
+from sklearn.cluster import KMeans
+
 
 np.set_printoptions(precision=3)
 np.set_printoptions(threshold=30)
@@ -48,7 +51,7 @@ class sparse_pca:
 				discard_index = discard_index_better
 
 				#print(eigs_1, eigs_2)
-				if eigs_1*0.99 < eigs_2:
+				if eigs_1*0.995 < eigs_2:
 					print('\tEigen percentage : %.3f,  %.3f/%.3f'% (eigs_2/eigs_1, eigs_2, eigs_1))
 					print('\tSamples used : %d'% (ń))
 					break
@@ -98,12 +101,13 @@ class sparse_pca:
 		print('\t vAᵴv : %.3f'%self.debug_record[λ_id]['vAᵴv'])
 		print('\t ῡAῡ : %.3f'%self.debug_record[λ_id]['ῡAῡ'])
 
-	def get_sparce_eig_vector(self, A, num_of_eigs=2, sparcity=0.95):
+	def get_sparce_eig_vector(self, A, num_of_eigs=None, sparcity=0.95):
 		orig_A = A.copy()
 		self.sparcity = sparcity		# 0 to 1, the closer to 0 the more sparse
 		n = A.shape[0]
 		eigvec = np.empty((n, 0))
 		
+		if num_of_eigs is None: num_of_eigs = 1000
 		for λ_id in np.arange(1, num_of_eigs + 1):
 			print('Layer : %d'%λ_id)
 			self.debug_record[λ_id] = {}
@@ -133,56 +137,53 @@ class sparse_pca:
 			eigvec = np.hstack((eigvec, vi))
 			A = self.matrix_projection_deflation(A, vi)
 
+			if num_of_eigs == 1000:
+				num_not_assigned = np.sum(np.sum(np.absolute(eigvec), axis=1) < 0.0000001)
+				print('\tNumber of samples not assigned : %d'%num_not_assigned)
+				if num_not_assigned == 0:
+					D = (np.diag(eigvec.T.dot(orig_A).dot(eigvec)))
+					return [D, eigvec]
+
 		D = (np.diag(eigvec.T.dot(orig_A).dot(eigvec)))
 		return [D, eigvec]
 
-#	Data 1
-x = np.vstack((np.random.randn(30,5), np.random.randn(30,5) + 10))
-x = preprocessing.scale(x)
-γ = 1.0/(2*0.5*0.5)
-A = sklearn.metrics.pairwise.rbf_kernel(x, gamma=γ)
-np.fill_diagonal(A, 0)			#	Set diagonal of adjacency matrix to 0
-#A = x.dot(x.T)
-#Dinv = np.diag(1/np.sum(A,axis=1))
-#A = Dinv.dot(A)
-#import pdb; pdb.set_trace()
 
-##	Data 2
-#A = np.random.randn(100,100)
-#A = A.dot(A.T)
+if __name__ == "__main__":
+	#	Data 1
+	data_name = 'wine'
+	#data_name = 'cancer'
+	#data_name = 'car'
 
-##	Data 3
-#A =  np.array([[ 5.95 ,  2.558, -0.045,  5.369,  0.571,  4.871, -1.672,  0.784, -1.175, -2.351],
-#				[ 2.558,  9.927, -1.97 ,  1.867,  8.123,  1.998, -3.867, -5.423, -4.889, -3.455],
-#				[-0.045, -1.97 , 11.314,  3.922, -3.707,  2.685,  5.36 , -4.995, -0.136,  1.396],
-#				[ 5.369,  1.867,  3.922,  8.214,  0.626,  3.814, -0.26 , -2.162,  1.232, -1.246],
-#				[ 0.571,  8.123, -3.707,  0.626, 12.372, -0.182, -2.772, -1.065, -2.313,  0.384],
-#				[ 4.871,  1.998,  2.685,  3.814, -0.182,  6.045,  0.541,  0.586, -3.12 , -1.502],
-#				[-1.672, -3.867,  5.36 , -0.26 , -2.772,  0.541,  4.191,  0.548,  0.72 ,  2.633],
-#				[ 0.784, -5.423, -4.995, -2.162, -1.065,  0.586,  0.548, 10.719,  2.188,  2.767],
-#				[-1.175, -4.889, -0.136,  1.232, -2.313, -3.12 ,  0.72 ,  2.188,  5.608,  2.17 ],
-#				[-2.351, -3.455,  1.396, -1.246,  0.384, -1.502,  2.633,  2.767,  2.17 ,  3.465]])
+	X = np.loadtxt('data/' + data_name + '.csv', delimiter=',', dtype=np.float64)			
+	Y = np.loadtxt('data/' + data_name + '_label.csv', delimiter=',', dtype=np.int)			
+	Y = np.reshape(Y, (len(Y),1))
+	X = preprocessing.scale(X)
+	γ = 1.0/(2*1.0*1.0)
+	A = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
+	np.fill_diagonal(A, 0)			#	Set diagonal of adjacency matrix to 0
 
+	##	Data 2
+	#x = np.vstack((np.random.randn(10,5), np.random.randn(10,5) + 5, np.random.randn(10,5) + 10))
+	#x = preprocessing.scale(x)
+	#γ = 1.0/(2*0.5*0.5)
+	#A = sklearn.metrics.pairwise.rbf_kernel(x, gamma=γ)
+	#np.fill_diagonal(A, 0)			#	Set diagonal of adjacency matrix to 0
 
-#	Input matrix A must be SPSD
-eigN = 2
+	#	Input matrix A must be SPSD
+	sp = sparse_pca()
+	[D,V] = sp.get_sparce_eig_vector(A, num_of_eigs=None)		# num_of_eigs : how many eigen vectors to produce, None automatically choose minimum
+	[D2,V2] = np.linalg.eigh(A)
+	
+	
+	print('\nOutput')
+	print('Actual Eigen values : ', np.flip(D2)[0:V.shape[1]])
+	print('Sparse Eigen values : ', D)
 
-sp = sparse_pca()
-[D,V] = sp.get_sparce_eig_vector(A, num_of_eigs=eigN)		# sparcity : 0 to 1, the closer to 0 the more sparse
-[D2,V2] = np.linalg.eigh(A)
+	print('\nNotice how using sparse eigenvectors achieves the same magnitude')
+	print('\t vAv : %.3f'% np.sum(np.flip(D2)[0:V.shape[1]]))
+	print('\t ῡAῡ : %.3f'%np.trace(V.T.dot(A).dot(V)))
+	import pdb; pdb.set_trace()
 
-print('\nOutput')
-print('Actual Eigen values : ', np.flip(D2)[0:eigN])
-print('Eigen values : ', D)
-print('Eigen vector : ')
-print(V[0:30,:], '\n')
-print(V[30:60,:], '\n')
-
-[V,D] = np.linalg.eigh(V.T.dot(V))
-
-import pdb; pdb.set_trace()
-fig = plt.figure()
-plt.plot(V[0:30,0], V[0:30,1],'or')
-plt.plot(V[30:60,0], V[30:60,1],'ob')
-plt.show()
+	#print('Eigen vector : ')
+	#print(V)
 
