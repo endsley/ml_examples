@@ -51,7 +51,7 @@ class sparse_pca:
 				discard_index = discard_index_better
 
 				#print(eigs_1, eigs_2)
-				if eigs_1*0.995 < eigs_2:
+				if eigs_1*0.999 < eigs_2:
 					print('\tEigen percentage : %.3f,  %.3f/%.3f'% (eigs_2/eigs_1, eigs_2, eigs_1))
 					print('\tSamples used : %d'% (ń))
 					break
@@ -150,7 +150,8 @@ class sparse_pca:
 
 if __name__ == "__main__":
 	#	Data 1
-	data_name = 'wine'
+	#data_name = 'wine'
+	data_name = 'face'
 	#data_name = 'cancer'
 	#data_name = 'car'
 
@@ -158,7 +159,7 @@ if __name__ == "__main__":
 	Y = np.loadtxt('data/' + data_name + '_label.csv', delimiter=',', dtype=np.int)			
 	Y = np.reshape(Y, (len(Y),1))
 	X = preprocessing.scale(X)
-	γ = 1.0/(2*1.0*1.0)
+	γ = 1.0/(2*0.3*0.3)
 	A = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
 	np.fill_diagonal(A, 0)			#	Set diagonal of adjacency matrix to 0
 
@@ -179,7 +180,7 @@ if __name__ == "__main__":
 	print('Actual Eigen values : ', np.flip(D2)[0:V.shape[1]])
 	print('Sparse Eigen values : ', D)
 
-	print('\nNotice how using sparse eigenvectors achieves the same magnitude')
+	print('\nNotice how using sparse eigenvectors achieves the similar magnitude')
 	print('\t vAv : %.3f'% np.sum(np.flip(D2)[0:V.shape[1]]))
 	print('\t ῡAῡ : %.3f'%np.trace(V.T.dot(A).dot(V)))
 	import pdb; pdb.set_trace()
