@@ -150,8 +150,7 @@ class sparse_pca:
 
 if __name__ == "__main__":
 	#	Data 1
-	#data_name = 'wine'
-	data_name = 'face'
+	data_name = 'wine'
 	#data_name = 'cancer'
 	#data_name = 'car'
 
