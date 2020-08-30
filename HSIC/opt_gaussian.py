@@ -86,10 +86,19 @@ def get_opt_σ(X,Y, Y_kernel='Gaussian'):
 def get_opt_σ_via_random(X,Y, Y_kernel='Gaussian'):
 	optimizer = opt_gaussian(X,Y, Y_kernel=Y_kernel)
 
-	σ = (7*np.random.rand(2)).tolist()
-	print(σ, optimizer.ℍ(σ))
+	opt = 0
+	opt_σ = 0
+	for m in range(1000):
+		σ = (7*np.random.rand(2)).tolist()
+		new_opt = -optimizer.ℍ(σ)
+		if opt < new_opt:
+			opt = new_opt
+			opt_σ = σ
 
-	import pdb; pdb.set_trace()
+	print('Random Result ')
+	print('\tbest_σ : ', opt_σ)
+	print('\tmax_HSIC : ' , opt)
+
 
 if __name__ == "__main__":
 	data_name = 'wine'
@@ -97,11 +106,15 @@ if __name__ == "__main__":
 	Y = np.loadtxt('../dataset/' + data_name + '_label.csv', delimiter=',', dtype=np.int32)			
 	X = preprocessing.scale(X)
 
+
+	optimized_results = get_opt_σ(X,Y, Y_kernel='linear')
+	best_σ = optimized_results.x
+	max_HSIC = -optimized_results.fun
+	print('Optimized Result ')
+	print('\tbest_σ : ', best_σ)
+	print('\tmax_HSIC : ' , max_HSIC)
+
+
 	optimized_results = get_opt_σ_via_random(X,Y, Y_kernel='linear')
-#	best_σ = optimized_results.x
-#	max_HSIC = -optimized_results.fun
-#
-#	print('best_σ : ', best_σ)
-#	print('max_HSIC : ' , max_HSIC)
 
 
