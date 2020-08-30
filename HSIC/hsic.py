@@ -8,6 +8,11 @@ from sklearn.metrics.cluster import normalized_mutual_info_score
 import matplotlib.pyplot as plt; plt.rcdefaults()
 import matplotlib.pyplot as plt
 
+import pandas as pd
+import numpy as np
+import ppscore as pps
+
+
 def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian'):	# compute normalized HSIC between X,Y
 	if len(X.shape) == 1: X = np.reshape(X, (X.size, 1))
 	if len(Y.shape) == 1: Y = np.reshape(Y, (Y.size, 1))
@@ -17,8 +22,8 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian'):	# compute normalized HSI
 	if Y_kernel == 'linear': Kᵧ = Y.dot(Y.T)
 
 	if X_kernel == 'Gaussian': 
-		σ = np.median(sklearn.metrics.pairwise_distances(X))
-		γ = 1.0/(2*σ*σ)
+		σ = np.median(sklearn.metrics.pairwise_distances(X))		# find a σ via optimum
+		γ = 8.0/(2*σ*σ)
 		Kᵪ = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
 
 	if Y_kernel == 'Gaussian': 
@@ -52,26 +57,32 @@ if __name__ == '__main__':
 	#	Linear Data
 	dat = np.random.rand(n,1)
 	linear_data = np.hstack((dat,dat)) + 0.04*np.random.randn(n,2)
+	df = pd.DataFrame(data=linear_data, columns=["x", "y"])
 	linear_pc = np.round(pearsonr(linear_data[:,0], linear_data[:,1])[0], 2)
 	linear_nmi = normalized_mutual_info_score(linear_data[:,0], linear_data[:,1])
-	linear_hsic = np.round(ℍ(linear_data[:,0], linear_data[:,1]),2)
-	
+	linear_hsic = np.round(ℍ(linear_data[:,0], linear_data[:,1]),2)	
+	linear_pps = pps.score(df, "x", "y")['ppscore']
+
 	print('Linear Relationship:')
 	print('\tCorrelation : ', linear_pc)
 	print('\tNMI : ', linear_nmi)
+	print('\tpps : ', linear_pps)
 	print('\tHSIC : ', linear_hsic)
 
 	#	Sine Data
 	dat_x = 9.3*np.random.rand(n,1)
 	dat_y = np.sin(dat_x)
 	sine_data = np.hstack((dat_x,dat_y)) + 0.06*np.random.randn(n,2)
+	df = pd.DataFrame(data=sine_data, columns=["x", "y"])
 	sine_pc = np.round(pearsonr(sine_data[:,0], sine_data[:,1])[0],2)
 	sine_nmi = normalized_mutual_info_score(sine_data[:,0], sine_data[:,1])
 	sine_hsic = np.round(ℍ(sine_data[:,0], sine_data[:,1]),2)
+	sine_pps = pps.score(df, "x", "y")['ppscore']
 	
 	print('Sine Relationship:')
 	print('\tCorrelation : ', sine_pc)
 	print('\tNMI : ', sine_nmi)
+	print('\tpps : ', sine_pps)
 	print('\tHSIC : ', sine_hsic)
 
 
@@ -79,30 +90,34 @@ if __name__ == '__main__':
 	dat_x = 4*np.random.rand(n,1) - 2
 	dat_y = 0.05*dat_x*dat_x
 	para_data = np.hstack((dat_x,dat_y)) + 0.01*np.random.randn(n,2)
-	#para_data[n/2:, 1] = -para_data[n/2:, 1] + 0.4	
+	df = pd.DataFrame(data=para_data, columns=["x", "y"])
 
 	para_pc = np.round(pearsonr(para_data[:,0], para_data[:,1])[0],2)
 	para_nmi = normalized_mutual_info_score(para_data[:,0], para_data[:,1])
 	para_hsic = np.round(ℍ(para_data[:,0], para_data[:,1]),2)
+	para_pps = pps.score(df, "x", "y")['ppscore']
 	
 	print('Parabola Relationship:')
 	print('\tCorrelation : ', para_pc)
 	print('\tNMI : ', para_nmi)
+	print('\tpps : ', para_pps)
 	print('\tHSIC : ', para_hsic)
-
 
 	#	Random uniform Data
 	unif_data = np.random.rand(n,2)
+	df = pd.DataFrame(data=unif_data, columns=["x", "y"])
 	unif_pc = np.round(pearsonr(unif_data[:,0], unif_data[:,1])[0],2)
 	unif_hsic = np.round(ℍ(unif_data[:,0], unif_data[:,1]),2)
 	unif_nmi = normalized_mutual_info_score(unif_data[:,0], unif_data[:,1])
+	unif_pps = pps.score(df, "x", "y")['ppscore']
 	
 	print('Random Relationship:')
 	print('\tCorrelation : ', unif_pc)
 	print('\tNMI : ', unif_nmi)
+	print('\tpps : ', unif_pps)
 	print('\tHSIC : ', unif_hsic)
 
-
+	import pdb; pdb.set_trace()
 
 	plt.figure(figsize=(9,2))
 
