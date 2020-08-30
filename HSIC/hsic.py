@@ -7,7 +7,7 @@ from scipy.stats.stats import pearsonr
 from sklearn.metrics.cluster import normalized_mutual_info_score
 import matplotlib.pyplot as plt; plt.rcdefaults()
 import matplotlib.pyplot as plt
-
+from opt_gaussian import *
 import pandas as pd
 import numpy as np
 import ppscore as pps
@@ -21,13 +21,19 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian'):	# compute normalized HSI
 	if X_kernel == 'linear': Kᵪ = X.dot(X.T)
 	if Y_kernel == 'linear': Kᵧ = Y.dot(Y.T)
 
+
+	optimizer = opt_gaussian(X,Y, Y_kernel=Y_kernel)
+	optimizer.minimize_H()
+
 	if X_kernel == 'Gaussian': 
-		σ = np.median(sklearn.metrics.pairwise_distances(X))		# find a σ via optimum
-		γ = 8.0/(2*σ*σ)
+		σ = np.median(sklearn.metrics.pairwise_distances(X))/2		# find a σ via optimum
+		#σ = optimizer.result.x[0]
+		γ = 1.0/(2*σ*σ)
 		Kᵪ = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
 
 	if Y_kernel == 'Gaussian': 
-		σ = np.median(sklearn.metrics.pairwise_distances(Y))
+		σ = np.median(sklearn.metrics.pairwise_distances(Y))/2
+		#σ = optimizer.result.x[1]
 		γ = 1.0/(2*σ*σ)
 		Kᵧ = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=γ)
 
@@ -61,7 +67,7 @@ if __name__ == '__main__':
 	linear_pc = np.round(pearsonr(linear_data[:,0], linear_data[:,1])[0], 2)
 	linear_nmi = normalized_mutual_info_score(linear_data[:,0], linear_data[:,1])
 	linear_hsic = np.round(ℍ(linear_data[:,0], linear_data[:,1]),2)	
-	linear_pps = pps.score(df, "x", "y")['ppscore']
+	linear_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 
 	print('Linear Relationship:')
 	print('\tCorrelation : ', linear_pc)
@@ -77,7 +83,7 @@ if __name__ == '__main__':
 	sine_pc = np.round(pearsonr(sine_data[:,0], sine_data[:,1])[0],2)
 	sine_nmi = normalized_mutual_info_score(sine_data[:,0], sine_data[:,1])
 	sine_hsic = np.round(ℍ(sine_data[:,0], sine_data[:,1]),2)
-	sine_pps = pps.score(df, "x", "y")['ppscore']
+	sine_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 	
 	print('Sine Relationship:')
 	print('\tCorrelation : ', sine_pc)
@@ -95,7 +101,7 @@ if __name__ == '__main__':
 	para_pc = np.round(pearsonr(para_data[:,0], para_data[:,1])[0],2)
 	para_nmi = normalized_mutual_info_score(para_data[:,0], para_data[:,1])
 	para_hsic = np.round(ℍ(para_data[:,0], para_data[:,1]),2)
-	para_pps = pps.score(df, "x", "y")['ppscore']
+	para_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 	
 	print('Parabola Relationship:')
 	print('\tCorrelation : ', para_pc)
@@ -109,7 +115,7 @@ if __name__ == '__main__':
 	unif_pc = np.round(pearsonr(unif_data[:,0], unif_data[:,1])[0],2)
 	unif_hsic = np.round(ℍ(unif_data[:,0], unif_data[:,1]),2)
 	unif_nmi = normalized_mutual_info_score(unif_data[:,0], unif_data[:,1])
-	unif_pps = pps.score(df, "x", "y")['ppscore']
+	unif_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 	
 	print('Random Relationship:')
 	print('\tCorrelation : ', unif_pc)
@@ -117,26 +123,25 @@ if __name__ == '__main__':
 	print('\tpps : ', unif_pps)
 	print('\tHSIC : ', unif_hsic)
 
-	import pdb; pdb.set_trace()
 
-	plt.figure(figsize=(9,2))
+	plt.figure(figsize=(13,3))
 
 
 	plt.subplot(141)
 	plt.plot(linear_data[:,0], linear_data[:,1], 'bx')
-	plt.title('$\\rho$ : ' + str(linear_pc) + ' , HSIC : ' + str(linear_hsic))
+	plt.title('$\\rho$ : ' + str(linear_pc) + ' , HSIC : ' + str(linear_hsic) + '\npps : ' + str(linear_pps) + ' , nmi : ' + str(linear_nmi))
 	
 	plt.subplot(142)
 	plt.plot(sine_data[:,0], sine_data[:,1], 'bx')
-	plt.title('$\\rho$ : ' + str(sine_pc) + ' , HSIC : ' + str(sine_hsic))
+	plt.title('$\\rho$ : ' + str(sine_pc) + ' , HSIC : ' + str(sine_hsic) + '\npps : ' + str(sine_pps) + ' , nmi : ' + str(sine_nmi))
 
 	plt.subplot(143)
 	plt.plot(para_data[:,0], para_data[:,1], 'bx')
-	plt.title('$\\rho$ : ' + str(para_pc) + ' , HSIC : ' + str(para_hsic))
+	plt.title('$\\rho$ : ' + str(para_pc) + ' , HSIC : ' + str(para_hsic) + '\npps : ' + str(para_pps) + ' , nmi : ' + str(para_nmi))
 
 	plt.subplot(144)
 	plt.plot(unif_data[:,0], unif_data[:,1], 'bx')
-	plt.title('$\\rho$ : ' + str(unif_pc) + ' , HSIC : ' + str(unif_hsic))
+	plt.title('$\\rho$ : ' + str(unif_pc) + ' , HSIC : ' + str(unif_hsic) + '\npps : ' + str(unif_pps) + ' , nmi : ' + str(unif_nmi))
 
 	plt.tight_layout()
 	plt.show()
