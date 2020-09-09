@@ -39,13 +39,14 @@ class ORF():
 		P = np.cos(X.dot(rand_proj) + phase_shift)
 		K = (2.0/m)*P.dot(P.T)
 	
-		return K
+		return [np.sqrt(2/m)*P,K]
 
-	def SORF(self, X, σ, α):	# α repeats the number of Wᵴ matrices
+	def SORF(self, X, σ, m):	# α repeats the number of Wᵴ matrices
 		γ = 1.0/(2*σ*σ)
-		sorf = pyrfm.random_feature.StructuredOrthogonalRandomFeature(gamma=γ)
+		sorf = pyrfm.random_feature.StructuredOrthogonalRandomFeature(n_components=m, gamma=γ)
 		Φx = sorf.fit_transform(X)
 		K = Φx.dot(Φx.T)
+		return [Φx, K]
 
 #		My version is not working, I think it is because I am using shift instead of cosine sine
 
@@ -178,38 +179,48 @@ if __name__ == "__main__":
 	np.set_printoptions(threshold=sys.maxsize)
 
 
-	#X = np.array([[0.2,1],[0,0],[0,1],[0,-1],[4,4],[4,5],[3,4],[4,3]], dtype='f')	
-	#X1 = np.random.randn(30,16)
-	#X2 = np.random.randn(30,16) + 3
-	#X = np.vstack((X1,X2))
-
-	X = genfromtxt('../dataset/wine.csv', delimiter=',')
-	X = preprocessing.scale(X)
+	#X = genfromtxt('../dataset/mnist_10000_784.csv', delimiter=',')
+	#X = genfromtxt('../dataset/wine.csv', delimiter=',')
+	#X = preprocessing.scale(X)
+	X = np.random.randn(15000,700)
 
 	σ = np.median(sklearn.metrics.pairwise.pairwise_distances(X))
-	α = 100
-	m = X.shape[1]*α
+	n = X.shape[0]
+	d = X.shape[1]
+	m = int(np.power(2,np.ceil(np.log2(d*2))))
 
 
 	start_time = perf_counter() 
 	orf = ORF()
-	orf_K = orf.SORF(X, σ, 100)
+	[Φx, orf_K] = orf.SORF(X, σ, m)
 	time1 = (perf_counter() - start_time)
 
 	start_time = perf_counter() 
-	rff_K = orf.RFF(X, m, σ)
-	time1 = (perf_counter() - start_time)
-
-
+	[rΦx, rff_K] = orf.RFF(X, m, σ)
+	time2 = (perf_counter() - start_time)
 
 	γ = 1.0/(2*σ*σ)
 	start_time = perf_counter() 
 	rbk = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
-	time2 = (perf_counter() - start_time)
+	time3 = (perf_counter() - start_time)
 
-	print('ORF : \n', orf_K[0:10,0:10], '\n')
-	print('RFF : \n', rff_K[0:10,0:10], '\n')
-	print('RBK : \n', rbk[0:10,0:10])
+	ε1 = np.linalg.norm(rbk - orf_K) #(1/(n*n))*
+	ε2 = np.linalg.norm(rbk - rff_K) #(1/(n*n))*
+
+	print('ORF : ')
+	print('\tτ=%.3f, ε=%.3f'%(time1, ε1))
+	print('\t Feature map dimension : ',Φx.shape)
+	print('\t' + str(orf_K[0:10,0:10]).replace('\n', '\n\t'))
+
+	print('RFF : ')
+	print('\tτ=%.3f, ε=%.3f'%(time2, ε2))
+	print('\t Feature map dimension : ',rΦx.shape)
+	print('\t' + str(rff_K[0:10,0:10]).replace('\n', '\n\t'))
+
+	print('RBK :')
+	print('\tτ=%.3f, ε=%.3f'%(time3, 0))
+	print('\t' + str(rbk[0:10,0:10]).replace('\n', '\n\t'))
+
 
 #	start_time = time.time() 
 #	rbf_feature = RBFSampler(gamma=1, random_state=1, n_components=2000)
