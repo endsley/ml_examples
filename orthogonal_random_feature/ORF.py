@@ -6,10 +6,27 @@ import numpy.matlib
 import sklearn.metrics
 from time import perf_counter
 from scipy.linalg import hadamard
+from numpy import genfromtxt
+from sklearn import preprocessing
+import sklearn.metrics
+import pyrfm.random_feature
 
 class ORF():
 	def __init__(self):
 		pass
+
+	def pad_X_to_power_of_2(self, X):
+		n = X.shape[0]
+		d = X.shape[1]
+		next_power = np.ceil(np.log2(d))
+
+		if next_power == d: return X
+
+		nP = np.power(2, next_power)
+		Δ = int(nP - d)
+		Z = np.zeros((n,Δ))
+		X =  np.hstack((X,Z))
+		return X
 
 	def RFF(self, X, m, σ):
 		N = X.shape[0]
@@ -25,25 +42,77 @@ class ORF():
 		return K
 
 	def SORF(self, X, σ, α):	# α repeats the number of Wᵴ matrices
-		N = X.shape[0]
-		d = X.shape[1]
-	
-		phase_shift = 2*np.pi*np.random.rand(1, m)
-		phase_shift = np.matlib.repmat(phase_shift, N, 1)
-		Wᵴ = self.get_Wᵴ(X.T, σ, α)
-	
-		P = np.cos(X.dot(Wᵴ.T) + phase_shift)
-		K = (2.0/m)*P.dot(P.T)
-	
-		return K
+		γ = 1.0/(2*σ*σ)
+		sorf = pyrfm.random_feature.StructuredOrthogonalRandomFeature(gamma=γ)
+		Φx = sorf.fit_transform(X)
+		K = Φx.dot(Φx.T)
+
+#		My version is not working, I think it is because I am using shift instead of cosine sine
+
+#		X = self.pad_X_to_power_of_2(X)
+#
+#		N = X.shape[0]
+#		d = X.shape[1]
+#		m = d*α	
+#
+#		phase_shift = 2*np.pi*np.random.rand(1, m)
+#		phase_shift = np.matlib.repmat(phase_shift, N, 1)
+#		#WX = self.get_WX(X.T, σ, α)
+#		WX = self.get_WX_slow(X.T, σ, α)
+#		#import pdb; pdb.set_trace()	
+#
+#		P = np.cos(WX.T + phase_shift)
+#		K = (2.0/m)*P.dot(P.T)
+#	
+#		return K
 
 
+	def get_WX_slow(self, X, σ, α):		
+		d = X.shape[0]
+		n = X.shape[1]
 
-	def get_Wᵴ(self, X, σ, α):		
-	# Wᵴ is a m x d matrix where m is the rff dimension, α repeats the number of Wᵴ matrices
+
+		#Qx = np.empty((0, d))
+		#for i in range(α):
+		#	D = np.diag(2*np.round(np.random.rand(d)) - 1)
+	
+		#	HD = self.mult_by_Hadamard_slow(D)
+		#	DHD = self.mult_by_Rademacher_distribution(HD)
+		#	HDHD = self.mult_by_Hadamard_slow(DHD)
+		#	DHDHD = self.mult_by_Rademacher_distribution(HDHD)
+		#	HDHDHD = self.mult_by_Hadamard_slow(DHDHD)
+	
+		#	Q_new = (np.sqrt(d)/σ)*HDHDHD
+		#	Qx = np.vstack((Qx, Q_new))
+
+		#import pdb; pdb.set_trace()
+
+
+		Qx = np.empty((0, n))
+		for i in range(α):
+			DX = self.mult_by_Rademacher_distribution(X)
+			HDX = self.mult_by_Hadamard_slow(DX)
+			DHDX = self.mult_by_Rademacher_distribution(HDX)
+			HDHDX = self.mult_by_Hadamard_slow(DHDX)
+			DHDHDX = self.mult_by_Rademacher_distribution(HDHDX)
+			HDHDHDX = self.mult_by_Hadamard_slow(DHDHDX)
+			Q_new = (np.sqrt(d)/σ)*HDHDHDX
+			Qx = np.vstack((Qx, Q_new))
+		return Qx
+
+	def mult_by_Hadamard_slow(self, x):	# x is in column form
+		l = x.shape[0]
+		H = hadamard(l)
+		#return H.dot(x)
+		return (1/np.sqrt(2))*H.dot(x)
+
+
+	def get_WX(self, X, σ, α):
+	# Qx is a d x n matrix where m is the rff dimension, α repeats the number of Wᵴ matrices
 	# X is a d x n matrix
 		d = X.shape[0]
-		Wᵴ = np.empty((0, d))
+		n = X.shape[1]
+		Qx = np.empty((0, n))
 
 		for i in range(α):
 			DX = self.mult_by_Rademacher_distribution(X)
@@ -52,10 +121,10 @@ class ORF():
 			HDHDX = self.fwht(DHDX)
 			DHDHDX = self.mult_by_Rademacher_distribution(HDHDX)
 			HDHDHDX = self.fwht(DHDHDX)
-			Wᵴ_new = (np.sqrt(d)/σ)*HDHDHDX
-			import pdb; pdb.set_trace()
-			Wᵴ = np.vstack((Wᵴ, Wᵴ_new))
-		return Wᵴ
+			Q_new = (np.sqrt(d)/σ)*HDHDHDX
+			Qx = np.vstack((Qx, Q_new))
+
+		return Qx
 
 	def mult_by_Rademacher_distribution(self, X):	#X should be d x n
 		d = X.shape[0]
@@ -109,16 +178,28 @@ if __name__ == "__main__":
 	np.set_printoptions(threshold=sys.maxsize)
 
 
+	#X = np.array([[0.2,1],[0,0],[0,1],[0,-1],[4,4],[4,5],[3,4],[4,3]], dtype='f')	
+	#X1 = np.random.randn(30,16)
+	#X2 = np.random.randn(30,16) + 3
+	#X = np.vstack((X1,X2))
 
-	σ = 0.5
-	m = 2000
+	X = genfromtxt('../dataset/wine.csv', delimiter=',')
+	X = preprocessing.scale(X)
 
-	X = np.array([[0.2,1],[0,0],[0,1],[0,-1],[4,4],[4,5],[3,4],[4,3]], dtype='f')	
+	σ = np.median(sklearn.metrics.pairwise.pairwise_distances(X))
+	α = 100
+	m = X.shape[1]*α
+
+
 	start_time = perf_counter() 
 	orf = ORF()
-	rff_K = orf.SORF(X, σ, 100)
-	#rff_K = orf.RFF(X, m, σ)
+	orf_K = orf.SORF(X, σ, 100)
 	time1 = (perf_counter() - start_time)
+
+	start_time = perf_counter() 
+	rff_K = orf.RFF(X, m, σ)
+	time1 = (perf_counter() - start_time)
+
 
 
 	γ = 1.0/(2*σ*σ)
@@ -126,8 +207,9 @@ if __name__ == "__main__":
 	rbk = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
 	time2 = (perf_counter() - start_time)
 
-	print(rff_K, '\n')
-	print(rbk)
+	print('ORF : \n', orf_K[0:10,0:10], '\n')
+	print('RFF : \n', rff_K[0:10,0:10], '\n')
+	print('RBK : \n', rbk[0:10,0:10])
 
 #	start_time = time.time() 
 #	rbf_feature = RBFSampler(gamma=1, random_state=1, n_components=2000)
