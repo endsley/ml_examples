@@ -182,7 +182,7 @@ if __name__ == "__main__":
 	#X = genfromtxt('../dataset/mnist_10000_784.csv', delimiter=',')
 	#X = genfromtxt('../dataset/wine.csv', delimiter=',')
 	#X = preprocessing.scale(X)
-	X = np.random.randn(15000,700)
+	X = np.random.randn(15000,400)
 
 	σ = np.median(sklearn.metrics.pairwise.pairwise_distances(X))
 	n = X.shape[0]
