@@ -20,7 +20,7 @@ from sklearn.linear_model import SGDClassifier
 #	gamma = 1/(2*sigma^2)
 
 np.set_printoptions(precision=3)
-np.set_printoptions(threshold=np.nan)
+#np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 
@@ -40,7 +40,7 @@ def RFF(X, nrmlize, m, sigma):
 
 
 if __name__ == "__main__":
-	#X = np.array([[0,0],[0,1],[0,-1],[4,4],[4,5],[3,4],[4,3]], dtype='f')	 
+	X = np.array([[0,0],[0,1],[0,-1],[4,4],[4,5],[3,4],[4,3]], dtype='f')	 
 	#X = genfromtxt('../dataset/data_4.csv', delimiter=',')
 	#X = genfromtxt('../dataset/breast-cancer.csv', delimiter=',')
 	#X = genfromtxt('../dataset/facial_85.csv', delimiter=',')
@@ -68,8 +68,10 @@ if __name__ == "__main__":
 	rff_K = Z.dot(Z.T)
 	rff_time = (time.time() - start_time)
 
+	print(K, '\n')
+	print(rff_K)
 
-	print K_time, rbk_time, rff_time
+	print(K_time, rbk_time, rff_time)
 
 	import pdb; pdb.set_trace()
 

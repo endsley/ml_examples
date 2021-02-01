@@ -111,7 +111,7 @@ if __name__ == "__main__":
 	best_σ = optimized_results.x
 	max_HSIC = -optimized_results.fun
 	print('Optimized Result ')
-	print('\tbest_σ : ', best_σ)
+	print('\tbest_σ [σₓ, σᵧ]: ', best_σ)
 	print('\tmax_HSIC : ' , max_HSIC)
 
 

@@ -17,6 +17,9 @@ import torchvision.transforms as transforms
 # Matplotlib
 #%matplotlib inline
 import matplotlib.pyplot as plt
+from numpy import genfromtxt
+
+
 
 # OS
 import os
@@ -92,6 +95,11 @@ class Autoencoder(nn.Module):
 		self.bottleneck = nn.Linear(48*4*4, self.latent_image_len)
 		self.bottleneck_out = nn.Linear(self.latent_image_len, 48*4*4)
 
+	def only_decoder(self, bottleneck):
+		encoded3 = self.bottleneck_out(bottleneck).reshape((bottleneck.shape[0],48,4,4))
+		decoded = self.decoder(encoded3)
+		return decoded
+
 	def forward(self, x):
 		#encoded = self.encoder(x)
 		#decoded = self.decoder(encoded)
@@ -99,10 +107,10 @@ class Autoencoder(nn.Module):
 
 
 		encoded = self.encoder(x)
-		conv_shape = encoded.shape
+		self.conv_shape = encoded.shape
 		encoded_flat = torch.flatten(encoded, 1)
 		self.latent = self.bottleneck(encoded_flat)
-		encoded3 = self.bottleneck_out(self.latent).reshape(conv_shape)
+		encoded3 = self.bottleneck_out(self.latent).reshape(self.conv_shape)
 
 		decoded = self.decoder(encoded3)
 		return encoded3, decoded
@@ -111,6 +119,7 @@ def main():
 	parser = argparse.ArgumentParser(description="Train Autoencoder")
 	parser.add_argument("--valid", action="store_true", default=False, help="Perform validation only.")
 	parser.add_argument("--outbottleneck", action="store_true", default=False, help="output bottleneck only.")
+	parser.add_argument("--examine_labels", action="store_true", default=False, help="output labels only.")
 
 	args = parser.parse_args()
 
@@ -118,15 +127,38 @@ def main():
 	autoencoder = create_model()
 
 	# Load data
-	transform = transforms.Compose(
-		[transforms.ToTensor(), ])
+	transform = transforms.Compose( [transforms.ToTensor(), ])
 	trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-	trainloader = torch.utils.data.DataLoader(trainset, batch_size=10000, shuffle=True, num_workers=2)
+	trainloader = torch.utils.data.DataLoader(trainset, batch_size=16, shuffle=True, num_workers=2)
 	testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-	testloader = torch.utils.data.DataLoader(testset, batch_size=10000, shuffle=False, num_workers=2)
+	testloader = torch.utils.data.DataLoader(testset, batch_size=16, shuffle=False, num_workers=2)
 	classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 	
+	if args.examine_labels:
+		print("Examining Labels...")
+		autoencoder.load_state_dict(torch.load("./weights/autoencoder.pkl"))
+		X = genfromtxt('data/cfar_1.csv', delimiter=',')
+		Y = genfromtxt('data/cfar_1_label.csv', delimiter=',')
+
+		Xtorch = torch.from_numpy(X).float()
+
+		## initialize shape
+		#for i, (inputs, label) in enumerate(testloader, 0):
+		#	img_batch = get_torch_vars(inputs)
+		#	decoded_imgs = autoencoder(img_batch)[1]
+		#	break
+
+		for i in range(15,32):
+			output = autoencoder.only_decoder(Xtorch.cuda())	
+			print(classes[int(Y[i])])
+			imshow(output.detach()[i])
+
+		exit(0)
+
+
+
+
 	if args.outbottleneck:
 		print("Outputing Bottleneck...")
 		autoencoder.load_state_dict(torch.load("./weights/autoencoder.pkl"))
@@ -145,19 +177,6 @@ def main():
 
 			np.savetxt(name, new_img_batch, delimiter=',', fmt='%.5f') 
 			np.savetxt(nameL, label, delimiter=',', fmt='%d') 
-
-			#all_images = np.vstack((all_images, new_img_batch))
-			#all_labels.extend(label)
-
-			#print(all_images.shape, len(all_labels))
-			print(i)
-
-			#if all_images.shape[0] >= 15792:
-			#	import pdb; pdb.set_trace()
-
-			#if i == 20:
-			#	print('GroundTruth: ', ' '.join('%5s' % classes[label[j]] for j in range(16)))
-			#	imshow(torchvision.utils.make_grid(decoded_imgs.data))
 
 		exit(0)
 

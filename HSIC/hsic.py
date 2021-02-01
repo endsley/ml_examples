@@ -37,6 +37,8 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian'):	# compute normalized HSI
 		γ = 1.0/(2*σ*σ)
 		Kᵧ = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=γ)
 
+	#np.fill_diagonal(Kᵪ, 0)
+	#np.fill_diagonal(Kᵧ, 0)
 
 	HKᵪ = Kᵪ - np.mean(Kᵪ, axis=0)					# equivalent to		HKᵪ = H.dot(Kᵪ)
 	HKᵧ = Kᵧ - np.mean(Kᵧ, axis=0)                  # equivalent to		HKᵧ = H.dot(Kᵧ)
