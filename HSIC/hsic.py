@@ -13,8 +13,17 @@ import pandas as pd
 import numpy as np
 import ppscore as pps
 
+# compute normalized HSIC between X,Y
+# if sigma_type = mpd, it uses median of pairwise distance
+# if sigma_type = opt, it uses optimal
+def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt'):	
+	def get_γ(optimizer, sigma_type, X):
+		if sigma_type == 'mpd': σ = np.median(sklearn.metrics.pairwise_distances(X))/2		# find a σ via optimum
+		else: σ = optimizer.result.x[0]
+		γ = 1.0/(2*σ*σ)
+		return γ
 
-def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian'):	# compute normalized HSIC between X,Y
+
 	if len(X.shape) == 1: X = np.reshape(X, (X.size, 1))
 	if len(Y.shape) == 1: Y = np.reshape(Y, (Y.size, 1))
 	n = X.shape[0]
@@ -22,26 +31,17 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian'):	# compute normalized HSI
 	if X_kernel == 'linear': Kᵪ = X.dot(X.T)
 	if Y_kernel == 'linear': Kᵧ = Y.dot(Y.T)
 
-
 	optimizer = opt_gaussian(X,Y, Y_kernel=Y_kernel)
 	optimizer.minimize_H()
 
 	if X_kernel == 'Gaussian': 
-		σ = np.median(sklearn.metrics.pairwise_distances(X))/2		# find a σ via optimum
-		#σ = optimizer.result.x[0]
-		γ = 1.0/(2*σ*σ)
+		γ = get_γ(optimizer, sigma_type, X)
 		Kᵪ = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
-	elif X_kernel == 'Linear': 
-		Kᵪ = X.dot(X.T)
-
 	if Y_kernel == 'Gaussian': 
-		σ = np.median(sklearn.metrics.pairwise_distances(Y))/2
-		#σ = optimizer.result.x[1]
-		γ = 1.0/(2*σ*σ)
+		γ = get_γ(optimizer, sigma_type, Y)
 		Kᵧ = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=γ)
-	elif Y_kernel == 'Linear': 
-		Kᵧ = Y.dot(Y.T)
 
+	
 	#np.fill_diagonal(Kᵪ, 0)
 	#np.fill_diagonal(Kᵧ, 0)
 
