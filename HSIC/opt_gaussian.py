@@ -9,6 +9,7 @@ import itertools
 import socket
 import sklearn.metrics
 from scipy.optimize import minimize
+from scipy.optimize import Bounds
 from sklearn import preprocessing
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.utils.random import sample_without_replacement
@@ -59,7 +60,8 @@ class opt_gaussian():
 		self.σ = [σₓ, σᵧ]
 
 	def minimize_H(self):
-		self.result = minimize(self.ℍ, self.σ, method='BFGS', options={'gtol': 1e-5, 'disp': False})
+		self.result = minimize(self.ℍ, self.σ, method='L-BFGS-B', options={'gtol': 1e-5, 'disp': False}, bounds=Bounds(0.05, 100000))
+
 
 	def ℍ(self, σ):
 		[σₓ, σᵧ] = σ
