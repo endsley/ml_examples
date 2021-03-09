@@ -49,7 +49,7 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt'):
 	HKᵪ = Kᵪ - np.mean(Kᵪ, axis=0)					# equivalent to		HKᵪ = H.dot(Kᵪ)
 	HKᵧ = Kᵧ - np.mean(Kᵧ, axis=0)                  # equivalent to		HKᵧ = H.dot(Kᵧ)
 
-	Hᵪᵧ= np.sum(HKᵪ*HKᵧ)
+	Hᵪᵧ= np.sum(HKᵪ.T*HKᵧ)
 
 	Hᵪ = np.linalg.norm(HKᵪ)						# equivalent to 	np.sqrt(np.sum(KᵪH*KᵪH))
 	Hᵧ = np.linalg.norm(HKᵧ) 						# equivalent to 	np.sqrt(np.sum(KᵧH*KᵧH))
