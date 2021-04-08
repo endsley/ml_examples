@@ -16,10 +16,13 @@ import ppscore as pps
 # compute normalized HSIC between X,Y
 # if sigma_type = mpd, it uses median of pairwise distance
 # if sigma_type = opt, it uses optimal
-def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt'):	
+def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt', normalize_hsic=True):	
 	def get_γ(X,Y, sigma_type):
 		if sigma_type == 'mpd': 
-			σ = np.median(sklearn.metrics.pairwise_distances(X))		# find a σ via optimum
+			σ = np.median(sklearn.metrics.pairwise_distances(X))		
+			#pd_matrix = sklearn.metrics.pairwise_distances(X)
+			#only_pair_wise = pd_matrix[np.triu_indices_from(pd_matrix, k=1)]
+			#σ = np.median(only_pair_wise)		
 		else: 
 			optimizer = opt_gaussian(X,Y, Y_kernel=Y_kernel)
 			optimizer.minimize_H()
@@ -27,6 +30,12 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt'):
 			if σ < 0.01: σ = 0.05		# ensure that σ is not too low
 		γ = 1.0/(2*σ*σ)
 		return γ
+
+	def double_center(Ψ):
+		HΨ = Ψ - np.mean(Ψ, axis=0)								# equivalent to Γ = Ⲏ.dot(Kᵧ).dot(Ⲏ)
+		HΨH = (HΨ.T - np.mean(HΨ.T, axis=0)).T
+		return HΨH
+
 
 	if len(X.shape) == 1: X = np.reshape(X, (X.size, 1))
 	if len(Y.shape) == 1: Y = np.reshape(Y, (Y.size, 1))
@@ -42,14 +51,13 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt'):
 		γ = get_γ(X, Y, sigma_type)
 		Kᵧ = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=γ)
 
-	
-	#np.fill_diagonal(Kᵪ, 0)
-	#np.fill_diagonal(Kᵧ, 0)
 
 	HKᵪ = Kᵪ - np.mean(Kᵪ, axis=0)					# equivalent to		HKᵪ = H.dot(Kᵪ)
 	HKᵧ = Kᵧ - np.mean(Kᵧ, axis=0)                  # equivalent to		HKᵧ = H.dot(Kᵧ)
+	Hᵪᵧ= np.sum(HKᵪ.T*HKᵧ)							# same as HKᵪH = double_center(Kᵪ)
+                                                    #		  Hᵪᵧ = np.sum(HKᵪH*Kᵧ)
 
-	Hᵪᵧ= np.sum(HKᵪ.T*HKᵧ)
+	if not normalize_hsic: return Hᵪᵧ/(n*n)
 
 	Hᵪ = np.linalg.norm(HKᵪ)						# equivalent to 	np.sqrt(np.sum(KᵪH*KᵪH))
 	Hᵧ = np.linalg.norm(HKᵧ) 						# equivalent to 	np.sqrt(np.sum(KᵧH*KᵧH))
@@ -59,10 +67,6 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt'):
 
 
 
-def double_center(Ψ):
-	HΨ = Ψ - np.mean(Ψ, axis=0)								# equivalent to Γ = Ⲏ.dot(Kᵧ).dot(Ⲏ)
-	HΨH = (HΨ.T - np.mean(HΨ.T, axis=0)).T
-	return HΨH
 
 
 if __name__ == '__main__':
@@ -80,7 +84,7 @@ if __name__ == '__main__':
 
 	plinear_pc = np.round(pearsonr(plinear_data[:,0], plinear_data[:,1])[0], 2)
 	plinear_nmi = np.round(normalized_mutual_info_score(XP_data_nmi, YP_data_nmi),2)
-	plinear_hsic = np.round(ℍ(plinear_data[:,0], plinear_data[:,1]),2)	
+	plinear_hsic = np.round(ℍ(plinear_data[:,0], plinear_data[:,1], sigma_type='opt'),2)	
 	plinear_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 
 	print('Linear Relationship:')
@@ -102,7 +106,7 @@ if __name__ == '__main__':
 
 	linear_pc = np.round(pearsonr(linear_data[:,0], linear_data[:,1])[0], 2)
 	linear_nmi = np.round(normalized_mutual_info_score(XL_data_nmi, YL_data_nmi),2)
-	linear_hsic = np.round(ℍ(linear_data[:,0], linear_data[:,1]),2)	
+	linear_hsic = np.round(ℍ(linear_data[:,0], linear_data[:,1], sigma_type='opt'),2)	
 	linear_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 
 	print('Linear Relationship:')
@@ -124,7 +128,7 @@ if __name__ == '__main__':
 	Ysine_data_nmi = np.squeeze(enc.fit_transform(np.atleast_2d(sine_data[:,1]).T))
 
 	sine_nmi = np.round(normalized_mutual_info_score(Xsine_data_nmi, Ysine_data_nmi),2)
-	sine_hsic = np.round(ℍ(sine_data[:,0], sine_data[:,1]),2)
+	sine_hsic = np.round(ℍ(sine_data[:,0], sine_data[:,1], sigma_type='opt'),2)
 	sine_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 
 	print('Sine Relationship:')
@@ -147,7 +151,7 @@ if __name__ == '__main__':
 
 	para_pc = np.round(pearsonr(para_data[:,0], para_data[:,1])[0],2)
 	para_nmi = np.round(normalized_mutual_info_score(Xp_data_nmi, Yp_data_nmi),2)
-	para_hsic = np.round(ℍ(para_data[:,0], para_data[:,1]),2)
+	para_hsic = np.round(ℍ(para_data[:,0], para_data[:,1], sigma_type='opt'),2)
 	para_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 	
 	print('Parabola Relationship:')
@@ -167,7 +171,7 @@ if __name__ == '__main__':
 
 
 	unif_pc = np.round(pearsonr(unif_data[:,0], unif_data[:,1])[0],2)
-	unif_hsic = np.round(ℍ(unif_data[:,0], unif_data[:,1]),2)
+	unif_hsic = np.round(ℍ(unif_data[:,0], unif_data[:,1], sigma_type='opt'),2)
 	unif_nmi = np.round(normalized_mutual_info_score(Xr_data_nmi, Yr_data_nmi),2)
 	unif_pps = np.round(pps.score(df, "x", "y")['ppscore'],2)
 	
