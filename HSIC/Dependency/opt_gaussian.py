@@ -49,13 +49,13 @@ class opt_gaussian():
 		elif Y_kernel == 'Gaussian':
 			Ðᵧ = sklearn.metrics.pairwise.pairwise_distances(Y)
 			σᵧ = np.median(Ðᵧ)
-			self.Ðᵧᒾ = (-Ðᵧ*Ðᵧ)/2
+			self.Ðᵧᒾ = (-Ðᵧ*Ðᵧ)
 
 
 		#	X_kernel == 'Gaussian'
 		Ðₓ = sklearn.metrics.pairwise.pairwise_distances(X)
 		σₓ = np.median(Ðₓ)
-		self.Ðₓᒾ = (-Ðₓ*Ðₓ)/2
+		self.Ðₓᒾ = (-Ðₓ*Ðₓ)
 
 		self.σ = [σₓ, σᵧ]
 
@@ -63,27 +63,41 @@ class opt_gaussian():
 		self.result = minimize(self.ℍ, self.σ, method='L-BFGS-B', options={'gtol': 1e-5, 'disp': False}, bounds=Bounds(0.05, 100000))
 
 
-	def ℍ(self, σ):
+	def ℍ(self, σ, X=None, Y=None):
 		[σₓ, σᵧ] = σ
-		Kₓ = np.exp(self.Ðₓᒾ/(σₓ*σₓ))
+		if X is None:
+			Kₓ = np.exp(self.Ðₓᒾ/(2*σₓ*σₓ))
+			if self.Y_kernel == 'linear':
+				Γ = self.Γ		
+			elif self.Y_kernel == 'Gaussian':
+				Kᵧ = np.exp(self.Ðᵧᒾ/(σᵧ*σᵧ))
+				HKᵧ = Kᵧ - np.mean(Kᵧ, axis=0)								# equivalent to Γ = Ⲏ.dot(Kᵧ).dot(Ⲏ)
+				Γ = HKᵧH = (HKᵧ.T - np.mean(HKᵧ.T, axis=0)).T
+		else:
+			Ðₓ = sklearn.metrics.pairwise.pairwise_distances(X)
+			Ðₓᒾ = (-Ðₓ*Ðₓ)
+			Kₓ = np.exp(Ðₓᒾ/(2*σₓ*σₓ))
 
+			ń = X.shape[0]
+			ð = X.shape[1]
 
-		if self.Y_kernel == 'linear':
-			Γ = self.Γ		
-		elif self.Y_kernel == 'Gaussian':
-			Kᵧ = np.exp(self.Ðᵧᒾ/(σᵧ*σᵧ))
+			Yₒ = OneHotEncoder(categories='auto', sparse=False).fit_transform(np.reshape(Y,(len(Y),1)))
+			Kᵧ = Yₒ.dot(Yₒ.T)
+
 			HKᵧ = Kᵧ - np.mean(Kᵧ, axis=0)								# equivalent to Γ = Ⲏ.dot(Kᵧ).dot(Ⲏ)
 			Γ = HKᵧH = (HKᵧ.T - np.mean(HKᵧ.T, axis=0)).T
-
 
 		loss = -np.sum(Kₓ*Γ)
 		return loss
 
 
-def get_opt_σ(X,Y, Y_kernel='Gaussian'):
+def get_opt_σ(X,Y, Y_kernel='linear', compute_final_hsic=False):
 	optimizer = opt_gaussian(X,Y, Y_kernel=Y_kernel)
 	optimizer.minimize_H()
-	return optimizer.result
+
+	if compute_final_hsic: 
+		optimizer.final_hsic = -optimizer.ℍ(optimizer.result.x, X=X, Y=Y)
+	return optimizer
 
 def get_opt_σ_via_random(X,Y, Y_kernel='Gaussian'):
 	optimizer = opt_gaussian(X,Y, Y_kernel=Y_kernel)
@@ -103,15 +117,16 @@ def get_opt_σ_via_random(X,Y, Y_kernel='Gaussian'):
 
 
 if __name__ == "__main__":
-	data_name = 'wine'
+	#data_name = 'wine'
+	data_name = 'spiral_arm'
 	X = np.loadtxt('../dataset/' + data_name + '.csv', delimiter=',', dtype=np.float64)			
 	Y = np.loadtxt('../dataset/' + data_name + '_label.csv', delimiter=',', dtype=np.int32)			
 	X = preprocessing.scale(X)
 
 
-	optimized_results = get_opt_σ(X,Y, Y_kernel='linear')
-	best_σ = optimized_results.x
-	max_HSIC = -optimized_results.fun
+	optimizer = get_opt_σ(X,Y, compute_final_hsic=True)
+	best_σ = optimizer.result.x
+	max_HSIC = optimizer.final_hsic
 	print('Optimized Result ')
 	print('\tbest_σ [σₓ, σᵧ]: ', best_σ)
 	print('\tmax_HSIC : ' , max_HSIC)

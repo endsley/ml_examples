@@ -16,13 +16,10 @@ import ppscore as pps
 # compute normalized HSIC between X,Y
 # if sigma_type = mpd, it uses median of pairwise distance
 # if sigma_type = opt, it uses optimal
-def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt', normalize_hsic=True):	
+def HSIC(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt', normalize_hsic=True):	
 	def get_γ(X,Y, sigma_type):
 		if sigma_type == 'mpd': 
 			σ = np.median(sklearn.metrics.pairwise_distances(X))		
-			#pd_matrix = sklearn.metrics.pairwise_distances(X)
-			#only_pair_wise = pd_matrix[np.triu_indices_from(pd_matrix, k=1)]
-			#σ = np.median(only_pair_wise)		
 		else: 
 			optimizer = opt_gaussian(X,Y, Y_kernel=Y_kernel)
 			optimizer.minimize_H()
@@ -36,27 +33,37 @@ def ℍ(X,Y, X_kernel='Gaussian', Y_kernel='Gaussian', sigma_type='opt', normali
 		HΨH = (HΨ.T - np.mean(HΨ.T, axis=0)).T
 		return HΨH
 
+	def get_Kᵪ(X, Y, X_kernel):
+		if X_kernel == 'linear': 
+			Kᵪ = X.dot(X.T)
+		elif X_kernel == 'Gaussian':
+			γ = get_γ(X, Y, sigma_type)
+			Kᵪ = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
+
+		return Kᵪ
+
+	def get_Kᵧ(X, Y, X_kernel):
+		if Y_kernel == 'linear': 
+			Yₒ = OneHotEncoder(categories='auto', sparse=False).fit_transform(Y)
+			Kᵧ = Yₒ.dot(Yₒ.T)
+		elif X_kernel == 'Gaussian':
+			γ = get_γ(X, Y, sigma_type)
+			Kᵧ = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=γ)
+
+		return Kᵧ
+
 
 	if len(X.shape) == 1: X = np.reshape(X, (X.size, 1))
 	if len(Y.shape) == 1: Y = np.reshape(Y, (Y.size, 1))
 	n = X.shape[0]
 
-	if X_kernel == 'linear': Kᵪ = X.dot(X.T)
-	if Y_kernel == 'linear': Kᵧ = Y.dot(Y.T)
-
-	if X_kernel == 'Gaussian': 
-		γ = get_γ(X,Y, sigma_type)
-		Kᵪ = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
-	if Y_kernel == 'Gaussian': 
-		γ = get_γ(X, Y, sigma_type)
-		Kᵧ = sklearn.metrics.pairwise.rbf_kernel(Y, gamma=γ)
-
+	Kᵪ = get_Kᵪ(X, Y, X_kernel)
+	Kᵧ = get_Kᵧ(X, Y, X_kernel)
 
 	HKᵪ = Kᵪ - np.mean(Kᵪ, axis=0)					# equivalent to		HKᵪ = H.dot(Kᵪ)
 	HKᵧ = Kᵧ - np.mean(Kᵧ, axis=0)                  # equivalent to		HKᵧ = H.dot(Kᵧ)
 	Hᵪᵧ= np.sum(HKᵪ.T*HKᵧ)							# same as HKᵪH = double_center(Kᵪ)
                                                     #		  Hᵪᵧ = np.sum(HKᵪH*Kᵧ)
-
 	if not normalize_hsic: return Hᵪᵧ/(n*n)
 
 	Hᵪ = np.linalg.norm(HKᵪ)						# equivalent to 	np.sqrt(np.sum(KᵪH*KᵪH))
