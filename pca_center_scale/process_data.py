@@ -6,8 +6,15 @@ import os
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
 from numpy import genfromtxt
+import pandas as pd
+import sys
 
-data = genfromtxt('mnist.csv', delimiter=',')
+np.set_printoptions(precision=4)
+np.set_printoptions(threshold=30)
+np.set_printoptions(linewidth=300)
+np.set_printoptions(suppress=True)
+np.set_printoptions(threshold=sys.maxsize)
+
 
 def pca_center_scale(data, keep_variance): #keep_variance 0 to 1
 	#	Assuming the data with each row as a single sample
@@ -18,9 +25,32 @@ def pca_center_scale(data, keep_variance): #keep_variance 0 to 1
 
 	return X
 
-X = center_scale_PCA(data, 0.9)
-np.savetxt('mnist_pca_90.csv', X, delimiter=',', fmt='%.4f') 
 
+def center_scale_with_missing_data(X, replace_nan_with_0=False): 
+	d = X.shape[1]
+	for i in range(d):
+		x = X[:,i]
+		ẋ = x[np.invert(np.isnan(x))]
+		ẋ = ẋ - np.mean(ẋ)
+		σ = np.std(ẋ)
+		X[np.invert(np.isnan(x)), i] = ẋ/σ
+
+	if replace_nan_with_0:
+		X = np.nan_to_num(X)
+
+	return X
+
+
+
+df = pd.read_csv ('chem.exposures.csv')
+X = center_scale_with_missing_data(df.to_numpy(), replace_nan_with_0=True)
+import pdb; pdb.set_trace()
+
+
+
+#data = genfromtxt('mnist.csv', delimiter=',')
+#X = center_scale_PCA(data, 0.9)
+#np.savetxt('mnist_pca_90.csv', X, delimiter=',', fmt='%.4f') 
 #print(X.mean(axis=0))
 #print(X.std(axis=0))
 
