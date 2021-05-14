@@ -25,20 +25,29 @@ def pca_center_scale(data, keep_variance): #keep_variance 0 to 1
 
 	return X
 
-
+#np.nanmean and np.nanstd		should give the same stuff
 def center_scale_with_missing_data(X, replace_nan_with_0=False): 
 	d = X.shape[1]
+	ignore_column_with_0_σ = []
 	for i in range(d):
 		x = X[:,i]
 		ẋ = x[np.invert(np.isnan(x))]
 		ẋ = ẋ - np.mean(ẋ)
 		σ = np.std(ẋ)
-		X[np.invert(np.isnan(x)), i] = ẋ/σ
+
+		if σ < 0.00001:
+			ignore_column_with_0_σ.append(i)		# add this to delete list
+		else:
+			X[np.invert(np.isnan(x)), i] = ẋ/σ
+
+
+	for i in ignore_column_with_0_σ:
+		X = np.delete(X, i , axis=1)	# # delete columns with σ=0
 
 	if replace_nan_with_0:
 		X = np.nan_to_num(X)
 
-	return X
+	return X, ignore_column_with_0_σ
 
 
 
