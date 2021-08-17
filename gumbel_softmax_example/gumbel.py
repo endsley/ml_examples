@@ -18,7 +18,7 @@ torch.set_printoptions(sci_mode=False)
 
 
 
-def gumbel(pᵢ, τ=0.1):		#The rows should add up to 1
+def gumbel(pᵢ, τ=0.1, device='cpu'):		#The rows should add up to 1
 	'''
 		Notes : https://github.com/endsley/math_notebook/blob/master/neural_network/Gumbel_Softmax.pdf
 
@@ -28,33 +28,46 @@ def gumbel(pᵢ, τ=0.1):		#The rows should add up to 1
 
 		Implement: Make sure that the rows add up to 1
 	'''
-	pᵢ = np.atleast_2d(pᵢ)
-	logit = np.log(pᵢ)
-
-	R = np.random.rand(logit.shape[0], logit.shape[1])
-	ε = -np.log(-np.log(R))
-	
-	noisy_logits = (ε + logit) / τ
-	C = softmax(noisy_logits, axis=1)
-	return C
-
-
-def Tgumbel(pᵢ, τ=0.1, device='cpu'):	# pytorch implementation of the gumbel-softmax
 	if type(pᵢ).__name__ == 'ndarray':	#The rows should add up to 1
-		pᵢ = torch.from_numpy(pᵢ)
+		pᵢ = np.atleast_2d(pᵢ)
+		logit = np.log(pᵢ)
+	
+		R = np.random.rand(logit.shape[0], logit.shape[1])
+		ε = -np.log(-np.log(R))
+		
+		noisy_logits = (ε + logit) / τ
+		C = softmax(noisy_logits, axis=1)
+		return C
+	elif type(pᵢ).__name__ == 'Tensor':	#The rows should add up to 1
 		pᵢ = pᵢ.to(device, non_blocking=True)
+		logit = torch.log(pᵢ)
+	
+		uniform_dist = Uniform(1e-30, 1.0, )	
+		uniform = uniform_dist.rsample(sample_shape=logit.size())
+		uniform = uniform.to(device, non_blocking=True )
+		ε = -torch.log(-torch.log(uniform))
+	
+		noisy_logits = (ε + logit) / τ
+		C = torch.nn.Softmax(dim=-1)(noisy_logits)
+	
+		return C
 
-	logit = torch.log(pᵢ)
-
-	uniform_dist = Uniform(1e-30, 1.0, )	
-	uniform = uniform_dist.rsample(sample_shape=logit.size())
-	uniform = uniform.to(device, non_blocking=True )
-	ε = -torch.log(-torch.log(uniform))
-
-	noisy_logits = (ε + logit) / τ
-	C = torch.nn.Softmax(dim=-1)(noisy_logits)
-
-	return C
+#def Tgumbel(pᵢ, τ=0.1, device='cpu'):	# pytorch implementation of the gumbel-softmax
+#	if type(pᵢ).__name__ == 'ndarray':	#The rows should add up to 1
+#		pᵢ = torch.from_numpy(pᵢ)
+#		pᵢ = pᵢ.to(device, non_blocking=True)
+#
+#	logit = torch.log(pᵢ)
+#
+#	uniform_dist = Uniform(1e-30, 1.0, )	
+#	uniform = uniform_dist.rsample(sample_shape=logit.size())
+#	uniform = uniform.to(device, non_blocking=True )
+#	ε = -torch.log(-torch.log(uniform))
+#
+#	noisy_logits = (ε + logit) / τ
+#	C = torch.nn.Softmax(dim=-1)(noisy_logits)
+#
+#	return C
 
 
 
@@ -73,12 +86,10 @@ if __name__ == "__main__":
 	
 	C = C/10000
 	
-
-
 	# torch implementation
 	Ct = torch.zeros(6,4)
 	for n in range(10000):
-		Ct += torch.round(Tgumbel(X))
+		Ct += torch.round(gumbel(torch.from_numpy(X)))
 	
 	Ct = Ct.numpy()/10000
 
