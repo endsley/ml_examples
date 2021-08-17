@@ -5,7 +5,7 @@ import sys
 import torch
 from scipy.special import softmax
 from torch.distributions.uniform import Uniform
-
+from sklearn import preprocessing
 
 np.set_printoptions(precision=4)
 np.set_printoptions(threshold=sys.maxsize)
@@ -16,9 +16,21 @@ torch.set_printoptions(edgeitems=3)
 torch.set_printoptions(linewidth=400)
 torch.set_printoptions(sci_mode=False)
 
-def gumbel(logit):
-	τ = 0.1
-	logit = np.atleast_2d(logit)
+
+
+def gumbel(pᵢ, τ=0.1):		#The rows should add up to 1
+	'''
+		Notes : https://github.com/endsley/math_notebook/blob/master/neural_network/Gumbel_Softmax.pdf
+
+		The gumbel softmax generates samples based on a categorial distribution
+		that can be incorporated into a neural network. 
+		Given a categorical distribution of {pᑊ pᒾ pᶾ ...}, it will generate one-hot vectors given these probabilities.
+
+		Implement: Make sure that the rows add up to 1
+	'''
+	pᵢ = np.atleast_2d(pᵢ)
+	logit = np.log(pᵢ)
+
 	R = np.random.rand(logit.shape[0], logit.shape[1])
 	ε = -np.log(-np.log(R))
 	
@@ -27,41 +39,54 @@ def gumbel(logit):
 	return C
 
 
-def gumbel_torch(logit, τ=0.1, device='cpu'):
-	if type(logit) == type(np.array([])):
-		logit = torch.from_numpy(logit)
-		logit = logit.to(device, non_blocking=True)
+def Tgumbel(pᵢ, τ=0.1, device='cpu'):	# pytorch implementation of the gumbel-softmax
+	if type(pᵢ).__name__ == 'ndarray':	#The rows should add up to 1
+		pᵢ = torch.from_numpy(pᵢ)
+		pᵢ = pᵢ.to(device, non_blocking=True)
 
-	#uniform_dist = Uniform(1e-30, 1.0, )	
-	#uniform = uniform_dist.rsample(sample_shape=logit.size())
-	#uniform = uniform.to(device, non_blocking=True )
+	logit = torch.log(pᵢ)
 
-	uniform = torch.tensor([[0.0395, 0.5627, 0.6333, 0.9879],
-							[0.9708, 0.5521, 0.9495, 0.7506],
-							[0.5467, 0.4756, 0.7682, 0.4536],
-							[0.2372, 0.6185, 0.1950, 0.8943],
-							[0.3845, 0.2134, 0.5381, 0.2988],
-							[0.1815, 0.2892, 0.7473, 0.7980]])
-
+	uniform_dist = Uniform(1e-30, 1.0, )	
+	uniform = uniform_dist.rsample(sample_shape=logit.size())
+	uniform = uniform.to(device, non_blocking=True )
 	ε = -torch.log(-torch.log(uniform))
+
 	noisy_logits = (ε + logit) / τ
 	C = torch.nn.Softmax(dim=-1)(noisy_logits)
-	print(C)
-	import pdb; pdb.set_trace()
+
 	return C
 
 
 
-#X = np.random.rand(8,3)
-X = torch.tensor([[0.6120, 0.7751, 0.4464, 0.7116],
-					[0.7559, 0.7382, 0.8844, 0.9260],
-					[0.8406, 0.8425, 0.5663, 1.0891],
-					[0.6051, 0.4229, 0.5154, 0.8814],
-					[0.5818, 0.9113, 0.6363, 0.8099],
-					[0.5310, 0.6175, 0.7904, 0.7120]])
-C = gumbel(X)
-Ct = gumbel_torch(X)
+if __name__ == "__main__": 
+	X = np.array([[0.4405, 0.4045, 0.0754, 0.0796],			# The rows should add up to 1
+					[0.2287, 0.2234, 0.2676, 0.2802],
+					[0.2518, 0.2524, 0.1696, 0.3262],
+					[0.2495, 0.1744, 0.2126, 0.3635],
+					[0.1979, 0.31  , 0.2165, 0.2755],
+					[0.2003, 0.2329, 0.2982, 0.2686]])
+	
+	# numpy implementation
+	C = np.zeros((6,4))
+	for n in range(10000):
+		C += np.round(gumbel(X))
+	
+	C = C/10000
+	
 
-print(X,'\n')
-print(C)
-print(Ct)
+
+	# torch implementation
+	Ct = torch.zeros(6,4)
+	for n in range(10000):
+		Ct += torch.round(Tgumbel(X))
+	
+	Ct = Ct.numpy()/10000
+
+	print('True Probability')	
+	print(X,'\n')
+
+	print('Gumbel generated Probability from sampling')
+	print(C,'\n')
+
+	print('Gumbel generated Probability from sampling via pytorch')
+	print(Ct,'\n')
