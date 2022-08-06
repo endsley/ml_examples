@@ -19,6 +19,8 @@ np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 np.set_printoptions(threshold=sys.maxsize)
 
+# documentation : 
+#https://github.com/endsley/math_notebook/blob/master/MyPapers/Multi-source_clustering%2BSparse_PCA/Multi_source_Clustering_sparse_PCA.pdf
 
 class sparse_pca:
 	def __init__(self):
