@@ -40,7 +40,12 @@ class sparse_pca:
 			Aᵴ_better = B[:, keep_index_better]
 		
 			[D,V] = np.linalg.eigh(Aᵴ_better)
-			eigs_2_better = D[-1]
+		
+			try:
+				eigs_2_better = D[-1]
+			except:
+				import pdb; pdb.set_trace()
+
 			v2_better = V[:,-1]
 			
 			if eigs_2_better > eigs_2:
@@ -155,10 +160,11 @@ if __name__ == "__main__":
 	#data_name = 'car'
 
 	X = np.loadtxt('data/' + data_name + '.csv', delimiter=',', dtype=np.float64)			
-	Y = np.loadtxt('data/' + data_name + '_label.csv', delimiter=',', dtype=np.int)			
+	Y = np.loadtxt('data/' + data_name + '_label.csv', delimiter=',')			
 	Y = np.reshape(Y, (len(Y),1))
 	X = preprocessing.scale(X)
-	γ = 1.0/(2*0.3*0.3)
+	#γ = 1.0/(2*0.3*0.3)
+	γ = 1.0/(2)
 	A = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
 	np.fill_diagonal(A, 0)			#	Set diagonal of adjacency matrix to 0
 
