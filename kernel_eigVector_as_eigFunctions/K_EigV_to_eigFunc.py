@@ -44,16 +44,19 @@ def Φ(X):
 
 
 if __name__ == "__main__":
+	jprint = jupyter_print
+
+
 	X = np.array([[1,1], [2,2], [3,3]])
 	n = X.shape[0]
 	#	
-	Q = Φ(X)						# feature map
+	Φ = Φ(X)						# feature map
 	K = polyK(X)					# X to kernel matrix
 	#
-	Tn = (1/n)*Q.T.dot(Q)			# The approximate integral operator
+	Tn = (1/n)*Φ.T.dot(Φ)			# The approximate integral operator
 	#
-	[λ, Vk] = eig(K)				# eigenvalue/vector of the kernel matrix
-	[σ, Vq] = eig(Tn)				# eigenvalue/function of the integral operator
+	[λ, V] = eig(K)				# eigenvalue/vector of the kernel matrix
+	[σ, U] = eig(Tn)				# eigenvalue/function of the integral operator
 
 
 
@@ -62,23 +65,23 @@ if __name__ == "__main__":
 	eQ = pretty_np_array(σ, front_tab='', title='Eig Values of Tn', auto_print=False)
 	block_two_string_concatenate(eK, eQ, spacing='\t', add_titles=[], auto_print=True)
 	#
-	jupyter_print('Notice that the eigenvectors of K is not the same as Tn!!!')
-	jupyter_print('However if we multiply the eigenvalues by n, they become the same.\n')
+	jprint('Notice that the eigenvectors of K is not the same as Tn!!!')
+	jprint('However if we multiply the eigenvalues by n, they become the same.\n')
 #
 #
-	Dqn = n*σ[0:3]
-	DQ_text = pretty_np_array(Dqn, front_tab='', title='Eigenvalues after multiplied by n', auto_print=False, end_space=" = 3 * ") 
+	nσ = n*σ[0:3]
+	σ_text = pretty_np_array(nσ, front_tab='', title='Eigenvalues after multiplied by n', auto_print=False, end_space=" = 3 * ") 
 	eQn = pretty_np_array(σ[0:3], front_tab='', title='Original eigenvalues', auto_print=False)
-	display1 = block_two_string_concatenate(DQ_text, eQn, spacing=' ', add_titles=['Eigs'], auto_print=False)
-	jupyter_print(display1)
+	display1 = block_two_string_concatenate(σ_text, eQn, spacing=' ', add_titles=['Eigs'], auto_print=False)
+	jprint(display1)
 
 
 
-	jupyter_print('Therefore, we conclude that σ(K) = n*σ(Tn), we next verify the eigenvector eigenfunction relationship.\n')
-	jupyter_print('We first show the eigenvectors of K and eigenfunctions from Tn.')
+	jprint('Therefore, we conclude that σ(K) = n*σ(Tn), we next verify the eigenvector eigenfunction relationship.\n')
+	jprint('We first show the eigenvectors of K and eigenfunctions from Tn.')
 #
-	eigK = pretty_np_array(Vk, front_tab='', title='Eig of K', auto_print=False)
-	eigQ = pretty_np_array(Vq, front_tab='', title='Eig of Tn', auto_print=False)
+	eigK = pretty_np_array(V, front_tab='', title='Eig of K', auto_print=False)
+	eigQ = pretty_np_array(U, front_tab='', title='Eig of Tn', auto_print=False)
 	block_two_string_concatenate(eigK, eigQ, spacing='\t', add_titles=[], auto_print=True)
 #
 
@@ -91,11 +94,11 @@ if __name__ == "__main__":
 #	$$\Phi^T = \begin{bmatrix} \phi(x_1) &  \phi(x_2) & ... & \phi(x_n) \end{bmatrix}$$
 
 
-	Dq3 = σ[0:3]
-	eigFun_from__eigV_of_K = (1/np.sqrt(n*Dq3))*((Q.T.dot(Vk)))
-	eigFun = Vq[:,0:3]
+	σ3 = σ[0:3]
+	eigFun_from__eigV_of_K = (1/np.sqrt(n*σ3))*((Φ.T.dot(V)))
+	eigFun = U[:,0:3]
 #
-	jupyter_print('Notice how the eigenfunction computed from the eigenvectors is identical to the actual eigenfunctions !!!')
+	jprint('Notice how the eigenfunction computed from the eigenvectors is identical to the actual eigenfunctions !!!')
 	eigFun_from__eigV_of_K = pretty_np_array(eigFun_from__eigV_of_K, front_tab='', title='Computed eig Function', auto_print=False)
 	eigFun = pretty_np_array(eigFun, front_tab='', title='True Eigen Function', auto_print=False)
 	block_two_string_concatenate(eigFun_from__eigV_of_K, eigFun, spacing='\t', add_titles=[], auto_print=True)
@@ -103,10 +106,10 @@ if __name__ == "__main__":
 #	Alternatively, if we let $\lambda_i$ be the eigenvalues from the kernel matrix K, then the relationship would be
 #	$$f_i = \frac{1}{\sqrt{\lambda_i}} \Phi^T v_i$$
 
-	eigFun_from__eigV_of_K = (1/np.sqrt(λ))*((Q.T.dot(Vk)))
-	eigFun = Vq[:,0:3]
+	eigFun_from__eigV_of_K = (1/np.sqrt(λ))*((Φ.T.dot(V)))
+	eigFun = U[:,0:3]
 #
-	jupyter_print('Notice how the eigenfunction computed from the eigenvectors is identical to the actual eigenfunctions !!!')
+	jprint('Notice how the eigenfunction computed from the eigenvectors is identical to the actual eigenfunctions !!!')
 	eigFun_from__eigV_of_K = pretty_np_array(eigFun_from__eigV_of_K, front_tab='', title='Computed eig Function', auto_print=False)
 	eigFun = pretty_np_array(eigFun, front_tab='', title='True Eigen Function', auto_print=False)
 	block_two_string_concatenate(eigFun_from__eigV_of_K, eigFun, spacing='\t', add_titles=[], auto_print=True)
