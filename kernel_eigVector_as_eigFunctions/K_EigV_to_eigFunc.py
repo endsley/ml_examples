@@ -109,7 +109,7 @@ if __name__ == "__main__":
 	block_two_string_concatenate(eigFun_from__eigV_of_K, eigFun_str, spacing='\t', add_titles=[], auto_print=True)
 
 #	Alternatively, if we let $\lambda_i$ be the eigenvalues from the kernel matrix K, then the relationship would be
-#	$$\psi_i = \frac{1}{\sqrt{\lambda_i}} \Psi^T v_i$$
+#	$$\phi_i = \frac{1}{\sqrt{\lambda_i}} \Psi^T v_i$$
 
 	eigFun_from__eigV_of_K = (1/np.sqrt(λ))*((Ψ.T.dot(V)))
 	ϕ = U[:,0:3]
@@ -136,4 +136,13 @@ if __name__ == "__main__":
 	computedV = pretty_np_array(original_u, front_tab='', title='Computed eigvector', auto_print=False)
 	actualV = pretty_np_array(V, front_tab='', title='True Eigenvector', auto_print=False)
 	block_two_string_concatenate(computedV, actualV, spacing='\t', add_titles=[], auto_print=True)
+
+
+#	Lastly, note that you can map the data onto RKHS via the eigenfunctions $\phi_i$ and reproduce the kernel
+	L = Ψ.dot(ϕ)
+	K2 = L.dot(L.T)
+
+	computedK = pretty_np_array(K2, front_tab='', title='Computed eigvector', auto_print=False)
+	actualK = pretty_np_array(K, front_tab='', title='True Eigenvector', auto_print=False)
+	block_two_string_concatenate(computedK, actualK, spacing='\t', add_titles=[], auto_print=True)
 
