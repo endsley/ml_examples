@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+#	(2010, Rosasco ) On Learning with Integral Operators
+#	https://jmlr.org/papers/volume11/rosasco10a/rosasco10a.pdf
+#	The idea is that we know what the relationship between eigenvectors of the kernel matrix and the eigen functions.
+
 import numpy as np
 import sys
 from numpy.linalg import eig
@@ -14,8 +18,6 @@ np.set_printoptions(threshold=sys.maxsize)
 
 
 #	This code tests Proposition 9 of the paper 
-#	ONLEARNING WITHINTEGRALOPERATORS
-#	The idea is that we know what the relationship between eigenvectors of the kernel matrix and the eigen functions.
 
 #	Given $\psi_i$ as the feature map and $n$ as the number of samples, we define the integral operator $T_n$ as 
 #	$$T_n = \frac{1}{n}\sum_i \psi_i(x_i) \psi_i^T(x_i) $$
