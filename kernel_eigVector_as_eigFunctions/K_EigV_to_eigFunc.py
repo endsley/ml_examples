@@ -10,13 +10,6 @@ from numpy.linalg import eig
 from numpy.linalg import svd
 from tools import *
 
-np.set_printoptions(precision=4)
-np.set_printoptions(threshold=30)
-np.set_printoptions(linewidth=300)
-np.set_printoptions(suppress=True)
-np.set_printoptions(threshold=sys.maxsize)
-
-
 #	This code tests Proposition 9 of the paper 
 
 #	Given $\psi_i$ as the feature map and $n$ as the number of samples, we define the integral operator $T_n$ as 

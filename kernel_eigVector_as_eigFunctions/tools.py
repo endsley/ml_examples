@@ -4,6 +4,14 @@ from IPython.display import clear_output, HTML, Math
 import pandas as pd
 
 
+np.set_printoptions(precision=4)
+np.set_printoptions(threshold=30)
+np.set_printoptions(linewidth=300)
+np.set_printoptions(suppress=True)
+np.set_printoptions(threshold=sys.maxsize)
+
+
+
 
 
 def isnotebook():
