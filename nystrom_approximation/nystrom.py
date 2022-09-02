@@ -43,7 +43,7 @@ from sklearn.kernel_approximation import Nystroem
 from tools import *
 
 #	Initialize all the setting
-X = csv_load('../../dataset/wine.csv', shuffle_samples=True)
+X = csv_load('../dataset/wine.csv', shuffle_samples=True)
 q = 30				# size of submatrix A
 n = X.shape[0]		# number of total samples
 γ = get_rbf_γ(X)	# γ used for the gaussian kerenl
@@ -80,6 +80,52 @@ avg_error = np.sum(np.absolute(K - ǩ))/(n*n)
 avg_error2 = np.sum(np.absolute(K - K2))/(n*n)
 
 jupyter_print('The average absolute error with Nystrom of each element is %f'% avg_error)
-jupyter_print('The average absolute error with Sklearn Nystrom of each element is %f'% avg_error2)
+jupyter_print('The average absolute error with Sklearn Nystrom of each element is %f\n\n'% avg_error2)
 
 
+
+#	**How to use Nystrom to approximate eigenvectors of a large matrix** 
+#	The key insight is that given an approximation of the eigenfunction $\phi_i$, the corresponding eigenvector $u_i$ of the kernel matrix K is 
+#	$$u_i = \frac{1}{\sqrt{\sigma_i}} \Psi_n \phi_i$$
+
+#	**Method**
+#	1. use the eigenvectors $V$ of matrix A to approximate the eigenfunction
+#	where $V = [v_1, v_2, ..., v_q]$, we get an expression for the eigenfunction
+#	$$\phi_i = \frac{1}{\sqrt{\sigma_i}} \Psi_q^T v_i$$
+
+#	2. Next, we plug the eigenvector into the previous equation to get the eigenvector
+#	$$u_i = \frac{1}{\sqrt{\sigma_i}} \Psi_n (\frac{1}{\sqrt{\sigma_i}} \Psi_q^T v_i)$$
+#	$$u_i = \frac{1}{\sigma_i} \Psi_n \Psi_q^T v_i$$
+#	$$u_i = \frac{1}{\sigma_i} L v_i$$
+#	$$U = L V \begin{bmatrix} \frac{1}{\sigma_1} & 0 & 0 & ... \\ 0 & \frac{1}{\sigma_2} & 0 & ... \\  0 & 0 & \frac{1}{\sigma_3} & 0 & ... \\   \end{bmatrix}$$
+#	$\Sigma$ is a diagonal matrix
+#	$$\bar{U} = L V \Sigma$$
+
+
+jupyter_print("We now approximate the eigenvector with only 30 samples")
+Σ = np.diag(1/σs[0:10]) 	# notice that Σ here is defined slightly differently
+Ū = L.dot(V).dot(Σ)			# approximate eigenvector of the larger matrix
+[Λ, U] = np.linalg.eig(K)	# compute the "actual" eigenvectors
+
+jupyter_print("Notice that the approximation is not that great unless you are using a large amount of samples. ")
+jupyter_print("For this reason, it makes sense to combine random svd with nystrom to approximate the eigenvectors")
+print_two_matrices_side_by_side(U[0:10, 0:3], Ū[0:10, 0:3], title1='Actual eigenvectors', title2='Approximated Eigenvectors')
+
+
+jupyter_print("Let's perform the nystrom eigenvector approximation, but with a lot more samples, q=150, instead of just 30 samples")
+#	Initialize all the setting
+q = 150				# size of submatrix A
+
+#	Use Nystrom to approximate the kernel
+Xa = X[0:q, :]	# A will come from Xa
+L = sklearn.metrics.pairwise.rbf_kernel(X, Y=Xa, gamma=γ)
+A = L[0:q,:]
+[σs,V] = np.linalg.eig(A)
+V = V[:,0:10] # only keeping the largest eigenvectors
+
+Σ = np.diag(1/σs[0:10]) 	# notice that Σ here is defined slightly differently
+Ū = L.dot(V).dot(Σ)			# approximate eigenvector of the larger matrix
+
+
+jupyter_print("Notice how much more accurate the approximation becomes!!!")
+print_two_matrices_side_by_side(U[0:10, 0:3], Ū[0:10, 0:3], title1='Actual eigenvectors', title2='Approximated Eigenvectors')
