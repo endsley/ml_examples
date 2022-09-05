@@ -30,11 +30,11 @@ Xb = X[0:p, :]
 
 
 L = sklearn.metrics.pairwise.rbf_kernel(Xb, Y=Xa, gamma=γ)
+import pdb; pdb.set_trace()
 A = L[0:q,:]
 [σs,V] = np.linalg.eig(A)
 V = V[:,0:10] # only keeping the largest eigenvectors
-Σ = np.diag(1/(np.sqrt(σs[0:10])))
-Φ = L.dot(V).dot(Σ)
-ǩ = Φ.dot(Φ.T)
+Σ = np.diag(1/(σs[0:10]))
+V1 = L.dot(V).dot(Σ)
 
 

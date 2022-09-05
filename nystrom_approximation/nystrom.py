@@ -49,6 +49,7 @@ n = X.shape[0]		# number of total samples
 γ = get_rbf_γ(X)	# γ used for the gaussian kerenl
 
 
+
 #	Use Nystrom to approximate the kernel
 Xa = X[0:q, :]	# A will come from Xa
 L = sklearn.metrics.pairwise.rbf_kernel(X, Y=Xa, gamma=γ)
