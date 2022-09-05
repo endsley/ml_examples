@@ -35,15 +35,18 @@ n = X.shape[0]		# number of total samples
 #	Use rff nystrom to approximate K eigenvectors
 rbf_feature = RBFSampler(gamma=γ, random_state=1, n_components=100)
 Ψ = rbf_feature.fit_transform(X)
-Tn = Ψ.T.dot(Ψ)				# unscaled integral operator
-[σs,V] = np.linalg.eig(Tn)
+Tn = Ψ.T.dot(Ψ)								# unscaled integral operator
+
+#	Note that the approximation is running an eigendecomposition on 100x100 matrix instead of 178 and 178
+#	Obviously, the more samples we use the more accurate it would be.
+[σs,V] = np.linalg.eig(Tn)					
 Σ = np.diag(1/np.sqrt(σs[0:10]))
 Φ = V[:, 0:10]
-Ū = Ψ.dot(Φ).dot(Σ)			# Note: U bar above implies approximating U actual
+Ū = Ψ.dot(Φ).dot(Σ)		# Note: U bar above implies approximating U actual
 
 #	Use the kernel itself to get the actual eigenvectors
 K = sklearn.metrics.pairwise.rbf_kernel(X, gamma=γ)
-[Λ, U] = np.linalg.eig(K)	# compute the "actual" eigenvectors
+[Λ, U] = np.linalg.eig(K)	# compute the "actual" eigenvectors on a 178 x 178 matrix
 
 #	Print a portion the two eigenvectors at two locations
 print_two_matrices_side_by_side(U[0:20, 0:3], Ū[0:20, 0:3], title1='Actual eigenvectors', title2='Approximated Eigenvectors')
