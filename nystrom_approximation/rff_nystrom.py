@@ -57,13 +57,3 @@ avg_error = np.sum(np.absolute(U[:,0:10] - Ū))/(n*10)
 jupyter_print('The average absolute error with RFF Nystrom of each element is %f'% avg_error)
 
 
-
-
-
-
-
-
-
-
-
-

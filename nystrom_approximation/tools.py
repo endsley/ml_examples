@@ -13,6 +13,11 @@ np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 np.set_printoptions(threshold=sys.maxsize)
 
+def mean_absolute_error(U1, U2, scale):
+	U1 = np.absolute(U1)
+	U2 = np.absolute(U2)
+
+	return np.sum(np.absolute(U1 - U2))/scale
 
 def isnotebook():
 	try:

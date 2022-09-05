@@ -77,8 +77,9 @@ a= 100; b= 107
 print_two_matrices_side_by_side(K[a:b, a:b], ǩ[a:b, a:b], title1='Actual Kernel', title2='Nystrom Kernel')
 print_two_matrices_side_by_side(K[a:b, a:b], ǩ[a:b, a:b], title1='Actual Kernel', title2='Sklearn Nystrom Kernel')
 
-avg_error = np.sum(np.absolute(K - ǩ))/(n*n)
-avg_error2 = np.sum(np.absolute(K - K2))/(n*n)
+
+avg_error = mean_absolute_error(K, ǩ, (n*n))
+avg_error2 = mean_absolute_error(K, K2, (n*n))
 
 jupyter_print('The average absolute error with Nystrom of each element is %f'% avg_error)
 jupyter_print('The average absolute error with Sklearn Nystrom of each element is %f\n\n'% avg_error2)
@@ -112,6 +113,8 @@ jupyter_print("Notice that the approximation is not that great unless you are us
 jupyter_print("For this reason, it makes sense to combine random svd with nystrom to approximate the eigenvectors")
 print_two_matrices_side_by_side(U[0:10, 0:3], Ū[0:10, 0:3], title1='Actual eigenvectors', title2='Approximated Eigenvectors')
 
+avg_error = mean_absolute_error(U[:,0:10], Ū[:,0:10], (n*10))
+jupyter_print('The average absolute error of each element is %f\n'% avg_error)
 
 jupyter_print("Let's perform the nystrom eigenvector approximation, but with a lot more samples, q=150, instead of just 30 samples")
 #	Initialize all the setting
@@ -127,6 +130,8 @@ V = V[:,0:10] # only keeping the largest eigenvectors
 Σ = np.diag(1/σs[0:10]) 	# notice that Σ here is defined slightly differently
 Ū = L.dot(V).dot(Σ)			# approximate eigenvector of the larger matrix
 
-
 jupyter_print("Notice how much more accurate the approximation becomes!!!")
 print_two_matrices_side_by_side(U[0:10, 0:3], Ū[0:10, 0:3], title1='Actual eigenvectors', title2='Approximated Eigenvectors')
+
+avg_error = mean_absolute_error(U[:,0:10], Ū[:,0:10], (n*10))
+jupyter_print('The average absolute error of each element is %f\n'% avg_error)
