@@ -43,11 +43,11 @@ print("--- Real Time : %s seconds ---" % (time.time() - start_time))
 
 
 
-print estimated_kernel[0:5, 0:5]
-print '\n\n'
-print real_kernel[0:5, 0:5]
-print '\n\n'
-print RFF_estimated_kernel[0:5, 0:5]
+print( estimated_kernel[0:5, 0:5])
+print( '\n\n')
+print( real_kernel[0:5, 0:5])
+print( '\n\n')
+print( RFF_estimated_kernel[0:5, 0:5])
 
 
 
