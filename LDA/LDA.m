@@ -54,4 +54,5 @@ plot(y1,y2)
 plot(project_0(1,:), project_0(2,:),'go')
 plot(project_1(1,:), project_1(2,:),'go')
 
+print('LDA.png')
 input('press any key')
