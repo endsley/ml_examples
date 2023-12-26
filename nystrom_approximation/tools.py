@@ -35,6 +35,13 @@ def isnotebook():
 def wtype(data):
 	return type(data).__name__
 
+def eigh_sort(Q):	# From largest eig to smallest
+	[D,V] = np.linalg.eigh(Q)
+	idx = D.argsort()[::-1]   
+	eigenValues = D[idx]
+	eigenVectors = V[:,idx]
+	return [eigenValues, eigenVectors]
+
 
 
 def pretty_np_array(m, front_tab='', verticalize=False, title=None, auto_print=False, end_space=''):
