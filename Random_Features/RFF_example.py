@@ -7,6 +7,7 @@ import sklearn.metrics
 import numpy.matlib
 from sklearn.preprocessing import normalize
 from numpy import genfromtxt
+from numpy import sqrt
 import time
 
 import sklearn.metrics
@@ -32,9 +33,9 @@ def RFF(X, nrmlize, m, sigma):
 	phase_shift = np.matlib.repmat(phase_shift, N, 1)
 	rand_proj = np.random.randn(d, m)/(sigma)
 
-	P = np.cos(X.dot(rand_proj) + phase_shift)
-	K = (2.0/m)*P.dot(P.T)
-
+	P = sqrt(2)*np.cos(X.dot(rand_proj) + phase_shift)
+	K = (1/m)*P.dot(P.T)
+	K = np.clip(K, 0,1)
 	return K
 
 
@@ -47,9 +48,8 @@ if __name__ == "__main__":
 	#X = genfromtxt('../dataset/moon_30000x4.csv', delimiter=',')
 	
 	
-	sigma = 0.5
+	sigma = 1
 	m = 2000
-
 
 	start_time = time.time() 
 	K = RFF(X, True, m, sigma)
@@ -68,10 +68,10 @@ if __name__ == "__main__":
 	rff_K = Z.dot(Z.T)
 	rff_time = (time.time() - start_time)
 
-	print(K, '\n')
-	print(rff_K)
+	print('True Kernel (run time = %.6f)\n'%rbk_time, rbk, '\n')
+	print('My RFF Kernel(run time = %.6f)\n'%K_time, K, '\n')
+	print('Sklearn RFF Kernel(run time = %.6f)\n'%rff_time, rff_K, '\n')
 
-	print(K_time, rbk_time, rff_time)
 
 	import pdb; pdb.set_trace()
 

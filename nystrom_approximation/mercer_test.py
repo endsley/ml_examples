@@ -51,13 +51,16 @@ V = V[:, 0:9]
 Φ = K.dot(V).dot(Σ)
 K2 = Φ.dot(Φ.T)
 
-#	Remember that since this is a Gaussian Kernel, the feature map should be 
-#	$\Phi \in \mathbb{R}^{n \times \infty}$, but through Mercer's theorem, 
-#	we are apply to obtain $\Phi \in \mathbb{R}^{n \times 9}$. This is much
-#	easier to deal with. 
+
+
+#	Remember that since this is a Gaussian Kernel, the feature map should be $\Phi \in \mathbb{R}^{n \times \infty}$, 
+#	but through Mercer's theorem, we are apply to obtain $\Phi \in \mathbb{R}^{n \times 9}$. 
+#	This is much smaller and easier to deal with. 
 
 #	Lastly, when we print out the kernel matrix of $K$ and $K_2$, notice
 #	that they are approximately the same. 
+
+
 
 print(K, '\n') 
 print(K2)
