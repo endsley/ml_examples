@@ -1,6 +1,6 @@
 #!/usr/bin/env python
+# This code tests out RFF
 #Paper : https://drive.google.com/file/d/0B2GQI7-ZH4djdm85SGg4dUhBVVE/view
-
 
 import numpy as np
 import sklearn.metrics
@@ -14,27 +14,28 @@ import sklearn.metrics
 from sklearn.kernel_approximation import RBFSampler
 from sklearn.linear_model import SGDClassifier
 
-
-
-#	K(x, y) = exp(-gamma ||x-y||^2)
-#	sigma = sqrt( 1/(2*gamma) )
-#	gamma = 1/(2*sigma^2)
-
 np.set_printoptions(precision=3)
-#np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=300)
 np.set_printoptions(suppress=True)
 
-def RFF(X, nrmlize, m, sigma):
+
+#	Given $m$ as the number of basis functions for RFF and 
+#	$$X \in \mathbb{R}^{n \times d}, W \in \mathbb{R}^{m \times d}, b \in  \mathbb{R}^{m \times 1}, B \in \mathbb{R}^{n \times m}$$
+#	then
+#	$$\Phi = \sqrt{\frac{2}{m}} cos(XW^{\top} + B)$$
+
+
+
+def RFF(X, nrmlize, m, σ):
 	N = X.shape[0]
 	d = X.shape[1]
 
-	phase_shift = 2*np.pi*np.random.rand(1, m)
-	phase_shift = np.matlib.repmat(phase_shift, N, 1)
-	rand_proj = np.random.randn(d, m)/(sigma)
+	b = 2*np.pi*np.random.rand(1, m)
+	B = np.matlib.repmat(b, N, 1)
+	Wᵀ = np.random.randn(d, m)/(σ)
 
-	P = sqrt(2)*np.cos(X.dot(rand_proj) + phase_shift)
-	K = (1/m)*P.dot(P.T)
+	Φ = sqrt(2/m)*np.cos(X.dot(Wᵀ) + B)
+	K = Φ.dot(Φ.T)
 	K = np.clip(K, 0,1)
 	return K
 
@@ -48,15 +49,15 @@ if __name__ == "__main__":
 	#X = genfromtxt('../dataset/moon_30000x4.csv', delimiter=',')
 	
 	
-	sigma = 1
+	σ = 1
 	m = 2000
 
 	start_time = time.time() 
-	K = RFF(X, True, m, sigma)
+	K = RFF(X, True, m, σ)
 	K_time = (time.time() - start_time)
 
 
-	gamma = 1.0/(2*sigma*sigma)
+	gamma = 1.0/(2*σ*σ)
 	start_time = time.time() 
 	rbk = sklearn.metrics.pairwise.rbf_kernel(X, gamma=gamma)
 	rbk_time = (time.time() - start_time)
@@ -73,5 +74,4 @@ if __name__ == "__main__":
 	print('Sklearn RFF Kernel(run time = %.6f)\n'%rff_time, rff_K, '\n')
 
 
-	import pdb; pdb.set_trace()
 
