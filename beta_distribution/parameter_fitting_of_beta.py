@@ -3,6 +3,7 @@
 import numpy as np
 from scipy.stats import beta
 import matplotlib.pyplot as plt
+warnings = np.seterr(all='ignore')
 
 #	This example code shows how you can 
 #	use scipy to fit data to a beta distribution
