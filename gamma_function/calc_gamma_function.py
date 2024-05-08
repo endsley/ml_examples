@@ -8,7 +8,7 @@ from scipy.special import gamma as Γᵦ
 
 
 #	The $\Gamma(z)$ function is defined as 
-#	$$\int_0^{\infty} \; t^{z-1} \; e^{-t} \; dt$$
+#	$$\Gamma(z) = \int_0^{\infty} \; t^{z-1} \; e^{-t} \; dt$$
 #	It turns out that if $z$ happens to an integer, the integral simplies into
 #	$$\Gamma(z) = (z - 1)!$$
 
