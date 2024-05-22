@@ -18,11 +18,12 @@ from scipy.stats import norm
 
 #	## Basic counting and recognize distribution
 #	Using this approach, we simply need to recognize that this situation has a binary outcome.
-#	We learn from class to associate binary outcomes with Bernoulli Distribution with the pdf of
+#	Given binary outcomes, the Bernoulli Distribution is commonly used as the default structure of the pdf.
+#	In general, if we approximate p(x) with Bernoulli, then we assume a structure of 
 #	$$p(x) = \theta^x (1 - \theta)^{1 - x} \quad \text{where} \quad x \in \{0,1\}.$$
 
-#	Since we have 4 successes and 6 failures, we learned that $\theta$ is the probability of success 4/10,
-#	and failure is $1 - \theta = 6/10$. So in this simple example, finding $p(x)$ is really simple:
+#	According to Bernoulli distribution, the $\theta$ is the probability of success 4/10,
+#	and failure is $1 - \theta = 6/10$. So in this example, the p(x) would be:
 
 #	$$ p(x) = \frac{4}{10}^x \frac{6}{10}^{1 - x} \quad \text{where} \quad x \in \{0,1\}.$$
 
@@ -185,9 +186,9 @@ plt.show()
 #	### Key Realization
 #	- We look at the defintion of conditional probability to get the first key realization
 #	$$ p(\theta|X) = \frac{p(\theta, X)}{p(X)} = \frac{p(X|\theta) p(\theta)}{p(X)}. $$
-#	- If we are looking for $p(\theta|X)$, then the dataset $X$ must be already given. 
-#	- Therefore, $X$ is a constant and the joint distribution $p(\theta,X)$ is really just $p(\theta)$.
-#	$$p(\theta|X) = c p(\theta) $$
+#	- If we are looking for $p(\theta|X=data)$, then the dataset $X$ must be already given. 
+#	- Therefore, $X$ is a constant and the joint distribution $p(\theta,X=data)$ is really just $p(\theta)$.
+#	$$p(\theta|X=data) = c p(\theta) $$
 #	- From this observation, if we simply sample from $p(\theta)$, we would get the samples from $p(\theta|X)$.
 
 
