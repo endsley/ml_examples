@@ -252,6 +252,11 @@ plt.show()
 print('We accepted : %d samples.'%len(accepted_samples))
 print('Bayes E[p(θ|X)] = %.4f' % np.mean(accepted_samples))
 
+
+
+
+
+
 #	### Conclusion
 #	- We plotted out the histogram generated from rejection sampling. 
 #	- On top, we superimposed the true theoretical Beta distribution.
