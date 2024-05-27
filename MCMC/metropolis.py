@@ -2,7 +2,7 @@
 
 import numpy as np
 from numpy import exp as e
-from numpy.random import rand, exponential
+from numpy.random import rand, exponential, normal
 import matplotlib.pyplot as plt
 
 
@@ -13,38 +13,37 @@ def p(x):
 	except: x[x<0] = 0
 	return e(-x)
 
-def metropolis_sampler(n, μ, σ, start_point=30):
+def metropolis_sampler(n, μ, σ):
 	samples = []
 	
-	while len(samples) != n + start_point:
-		ᶍ = np.random.normal(μ, σ) # generate a new samples
+	while len(samples) != n:
+		ᶍ = normal(μ, σ) # generate a new samples
 		if rand() < p(ᶍ)/p(μ): 
-			samples.append(ᶍ)
 			μ = ᶍ
+		samples.append(μ)
 		   
-	return samples[start_point:]
+	return samples
 
 # Parameters
-n= 20000
-μ = 0.0
-σ = 1
+n= 10000
+μ = 0.5
+σ = 0.5
 
 # Generate samples
 X = metropolis_sampler(n, μ, σ)
-X2 = exponential(scale=1, size = 20000)
+X2 = exponential(scale=1, size = n)
 
 
 # Plot them out
 plt.figure(figsize=(10,4))
 plt.subplot(121)
 xi = np.linspace(0.1,5,100)
-yi = p(xi)
-plt.plot(xi,yi, color='red')
+plt.plot(xi,p(xi), color='red')
 plt.hist(X, density=True, bins=30)
 plt.title('Using Metropolis')
 
 plt.subplot(122)
-plt.plot(xi,yi, color='red')
+plt.plot(xi,p(xi), color='red')
 plt.hist(X2, density=True, bins=30)
 plt.title('Using Actual Exponential')
 
