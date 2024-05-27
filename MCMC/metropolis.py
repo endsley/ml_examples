@@ -31,12 +31,21 @@ n= 20000
 
 # Generate samples
 X = metropolis_sampler(n, μ, σ)
-#X = exponential(scale=1, size = 20000)
+X2 = exponential(scale=1, size = 20000)
 
 
 # Plot them out
+plt.figure(figsize=(10,4))
+plt.subplot(121)
 xi = np.linspace(0.1,5,100)
 yi = p(xi)
 plt.plot(xi,yi, color='red')
 plt.hist(X, density=True, bins=30)
+plt.title('Using Metropolis')
+
+plt.subplot(122)
+plt.plot(xi,yi, color='red')
+plt.hist(X2, density=True, bins=30)
+plt.title('Using Actual Exponential')
+
 plt.show()
