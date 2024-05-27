@@ -18,9 +18,8 @@ def metropolis_sampler(n, μ, σ):
 	
 	while len(samples) != n:
 		ᶍ = normal(μ, σ) # generate a new samples
-		if rand() < p(ᶍ)/p(μ): 
-			μ = ᶍ
-		samples.append(μ)
+		if rand() < p(ᶍ)/p(μ): μ = ᶍ
+		samples.append(μ)	# you either accept ᶍ or accept μ 
 		   
 	return samples
 
