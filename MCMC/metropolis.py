@@ -18,7 +18,7 @@ def metropolis_sampler(n, μ, σ, start_point=30):
 	
 	while len(samples) != n + start_point:
 		ᶍ = np.random.normal(μ, σ) # generate a new samples
-		if p(ᶍ) > p(μ) or rand() < p(ᶍ)/p(μ): 
+		if rand() < p(ᶍ)/p(μ): 
 			samples.append(ᶍ)
 			μ = ᶍ
 		   
