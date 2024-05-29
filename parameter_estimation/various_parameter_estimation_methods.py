@@ -8,13 +8,14 @@ from scipy.stats import norm
 
 #	# Parameter Estimation
 #	In this example, we are going to estimate the parameters of a Bernoulli Distribution
-# 	where the data consists of 4 successes and 6 failures. The methods are 
+# 	where the data $\mathcal{D}$ consists of 4 successes and 6 failures. The methods are 
 
 #	- Basic counting and recognizing the distributions
 #	- Maximum Likelihood
 #	- MAP
 #	- Bayesian Parameter Estimation
 
+#	## [Alternative reference source](https://gregorygundersen.com/blog/2020/08/19/bernoulli-beta/)
 
 #	## Basic counting and recognize distribution
 #	Using this approach, we simply need to recognize that this situation has a binary outcome.
@@ -38,17 +39,17 @@ from scipy.stats import norm
 
 
 #	## Maximum A Posteriori Estimation (MAP)
-#	The MAP estimation is more complicated. Here, instead of maximizing the $p(x|\theta)$, we want to find $\max \; p(\theta|X)$. 
-#	In other word, we want to find the most likely $\theta$ giving the entire dataset $X$.
+#	The MAP estimation is more complicated. Here, instead of maximizing the $p(X=\mathcal{D}|\theta)$, we want to find $\max \; p(\theta|X=\mathcal{D})$. 
+#	In other word, we want to find the most likely $\theta$ giving the entire dataset $X=\mathcal{D}$.
 #	Take a quick second to distinguish the difference between MLE and MAP
 #	- MLE : 
-#	$$ \max_{\theta} \; p(x|\theta) $$
+#	$$ \max_{\theta} \; p(X=\mathcal{D}|\theta) $$
 #	- MAP : 
-#	$$ \max_{\theta} \; p(\theta|X) $$
+#	$$ \max_{\theta} \; p(\theta|X=\mathcal{D}) $$
 #	With this method, we use the Bayes' Theorem 
-#	$$ p(\theta | X) = \frac{p(X|\theta) p(\theta)}{p(X)} $$
+#	$$ p(\theta | X=\mathcal{D}) = \frac{p(X=\mathcal{D}|\theta) p(\theta)}{p(X=\mathcal{D})} $$
 #	From MLE, we knew tht 
-#	$$p(X|\theta) = \mathcal{L} = \prod_{i=1}^n \; \theta^{x_i} (1 - \theta)^{1 - x_i}$$
+#	$$p(X=\mathcal{D}|\theta) = \mathcal{L} = \prod_{i=1}^n \; \theta^{x_i} (1 - \theta)^{1 - x_i}$$
 #	- With MLE, the likelihood function is sufficient. 
 #	- With MAP, it allow us to use prior knowledge about the distribution of $\theta$. The MAP estimate consequently combines our prior knowledge with the data and come up with the best estimation. 
 #	- In this particular example, we use a beta distribution with $\alpha = 2, \beta = 5$. 
@@ -84,7 +85,7 @@ plt.show()
 
 #	###	Applying MAP as Conjugate Priors
 #	When we apply MAP, we want to 
-#	$$\max_{\theta}\; p(\theta|X) = \frac{p(X|\theta) p(\theta)}{p(X)} $$
+#	$$\max_{\theta}\; p(\theta|X=\mathcal{D}) = \frac{p(X=\mathcal{D}|\theta) p(\theta)}{p(X=\mathcal{D})} $$
 #	From the description above, we know that the prior is a beta distribution
 #	$$ p(\theta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \theta^{\alpha - 1} (1 - \theta)^{\beta - 1} \quad \text{where if $n$ is an integer then} \quad \Gamma(n) = (n-1)!$$
 #	Since $\alpha$ and $\beta$ are integers, we have
@@ -93,22 +94,22 @@ plt.show()
 #	We also know the likelihood function as a Bernoulli distribution
 #	$$ \mathcal{L} =  \prod_{i=1}^n \; \theta^{x_i} (1 - \theta)^{1 - x_i} = \theta^{\sum_i x_i} (1 - \theta)^{\sum_i (1 - x_i)} $$
 #	Therefore, we have
-#	$$ p(\theta | X) = \frac{\left( \theta^{\sum_i x_i} (1 - \theta)^{\sum_i (1 - x_i)} \right) \left( 30 \theta^{1} (1 - \theta)^{4} \right)}{p(X)} $$
+#	$$ p(\theta | X=\mathcal{D}) = \frac{\left( \theta^{\sum_i x_i} (1 - \theta)^{\sum_i (1 - x_i)} \right) \left( 30 \theta^{1} (1 - \theta)^{4} \right)}{p(X=\mathcal{D})} $$
 #	Remember that for success $x_i = 1$ and failure $x_i = 0$, therefore, we can combine everything together as 
-#	$$ p(\theta | X) = \frac{ 30 \theta^{5} (1 - \theta)^{10} }{p(X)} $$
+#	$$ p(\theta | X=\mathcal{D}) = \frac{ 30 \theta^{5} (1 - \theta)^{10} }{p(X=\mathcal{D})} $$
 #	At this point, pay special attention to 
-#	- Since $X$ is given, $p(X)$ is simply a constant
+#	- Since $X=\mathcal{D}$ is given, $p(X=\mathcal{D})$ is simply a constant
 #	- Together to 30, we can simply set $30/p(X)$ as a constant value $c$, giving us
-#	$$ p(\theta | X) =  c \theta^{5} (1 - \theta)^{10} $$
+#	$$ p(\theta | X=\mathcal{D}) =  c \theta^{5} (1 - \theta)^{10} $$
 #	- Now pay special attention on the structure of Beta distribution 
 #	$$ p(\theta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \theta^{\alpha - 1} (1 - \theta)^{\beta - 1} \quad \text{where if $n$ is an integer then} \quad \Gamma(n) = (n-1)!$$
 #	- Realize that what we have is basically a beta distribution if we rearrange it to  
-#	$$ p(\theta | X) =  c \theta^{6 - 1} (1 - \theta)^{11 - 1} $$
+#	$$ p(\theta | X=\mathcal{D}) =  c \theta^{6 - 1} (1 - \theta)^{11 - 1} $$
 #	This implies that $\alpha = 6, \beta = 11$ and 
 #	$$ c = \frac{\Gamma(6 + 11)}{\Gamma(6)\Gamma(11)} $$
 #	Imply that we have a posterior distribution of
-#	$$ p(\theta|X) = \frac{\Gamma(6 + 11)}{\Gamma(6)\Gamma(11)} \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
-#	$$ p(\theta|X) = 48048 \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
+#	$$ p(\theta|X=\mathcal{D}) = \frac{\Gamma(6 + 11)}{\Gamma(6)\Gamma(11)} \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
+#	$$ p(\theta|X=\mathcal{D}) = 48048 \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
 
 
 #	Below, we draw out this beta distribution of the posterior
@@ -133,30 +134,30 @@ plt.show()
 #	- Notice prior to the candidate's performance we had a general sense of the total population and we called it the __prior distribution__.
 #	- However, after the candidate's performance, we combined our prior knowledge with the performance and came up with the __posterior distribution__ describing the distribution of the candidate's abilities. 
 #	- This result allows us to ask various questions about the candidate.
-#		- What is the most likely $p(\theta|X)$ (MAP)? 
+#		- What is the most likely $p(\theta|X=\mathcal{D})$ (MAP)? 
 #		- What is the probability that the candidate is better than the average candidate? 
 
 #	## MAP solution
 #	From the previous example, we see that the posterior is a Beta distribution 
-#	$$ p(\theta|X) = 48048 \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
+#	$$ p(\theta|X=\mathcal{D}) = 48048 \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
 #	with $\alpha = 6, \beta=11$. 
-#	Given that we know both $\alpha, \beta$ of the Beta distribution, the equation for $E[p(\theta|X)]$ and $\max_{\theta} \; p(\theta|X)$ is already known as
+#	Given that we know both $\alpha, \beta$ of the Beta distribution, the equation for $E[p(\theta|X=\mathcal{D})]$ and $\max_{\theta} \; p(\theta|X)$ is already known as
 
-#	$$E[p(\theta|X)] = \frac{\alpha}{\alpha + \beta} = \frac{6}{6 + 11} = \frac{6}{17}.$$
-#	$$\max_\theta p(\theta|X) = \frac{\alpha - 1}{\alpha + \beta - 2} = \frac{1}{3}.$$
+#	$$E[p(\theta|X=\mathcal{D})] = \frac{\alpha}{\alpha + \beta} = \frac{6}{6 + 11} = \frac{6}{17}.$$
+#	$$\max_\theta p(\theta|X=\mathcal{D}) = \frac{\alpha - 1}{\alpha + \beta - 2} = \frac{1}{3}.$$
 
-#	- Look at the plot above and notice that at 1/3 is the green line and it corresponds with highest point of $p(\theta|X)$ (This is the MAP solution).
+#	- Look at the plot above and notice that at 1/3 is the green line and it corresponds with highest point of $p(\theta|X=\mathcal{D})$ (This is the MAP solution).
 #	- Also see at at 6/17 $\approx$ 0.353, that's the expected point. 
 
 
 #	## The Bayesian Parameter Estimation
 #	To find the parameter, we can set $\theta$ to 
 #	- MLE : 
-#	$$\max_{\theta} \; p(x|\theta)$$
+#	$$\max_{\theta} \; p(X=\mathcal{D}|\theta)$$
 #	- MAP : 
-#	$$\max_{\theta} \; p(\theta|X)$$
+#	$$\max_{\theta} \; p(\theta|X=\mathcal{D})$$
 #	- __Bayesian Parameter Estimation__ : 
-#	$$p(\theta|X)$$
+#	$$p(\theta|X=\mathcal{D})$$
 
 #	Notice that for  __Bayesian Parameter Estimation__, the resulting $\theta$ is not a number. 
 #	Instead, it is a distribution of the posterior. 
@@ -168,9 +169,9 @@ plt.show()
 
 #	We see from above that 
 #	- The posterior is 
-#	$$ p(\theta|X) = 48048 \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
+#	$$ p(\theta|X=\mathcal{D}) = 48048 \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
 #	- And the best $\theta$ is $E[p(\theta|X)]$
-#	$$E[p(\theta|X)] = \frac{\alpha}{\alpha + \beta} = \frac{6}{6 + 11} = \frac{6}{17}.$$ (This is the best Bayesian Parameter Estimation for $\theta$.)
+#	$$E[p(\theta|X=\mathcal{D})] = \frac{\alpha}{\alpha + \beta} = \frac{6}{6 + 11} = \frac{6}{17}.$$ (This is the best Bayesian Parameter Estimation for $\theta$.)
 
 
 
@@ -185,24 +186,26 @@ plt.show()
 
 #	### Key Realization
 #	- We look at the defintion of conditional probability to get the first key realization
-#	$$ p(\theta|X) = \frac{p(\theta, X)}{p(X)} = \frac{p(X|\theta) p(\theta)}{p(X)}. $$
-#	- If we are looking for $p(\theta|X=data)$, then the dataset $X$ must be already given. 
-#	- Therefore, $X$ is a constant and the joint distribution $p(\theta,X=data)$ is really just $p(\theta)$.
-#	$$p(\theta|X=data) = c p(\theta) $$
-#	- From this observation, if we simply sample from $p(\theta)$, we would get the samples from $p(\theta|X)$.
+#	$$ p(\theta|X=\mathcal{D}) = \frac{p(\theta, X=\mathcal{D})}{p(X=\mathcal{D})} = \frac{p(X=\mathcal{D}|\theta) p(\theta)}{p(X=\mathcal{D})}. $$
+#	- If we are looking for $p(\theta|X=\mathcal{D})$, then the dataset $X$ must be already given. 
+#	- Therefore, $X$ is a constant and the joint distribution $p(\theta,X=\mathcal{D})$ = p(\theta)$ where $X=\mathcal{D}$ can be ignored.
+#	$$p(\theta|X=\mathcal{D}) = c p(\theta) $$
+#	- Note that $p(\theta)$ alone is NOT a proper distribution since it doesn't add up to 1
+#	- We must multiply $p(\theta)$ to $c$ to scale it. 
+#	- However, we can still sample from $p(\theta)$ as a surrogate to get the samples for $p(\theta|X=\mathcal{D})$.
 
 
 #	### Applying this Realization to the Current example. 
 #	Remember that we are trying to find the posterior distribution with Bayesian Parameter Estimation
-#	$$p(\theta|X) = \frac{p(X|\theta) p(\theta)}{p(X)} $$
-#	If we plug the given data $X$ into the joint distribution, we get
-#	$$ p(\theta|X) = c \; \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
+#	$$p(\theta|X=\mathcal{D}) = \frac{p(X=\mathcal{D}|\theta) p(\theta)}{p(X=\mathcal{D})} $$
+#	If we plug the given data $X=\mathcal{D}$ into the joint distribution, we get
+#	$$ p(\theta|X=\mathcal{D}) = c \; \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
 #	- Obviusly, due to conjugacy, we knew that the posterior is a beta distribution with the constant 
 #	$$ c = \frac{\Gamma(6 + 11)}{\Gamma(6)\Gamma(11)}$$.
 #	- However, in this example, we are going to pretend that we don't know the posterior 
 #	- We only know that the posterior is the joint times a constant $c$ 
-#	$$ p(\theta|X) = c p(\theta, X) = c \; \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
-#	- Our key realization says that if we simply sample from $c p(\theta,X)$, we would get the samples from $p(\theta|X)$.
+#	$$ p(\theta|X=\mathcal{D}) = c p(\theta, X=\mathcal{D}) = c \; \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
+#	- Our key realization says that if we simply sample from $c p(\theta,X=\mathcal{D})$, we would get the samples from $p(\theta|X=\mathcal{D})$.
 #	- There are many ways to perform sampling, however, since we don't know $c$, we need to pick a way that doesn't care about the constant $c$.
 #	- __Rejection Sampling__ for this case is idea since $c$ can be any value as long as the proposal distribution is larger.
 
@@ -253,12 +256,50 @@ print('We accepted : %d samples.'%len(accepted_samples))
 print('Bayes E[p(θ|X)] = %.4f' % np.mean(accepted_samples))
 
 
-
-
-
-
-#	### Conclusion
+#	### Note
 #	- We plotted out the histogram generated from rejection sampling. 
 #	- On top, we superimposed the true theoretical Beta distribution.
 #	- Notice how the samples matched very closely to the true distribution.
-#	- Notice that the approximate E[p(θ|X)] = 0.3525 is very close to the true solution of 0.353.
+#	- Notice that the approximate E[p(θ|X=\mathcal{D})] = 0.3525 is very close to the true solution of 0.353.
+
+
+#	## Predictive Posterior
+#	- finding the parameter is necessary, however, our goal is to find $p(x)$ that describes the data
+#	- We can get it through marginalizing out $\theta$ from $p(x,\theta)$
+#	$$p(x) = \int_0^1 \; p(x|\theta) p(\theta) \; d\theta $$
+#	- note that we found $p(\theta)$ previously using Bayesian Parameter estimation where
+#	$$ p(\theta|X=\mathcal{D}) = c p(\theta, X=\mathcal{D}) = c \; \theta^{6 - 1} (1 - \theta)^{11 - 1}$$
+
+#	For Bernoulli with Beta prior, it is easy since x can only be 0 or 1
+#	$$p(x) = \int_0^1 \;  \theta^x (1 - \theta)^{1 - x}  \left( \frac{1}{B(6,11)} \; \theta^{6 - 1} (1 - \theta)^{11 - 1} \right) \; d\theta $$
+#	$$p(x=1) = \int_0^1 \;  \theta \left( \frac{1}{B(6,11)} \; \theta^{6 - 1} (1 - \theta)^{11 - 1} \right) \; d\theta $$
+#	This is the definition of the expectation of the beta distribution (which is known), therefore
+#	$$p(x=1) = \frac{\alpha}{\alpha + \beta} \approx 0.353$$
+#	If we continue to follow this logic for x=0, then
+#	$$p(x=0) = \frac{\beta}{\alpha + \beta} \approx 0.647$$
+#	Together, the final $p(x)$ is
+#	$$ p(x) = \frac{\alpha^x \beta^{1 - x}}{\alpha + \beta} = \frac{6^x 11^{1 - x}}{17}$$
+
+
+
+#	## Predictive Posterior Via Sampling
+#	- In our example, it was easy to find the predictive posterior $p(x)$ since it turns out to be the expectation of Beta distribution.
+#	- However, if we look at the equation carefully
+#	$$p(x) = \int_0^1 \; p(x|\theta) p(\theta) \; d\theta $$
+#	- $p(x|\theta)$ could have been a much more complicated distribution, and the Predictive Posterior is not as obvious
+#	- in this case, we can still approximate the solution via sampling. 
+#	### Realize that the question is asking the probability of $x = \tilde{x}$ in $p(x = \tilde{x})$
+#	- Therefore, we know $x = \tilde{x}$, implying that
+#	$$p(x = \tilde{x}) = \int_0^1 \; p(x=\tilde{x}|\theta) p(\theta) \; d\theta $$
+#	- When we plug $\tilde{x}$ into $p(x=\tilde{x}|\theta)$, it become just a function of $\theta$ like $q(\theta)$, resulting in the approximation of 
+#	$$p(x) = \int_0^1 \; q(\theta) p(\theta) \; d\theta = E_{p(\theta)}[q(\theta)] \approx \frac{1}{n} \sum_i \; q(\theta).$$
+#	This implies that if we simply generate samples from $p(\theta)$, plug into $q(\theta)$ and average the resulting values, we would get $p(x=\tilde{x})$.
+
+# Generate samples from Beta
+px1 = mean(beta.rvs(6, 11, size=10000))
+px0 = 1 - px1
+
+print('Notice these results match the p(x=0), p(x=1) from above')
+print('p(x=1) = %.4f , p(x=0) = %.4f.'%(px1, px0))
+
+
