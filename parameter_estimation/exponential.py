@@ -124,7 +124,7 @@ I, err = quad(posterior, 0, ᨖ )
 print('The area of the probability = %.4f, confirm that it is a proper probability distribution'%I) 
 
 
-#	### Generate the predictive posterior distribution via ancestral sampling
+#	### Generate the predictive posterior distribution histogram via ancestral sampling
 #	- Since we have the joint distribution, we can obtain the marginal by generating samples of $(x, \lambda)$ from the joint distribution and discard the $\lambda$ values.
 #	- To generate the samples, we can use ancestral sampling. 
 #	- That is, we first sample from the gamma distribution, depending on the $\lambda$ generated, we can generate $x$ using the exponential distribution.
