@@ -9,6 +9,7 @@ from scipy.special import gamma as Γ
 from scipy.stats import norm
 from scipy.integrate import quad 
 from numpy import inf as ᨖ
+from numpy import exp as e
 
 #	# Parameter Estimation For Exponential Distribution
 #	In this example, given data $\mathcal{D}$, we are going to estimate the parameters of an Exponential Distribution using
@@ -70,15 +71,28 @@ print('Best λ according to Bayesian Parameter Estimation = %.4f'%(BPE_solution)
 x = linspace(0.2,0.5, 200);
 y = gamma.pdf(x, ǩ, loc=0, scale=θˊ);
 
-plt.figure(figsize=(10,4))
-plt.subplot(121);
+plt.figure(figsize=(13,4))
+plt.subplot(131);
 plt.hist(X, density=True, bins=30);
 plt.title('Histogram of X')
 
-plt.subplot(122)
+plt.subplot(132)
 plt.plot(x,y,color='red')
 plt.title('Posterior Distribution of λ')
+
+x = linspace(0,20, 200);
+prior = gamma.pdf(x, k, loc=0, scale=θ);
+
+plt.subplot(133)
+plt.plot(x,prior,color='blue')
+plt.title('Prior Distribution of λ')
 plt.show()
+
+
+#	### Notice
+#	- The prior distribution says that the possible $\lambda$ values can possibly range between 0 to 20
+#	- However, given the data, notice that the posterior distribution heavily indicates that $\lambda$ must be very close to 0.333.
+
 
 #	## Finding the Prdictive Posterior $p(x|\mathcal{D})$ 
 #	Our goal is to next find the $p(x|\mathcal{D})$ which has the equation
@@ -132,6 +146,15 @@ print('The area of the probability = %.4f, confirm that it is a proper probabili
 posterior_samples = []
 λs = gamma.rvs(ǩ, loc=0, scale=θˊ, size=n);
 for λ in λs: posterior_samples.append(expon.rvs(loc=0, scale= (1/λ)))
+
+#	### Point estimation using Monte Carlo Estimation
+#	- We can use ancestral sampling to get the histogram of the posterior. 
+#	- However, we can also get the point estimation of posterior at a specific point $p(x = \hat{x}|\mathcal{D})$ using monte carlo integration
+#	$$p(x=3|\mathcal{D}) = \int p(x=3|\lambda) p(\lambda|\mathcal{D}) \; d\lambda \approx \frac{1}{n} \sum_i \; p(x=3|\lambda)$$
+#	- Here is an example of $p(x = \hat{x}|\mathcal{D})$
+p3 = mean(λs*e(-λs*3))
+p3v = posterior(3)
+print('Estimation of p(x=3) = %.4f, Actual p(x=3) = %.4f'%(p3, p3v))
 
 
 #	### Let's plot out the predictive posterior 
