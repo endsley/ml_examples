@@ -62,3 +62,18 @@ from scipy.stats import norm
 #	Then
 #	$$p(\theta|X=\mathcal{D}) = \frac{\Gamma(\hat{\alpha_1} + \hat{\alpha_2} + \hat{\alpha_3} )}{\Gamma(\hat{\alpha_1})\Gamma(\hat{\alpha_2})\Gamma(\hat{\alpha_3})} \left( \theta_1^{\hat{\alpha_1} - 1} \theta_2^{\hat{\alpha_2} - 1} \theta_3^{\hat{\alpha_3} - 1} \right).$$
 
+
+
+#	###	The Predictive Posterior
+#	$$p(x|X=\mathcal{D}) = \int \; p(x|\theta) p(\theta|X = \mathcal{D}) \; d\theta $$
+#	$$p(x|X=\mathcal{D}) = \int \; \theta_1^{x_1} \theta_2^{x_2} \theta_3^{x_3} B(\hat{\alpha})  \theta_1^{\hat{\alpha_1} - 1} \theta_2^{\hat{\alpha_2} - 1} \theta_3^{\hat{\alpha_3} - 1} \; d\theta$$
+#	If we let 
+#	$$\bar{\alpha}_1 = x_1 + \hat{\alpha_1}$$
+#	$$\bar{\alpha}_2 = x_2 + \hat{\alpha_2}$$
+#	$$\bar{\alpha}_3 = x_3 + \hat{\alpha_3}$$
+#	then we can rewrite the integral as 
+#	$$\frac{B(\hat{\alpha})}{B(\bar{\alpha})} \; \int \; B(\bar{\alpha}) \theta_1^{\bar{\alpha_1} - 1} \theta_2^{\bar{\alpha_2} - 1} \theta_3^{\bar{\alpha_3} - 1} \; d\theta= \frac{B(\hat{\alpha})}{B(\bar{\alpha})}$$
+#	We can further simplify this into
+#	$$\frac{\Gamma(\hat{\alpha_1} + \hat{\alpha_2} + \hat{\alpha_3})}{\Gamma(\hat{\alpha_1})\Gamma(\hat{\alpha_2})\Gamma(\hat{\alpha_3})} \frac{\Gamma(\bar{\alpha_1})\Gamma(\bar{\alpha_2})\Gamma(\bar{\alpha_3})}{\Gamma(\bar{\alpha_1} + \bar{\alpha_2} + \bar{\alpha_3})} $$
+#	Remember that $x = [x_1\quad x_2\quad x_3]^{\top}$ and  $x_i \in \{0,1\}$ and $x_1 + x_2 + x_3 = 1$, this allows us to further simplify this into
+#	$$p(x|X=\mathcal{D}) = \frac{ \hat{\alpha_1}^{x_1} \hat{\alpha_2}^{x_2} \hat{\alpha_3}^{x_3}}{ \hat{\alpha_1} + \hat{\alpha_2} + \hat{\alpha_3} }$$
