@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[34]:
+# In[71]:
 
 
 import numpy as np
 from numpy.linalg import inv
 from numpy.random import rand, randn
 import matplotlib.pyplot as plt
-from scipy.stats import multivariate_normal
+from scipy.stats import multivariate_normal, invgamma
+from scipy.special import gamma as Γ
+from numpy import exp as e
+from numpy import log as ln
+
+
+
 
 #  Generate the data
-n = 200
+n = 20000
 x = rand(n,1)
 y = 3*x + 1 + 0.1*randn(n,1)  # solution w = [3,1]
 X = np.hstack((x, np.ones((n,1))))
@@ -24,7 +30,7 @@ plt.legend()
 plt.show()
 
 
-# In[35]:
+# In[72]:
 
 
 μₒ = np.array([[0],[0]])
@@ -49,7 +55,7 @@ plt.title('2D Gaussian Distribution')
 plt.show()
 
 
-# In[36]:
+# In[73]:
 
 
 # Let's now draw the Gaussian distribution in 3d space
@@ -75,4 +81,26 @@ ax.set_ylabel('Y-axis')
 ax.set_zlabel('Probability Density')
 ax.set_title('3D Gaussian Distribution Mesh')
 plt.show()
+
+
+# In[82]:
+
+
+a = 1
+b = 1
+α = n/2 + a
+β = y.T.dot(y)/2 + b + μₒ.T.dot(Λₒ).dot(μₒ)/2 - μ.T.dot(Λ).dot(μ)/2
+
+xr = np.reshape(np.linspace(0.007,0.013,100), (100,1))
+yr = invgamma.pdf(xr, a=α, scale=β)
+
+plt.plot(xr, yr)
+plt.title('True σ²: 0.01, Expected σ² : %.4f'% (β/(α-1)))
+plt.show()
+
+
+# In[ ]:
+
+
+
 
