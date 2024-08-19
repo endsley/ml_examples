@@ -12,12 +12,14 @@ from scipy.stats import multivariate_normal, invgamma
 from scipy.special import gamma as Γ
 from numpy import exp as e
 from numpy import log as ln
+from numpy import pi as π
 
 
-
+#import pdb; pdb.set_trace()
 
 #  Generate the data
 n = 20000
+d = 2
 x = rand(n,1)
 y = 3*x + 1 + 0.1*randn(n,1)  # solution w = [3,1]
 X = np.hstack((x, np.ones((n,1))))
@@ -99,8 +101,35 @@ plt.title('True σ²: 0.01, Expected σ² : %.4f'% (β/(α-1)))
 plt.show()
 
 
-# In[ ]:
+##	Use mcmc sampling to generate the distributions
 
+def p(ᶍ):	# the scaled probability value
+	w = np.reshape(ᶍ[0:2],(2,1))
+	σᒾ = ᶍ[2]
 
+	λ = -1/(2*σᒾ)
+	return (-n/2 - d/2 - a - 1)*ln(σᒾ) + λ*(y - X.dot(w)).T.dot(y - X.dot(w)) + λ*(w - μₒ).T.dot(Λₒ).dot(w - μₒ) + 2*b
+	
+
+def metropolis_sampler(N, μᵐ, Σᵐ):
+	samples = np.empty((0, 3))
+
+	while len(samples) != n:
+		ᶍ = np.random.multivariate_normal(μᵐ, Σᵐ, 1)[0]
+		if ᶍ[2] < 0: continue
+
+		if rand() < p(ᶍ)/p(μᵐ): μᵐ = ᶍ
+		samples = np.vstack((samples, μᵐ))
+		   
+	return samples
+
+N = 2000
+μᵐ = np.array([1,1,0.5])
+Σᵐ = 0.3*np.eye(3)
+
+# Generate samples
+S = metropolis_sampler(N, μᵐ, Σᵐ)
+
+import pdb; pdb.set_trace()
 
 
