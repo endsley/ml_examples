@@ -153,10 +153,13 @@ w = np.array([[2],[2]])
 
 while len(σᒾ_samples) < 20000 + burn:
 	#	sampling σᒾ
-	while σᒾᵥ <= 0:
-		σᒾᵥ = normal(σᒾₒ, 0.5) # generate a new samples
+	σᒾᵥ = normal(σᒾₒ, 0.5) # generate a new samples
+	while σᒾᵥ <= 0: σᒾᵥ = normal(σᒾₒ, 0.5) # keep generating until σᒾᵥ is a positive value.
 
-	if ln(rand()) < (p1(σᒾᵥ, w) - p1(σᒾₒ, w)): σᒾₒ = σᒾᵥ 		# since we use ln(p(x)), the ratio is subtraction
+	q = rand()
+	if ln(q) < (p1(σᒾᵥ, w).item() - p1(σᒾₒ, w).item()): 
+		σᒾₒ = σᒾᵥ 		# since we use ln(p(x)), the ratio is subtraction
+
 	σᒾ_samples.append(σᒾₒ)
 		   
 	#	sampling w
