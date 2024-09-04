@@ -17,7 +17,7 @@ w = array([[2],[2]]) # solution is 1,1
 η = 0.1
 
 #	The function we are trying to minimize is
-#	$$f(x) = \frac{1}{n} \; \sum_i^n \; (w^{\top} \phi(x_i) - y_i)^2$$
+#	$$f(x) = \frac{1}{n} \; \sum_i^n \; (w^{\top} x_i - y_i)^2$$
 
 
 def f(w):
@@ -30,7 +30,7 @@ def f(w):
 	
 
 #	The equation for the gradient is 
-#	$$f'(x) = \frac{2}{n} \; \sum_i^n \; (w^{\top} \phi(x_i) - y_i) \phi(x_i)$$
+#	$$f'(x) = \frac{2}{n} \; \sum_i^n \; (w^{\top} x_i - y_i) x_i$$
 
 
 def fᑊ(w):
