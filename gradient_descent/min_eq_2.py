@@ -23,7 +23,7 @@ w = array([[2],[2]]) # solution is 1,1
 def f(w):
 	fₒ = 0						# function output
 	for xᵢ, yᵢ in zip(X,y):
-		xᵢ = np.reshape(xᵢ, (2,1))
+		xᵢ = np.reshape(xᵢ, (2,1))	# make sure xᵢ is in column format
 		fₒ += (w.T.dot(xᵢ) - yᵢ)**2
 	
 	return ((1/n)*fₒ).item()
