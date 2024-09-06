@@ -3,7 +3,7 @@
 # Download the package at : https://github.com/HIPS/autograd
 
 import autograd.numpy as np
-from autograd.numpy import log
+from autograd.numpy import log as ln
 from autograd.numpy import exp
 from autograd import grad
 
@@ -15,10 +15,10 @@ from autograd import grad
 
 
 def f(x): 
-	return log(2*x*x)/log(3) - 2*x*exp(3*x) + 2
+	return ln(2*x*x)/ln(3) - 2*x*exp(3*x) + 2
 
 def ᐁf(x):
-	return 2/(x*log(3)) - 2*exp(3*x) - 6*x*exp(3*x)
+	return 2/(x*ln(3)) - 2*exp(3*x) - 6*x*exp(3*x)
 
 auto_grad = grad(f)  # Automatically obtain the gradient function
 
