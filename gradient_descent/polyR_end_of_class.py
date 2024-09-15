@@ -49,8 +49,8 @@ def fᑊ(w):
 #	This is the compact derivative and the better version
 #	# Comment out the other definition and notice this is the same
 
-#def fᑊ(w): 
-#	return (2/n)*Φ.T.dot(Φ.dot(w) - y)
+#	def fᑊ(w): 
+#		return (2/n)*Φ.T.dot(Φ.dot(w) - y)
 
 
 f_value_list = []
