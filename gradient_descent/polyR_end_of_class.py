@@ -37,6 +37,7 @@ def f(w):
 #	$$f'(x) = \frac{2}{n} \Phi^{\top}(\Phi w - y)$$
 #	I wrote both version of the code below, try them both and see they are the same.
 
+
 def fᑊ(w):
 	ᐁf = np.zeros((d,1))
 	for Φᵢ, yᵢ in zip(Φ,y):
@@ -44,9 +45,12 @@ def fᑊ(w):
 		ᐁf += (w.T.dot(Φᵢ) - yᵢ)*Φᵢ
 	return (2/n)*ᐁf
 
+
 #	This is the compact derivative and the better version
 #	# Comment out the other definition and notice this is the same
-#def fᑊ(w): return (2/n)*Φ.T.dot(Φ.dot(w) - y)
+
+#def fᑊ(w): 
+#	return (2/n)*Φ.T.dot(Φ.dot(w) - y)
 
 
 f_value_list = []
