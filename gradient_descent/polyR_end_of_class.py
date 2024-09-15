@@ -33,7 +33,7 @@ def f(w):
 #	You can rewrite it into compact matrix vector form if you are good, note that $y$ is
 #	a column vector of all labels.
 #	The derivation can be found here:
-#	https://github.khoury.northeastern.edu/chieh/course_page/blob/main/4420/lecture_4/compact_regression_derivative_derivation.pdf
+#	https://github.com/endsley/ml_examples/blob/master/regression_examples/compact_regression_derivative_derivation.pdf
 #	$$f'(x) = \frac{2}{n} \Phi^{\top}(\Phi w - y)$$
 
 def fᑊ(w):
