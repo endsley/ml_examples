@@ -35,6 +35,7 @@ def f(w):
 #	The derivation can be found here:
 #	https://github.com/endsley/ml_examples/blob/master/regression_examples/compact_regression_derivative_derivation.pdf
 #	$$f'(x) = \frac{2}{n} \Phi^{\top}(\Phi w - y)$$
+#	I wrote both version of the code below, try them both and see they are the same.
 
 def fᑊ(w):
 	ᐁf = np.zeros((d,1))
@@ -42,6 +43,11 @@ def fᑊ(w):
 		Φᵢ = np.reshape(Φᵢ, (d,1))
 		ᐁf += (w.T.dot(Φᵢ) - yᵢ)*Φᵢ
 	return (2/n)*ᐁf
+
+#	This is the compact derivative and the better version
+#	# Comment out the other definition and notice this is the same
+#def fᑊ(w): return (2/n)*Φ.T.dot(Φ.dot(w) - y)
+
 
 f_value_list = []
 for i in range(400):
