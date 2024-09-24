@@ -19,7 +19,7 @@ w = array([[2],[2]])
 
 
 #	The function we are trying to minimize is
-#	$$f(x) = \frac{1}{n} \; \sum_i^n \; (w^{\top} x_i - y_i)^2$$
+#	$$f(x) = \frac{1}{n} \; \sum_i^n \; (w^{\top} x_i - y_i)^2 = \frac{1}{n} \; \left( \; (w^{\top} x_1 - y_1)^2 + (w^{\top} x_2 - y_2)^2\right)$$
 
 
 def f(w):
@@ -27,7 +27,7 @@ def f(w):
 	
 
 #	The equation for the gradient is 
-#	$$f'(x) = \frac{2}{n} \; \sum_i^n \; (w^{\top} x_i - y_i) x_i$$
+#	$$f'(x) = \frac{2}{n} \; \sum_i^n \; (w^{\top} x_i - y_i) x_i = \frac{2}{n} \; \left( \; (w^{\top} x_1 - y_1) x_1 + (w^{\top} x_2 - y_2) x_2\right)$$
 
 
 def fᑊ(w):
