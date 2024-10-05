@@ -8,42 +8,35 @@ from numpy import mean
 
 xᑊ = array([[0],[1]])
 xᒾ = array([[1],[1]])
-X = np.vstack((xᑊ.T, xᒾ.T))
-n = X.shape[0] # number of samples
+yᑊ = 0
+yᒾ = 2
 
-A = array([[0,1],[1,1]])
-y = array([[0],[2]])
-w = array([[2],[2]]) # solution is 1,1
-η = 0.1
+n = 2 # number of samples
+η = 0.2 	# this is the step size
+
+# You can initialize w at any point, solution is at 2,0
+w = array([[2],[2]]) 
+
 
 #	The function we are trying to minimize is
-#	$$f(x) = \frac{1}{n} \; \sum_i^n \; (w^{\top} x_i - y_i)^2$$
+#	$$f(x) = \frac{1}{n} \; \sum_i^n \; (w^{\top} x_i - y_i)^2 = \frac{1}{n} \; \left( \; (w^{\top} x_1 - y_1)^2 + (w^{\top} x_2 - y_2)^2\right)$$
 
 
 def f(w):
-	fₒ = 0						# function output
-	for xᵢ, yᵢ in zip(X,y):
-		xᵢ = np.reshape(xᵢ, (2,1))	# make sure xᵢ is in column format
-		fₒ += (w.T.dot(xᵢ) - yᵢ)**2
-	
-	return ((1/n)*fₒ).item()
+	return (1/n)*((w.T.dot(xᑊ) - yᑊ)**2 + (w.T.dot(xᒾ) - yᒾ)**2)
 	
 
 #	The equation for the gradient is 
-#	$$f'(x) = \frac{2}{n} \; \sum_i^n \; (w^{\top} x_i - y_i) x_i$$
+#	$$f'(x) = \frac{2}{n} \; \sum_i^n \; (w^{\top} x_i - y_i) x_i = \frac{2}{n} \; \left( \; (w^{\top} x_1 - y_1) x_1 + (w^{\top} x_2 - y_2) x_2\right)$$
 
 
 def fᑊ(w):
-	ᐁf = np.zeros((2,1))
-	for xᵢ, yᵢ in zip(X,y):
-		xᵢ = np.reshape(xᵢ, (2,1))
-		ᐁf += (w.T.dot(xᵢ) - yᵢ)*xᵢ
-	return (2/n)*ᐁf
+	return (2/n)*((w.T.dot(xᑊ) - yᑊ)*xᑊ + (w.T.dot(xᒾ) - yᒾ)*xᒾ)
 
 f_value_list = []
-for i in range(20):
+for i in range(100):
 	w = w - η*fᑊ(w)				# gradient descent update w
-	f_value_list.append(f(w))
+	f_value_list.append(f(w).item())
 
 print('Best w = \n', w)
 
