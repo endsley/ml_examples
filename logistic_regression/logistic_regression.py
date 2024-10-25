@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+from numpy import round
 
 
 # random starting w 
@@ -40,4 +41,7 @@ w = gradient_descent(Φ, y, w, 0.1)
 
 print('\nPrediction After GD (good)')
 for x in Φ: print(q(x, w))
+
+print('\nFinal Prediction is displayed with rounding')
+for x in Φ: print(round(q(x, w)))
 
