@@ -6,19 +6,8 @@ from numpy import vstack, hstack
 from matplotlib import pyplot as plt
 
 
-X0 = array([[-2,1],
-			[0,3],
-			[1,4],
-			[1,5],
-			[2,5]])
-
-X1 = array([[0,0],
-			[1,1],
-			[2,1],
-			[3,2],
-			[4,3]])
-
-X = vstack((X0, X1))
+X0 = array([[-2,1], [0,3], [1,4], [1,5], [2,5]]) 
+X1 = array([[0,0], [1,1], [2,1], [3,2], [4,3]]) 
 
 # 	Finding S1
 v = reshape(mean(X0, axis=0) - mean(X1, axis=0), (2,1))
