@@ -20,13 +20,12 @@ X1 = array([[0,0],
 
 X = vstack((X0, X1))
 
-# 	Solving LDA
+# 	Finding S1
 v = reshape(mean(X0, axis=0) - mean(X1, axis=0), (2,1))
 S1 = v.dot(v.T)
+
+#	Finding the vector ṽւ that maximize center distance
 [D,V] = np.linalg.eigh(S1)
-
-#import pdb; pdb.set_trace()
-
 ṽւ = reshape(V[:,1], (2,1))
 linePoints = vstack((5*ṽւ.T, -5*ṽւ.T))
 
