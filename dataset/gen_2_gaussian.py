@@ -11,6 +11,8 @@ X = np.vstack((x1,x2))
 
 
 
+np.savetxt('two_gaussian.csv', X, delimiter=',', fmt='%.3f') 
+
 plt.plot(x1[:,0], x1[:,1], 'r.')
 plt.plot(x2[:,0], x2[:,1], 'b.')
 plt.show()
