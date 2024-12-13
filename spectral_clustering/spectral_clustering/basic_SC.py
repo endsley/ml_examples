@@ -16,7 +16,7 @@ n = X.shape[0]
 K = rbf_kernel(X, gamma=γ)
 
 [D,V] = eigh(K)
-import pdb; pdb.set_trace()
+
 U = V[:, n-2:n]	# pick out the largest eigenvectors
 Ū = normalize(U, norm='l2', axis=1) # normalize each row to length 1.
 
