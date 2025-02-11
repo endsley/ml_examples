@@ -6,11 +6,7 @@ import numpy as np
 
 #	1st (preferred) approach to center and scale data.
 X = np.array([[3, 0, 400], [2, 1, 200], [2, 2, 500], [1, 1, 100]])
-
-# Initialize the StandardScaler
-scaler = StandardScaler()
-
-# Fit the scaler to the data and transform the data
+scaler = StandardScaler() # Initialize the StandardScaler
 scaled_data = scaler.fit_transform(X)
 
 print("Original Data:\n", X)
@@ -20,12 +16,7 @@ print("Centered and Scaled Data:\n", scaled_data)
 
 #	2nd approach to center and scale data.
 #	----------------------------
-# Original data
-X = np.array([[3, 0, 400], [2, 1, 200], [2, 2, 500], [1, 1, 100]])
-print("Original Data:\n", X)
-
-# Scale the data
-X_scaled = preprocessing.scale(X)
+X_scaled = preprocessing.scale(X) # alternative to scale data
 print("\nScaled Data:\n", X_scaled)
 
 # Verify the mean and standard deviation of the scaled data
