@@ -38,7 +38,6 @@ def f(w):
 w = array([[0],[1]]) 
 η = 0.01
 
-
 def fᑊ(w):	# Gradient for GD
 	ᐁf = np.zeros((2,1))
 	for ϕᵢ, yᵢ in zip(Φ,y):
@@ -47,12 +46,9 @@ def fᑊ(w):	# Gradient for GD
 	return (2/n)*ᐁf
 
 gd_list = []
-for i in range(1000):
+for i in range(2000):
 	w = w - η*fᑊ(w)				# gradient descent update w
-	#w = w - η*fˢᑊ(w)				
 	gd_list.append(f(w))
-
-
 
 
 #	Solving with SGD
@@ -67,7 +63,7 @@ def fˢᑊ(w):	# Gradient for SGD
 
 
 sgd_list = []
-for i in range(1000):
+for i in range(60000):
 	wˢ = wˢ - η*fˢᑊ(wˢ)
 	sgd_list.append(f(wˢ))
 
